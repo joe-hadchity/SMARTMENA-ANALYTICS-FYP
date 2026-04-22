@@ -1,0 +1,156 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.inlineInput {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.inlineInput > input {
+  flex: 1;
+}
+
+.sampleRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.sampleLabel {
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.chip {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: border-color 0.12s ease, color 0.12s ease;
+}
+
+.chip:hover {
+  color: var(--text);
+  border-color: var(--accent);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.toggle {
+  display: inline-flex;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 3px;
+}
+
+.toggle button {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.toggle button:hover:not(:disabled) {
+  color: var(--text);
+}
+
+.toggle button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.toggleActive {
+  background: var(--accent) !important;
+  color: white !important;
+}
+
+.bigResult {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.bigLabel {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bigLabel :global(span) {
+  font-size: 13px !important;
+  padding: 6px 14px !important;
+}
+
+.confidenceWrap {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.confidenceLabel {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  font-weight: 600;
+  min-width: 80px;
+}
+
+.confidenceBar {
+  flex: 1;
+  height: 10px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.confidenceFill {
+  height: 100%;
+}
+
+.fill--positive {
+  background: var(--ok);
+}
+.fill--negative {
+  background: var(--error);
+}
+.fill--neutral {
+  background: var(--neutral);
+}
+
+.confidenceValue {
+  font-variant-numeric: tabular-nums;
+  font-size: 14px;
+  font-weight: 600;
+  min-width: 60px;
+  text-align: right;
+}
+
+.ids {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}

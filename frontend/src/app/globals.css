@@ -1,0 +1,319 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Theme tokens.
+ * HSL triplets (without the hsl() wrapper) so Tailwind's
+ * `hsl(var(--token) / <alpha>)` pattern can apply alpha channels.
+ */
+:root {
+  /* surfaces */
+  --bg:              220 33% 98%;   /* page background */
+  --bg-elevated:     0 0% 100%;     /* nav, modals */
+  --surface:         0 0% 100%;     /* cards */
+  --surface-muted:   220 20% 97%;
+  --surface-hover:   220 25% 96%;
+
+  /* borders */
+  --border:          220 20% 92%;
+  --border-strong:   220 16% 85%;
+
+  /* text */
+  --fg:              225 25% 11%;
+  --fg-muted:        225 10% 38%;
+  --fg-subtle:       225 10% 55%;
+  --fg-inverse:      0 0% 100%;
+
+  /* brand primary (SmartMENA blue) */
+  --primary:         220 94% 49%;
+  --primary-fg:      0 0% 100%;
+  --primary-soft:    220 100% 96%;
+  --primary-hover:   220 94% 43%;
+
+  /* semantic */
+  --success:         152 70% 40%;
+  --success-soft:    152 76% 95%;
+  --warning:         35 92% 50%;
+  --warning-soft:    42 96% 95%;
+  --danger:          0 78% 55%;
+  --danger-soft:     0 86% 96%;
+  --info:            205 90% 50%;
+  --info-soft:       205 100% 96%;
+
+  --ring:            220 94% 55%;
+
+  /* data-viz (primary teal-blue story; warm accents for secondary categories) */
+  --viz-1:           220 94% 49%;   /* primary blue */
+  --viz-2:           186 72% 44%;   /* teal */
+  --viz-3:           272 70% 58%;   /* violet */
+  --viz-4:           25 93% 58%;    /* amber */
+  --viz-5:           340 82% 58%;   /* rose */
+  --viz-6:           160 60% 42%;   /* emerald */
+
+  /* fonts */
+  --font-sans:       "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-arabic:     "IBM Plex Sans Arabic", "Noto Sans Arabic", "Tajawal", system-ui, sans-serif;
+}
+
+html.dark {
+  --bg:              228 25% 6%;
+  --bg-elevated:     228 22% 9%;
+  --surface:         228 22% 10%;
+  --surface-muted:   228 22% 12%;
+  --surface-hover:   228 22% 14%;
+
+  --border:          228 16% 18%;
+  --border-strong:   228 14% 26%;
+
+  --fg:              220 20% 96%;
+  --fg-muted:        220 14% 68%;
+  --fg-subtle:       220 12% 52%;
+  --fg-inverse:      225 25% 11%;
+
+  --primary:         220 94% 62%;
+  --primary-fg:      0 0% 100%;
+  --primary-soft:    220 60% 16%;
+  --primary-hover:   220 94% 68%;
+
+  --success:         152 65% 48%;
+  --success-soft:    152 50% 14%;
+  --warning:         35 92% 60%;
+  --warning-soft:    42 60% 14%;
+  --danger:          0 78% 62%;
+  --danger-soft:     0 60% 16%;
+  --info:            205 90% 62%;
+  --info-soft:       205 60% 14%;
+
+  --ring:            220 94% 62%;
+
+  --viz-1:           220 94% 62%;
+  --viz-2:           186 72% 54%;
+  --viz-3:           272 72% 68%;
+  --viz-4:           25 93% 62%;
+  --viz-5:           340 82% 65%;
+  --viz-6:           160 60% 52%;
+}
+
+html,
+body {
+  color: hsl(var(--fg));
+  background: hsl(var(--bg));
+  font-family: var(--font-sans);
+  font-feature-settings: "cv11", "ss01";
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html[dir="rtl"] body {
+  font-family: var(--font-arabic);
+}
+
+/* Remove the jarring colour flash on first paint when switching themes. */
+html.color-theme-in-transition,
+html.color-theme-in-transition * {
+  transition:
+    background-color 120ms ease-out,
+    border-color 120ms ease-out,
+    color 120ms ease-out !important;
+}
+
+/* Scrollbar (subtle, webkit only) */
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-thumb {
+  background: hsl(var(--border-strong));
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--fg-subtle));
+  background-clip: content-box;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Global focus ring (keyboard only). */
+*:focus {
+  outline: none;
+}
+*:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Text selection */
+::selection {
+  background: hsl(var(--primary) / 0.2);
+  color: hsl(var(--fg));
+}
+
+/*
+ * Component classes. These intentionally read as small "recipes" so page
+ * code stays expressive without needing to memorise long utility strings.
+ */
+@layer components {
+  .card {
+    @apply bg-surface border border-border rounded-xl shadow-sm;
+  }
+  .card-elevated {
+    @apply bg-surface border border-border rounded-xl shadow-md;
+  }
+
+  .input {
+    @apply w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm
+           placeholder:text-fg-subtle
+           focus-visible:border-primary focus-visible:shadow-glow
+           disabled:opacity-60 disabled:cursor-not-allowed transition-colors;
+  }
+  .label {
+    @apply text-xs font-medium text-fg-muted;
+  }
+  .kbd {
+    @apply inline-flex items-center justify-center rounded-[5px] border border-border
+           bg-surface-muted px-1.5 py-0.5 text-[10px] font-medium text-fg-muted
+           shadow-[inset_0_-1px_0_rgba(0,0,0,0.05)];
+  }
+
+  /* Marketing-grade gradient tile used in logo, empty states, illustrations. */
+  .gradient-tile {
+    background-image:
+      radial-gradient(120% 120% at 0% 0%, hsl(var(--viz-2) / 0.55) 0%, transparent 60%),
+      linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--viz-3)) 100%);
+  }
+  .gradient-text {
+    background: linear-gradient(90deg, hsl(var(--primary)) 0%, hsl(var(--viz-3)) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Subtle background orbs for hero / empty states (pure CSS, no assets). */
+  .bg-orbs {
+    background-image:
+      radial-gradient(60% 70% at 10% 0%, hsl(var(--primary) / 0.12) 0%, transparent 60%),
+      radial-gradient(55% 65% at 100% 20%, hsl(var(--viz-3) / 0.10) 0%, transparent 60%),
+      radial-gradient(40% 50% at 50% 100%, hsl(var(--viz-2) / 0.10) 0%, transparent 60%);
+  }
+
+  /* Subtle grid backdrop for dashboards (CSS mask fades the edges). */
+  .bg-grid {
+    background-image:
+      linear-gradient(hsl(var(--border) / 0.7) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--border) / 0.7) 1px, transparent 1px);
+    background-size: 28px 28px;
+    -webkit-mask-image:
+      radial-gradient(ellipse at top, rgba(0, 0, 0, 0.8), transparent 70%);
+    mask-image:
+      radial-gradient(ellipse at top, rgba(0, 0, 0, 0.8), transparent 70%);
+  }
+
+  /*
+   * Back-compat button utilities.
+   *
+   * New code should import { Button } from "@/components/ui/Button"; these
+   * classes exist so pages written against the v1 kit keep rendering
+   * correctly until their call sites are swept to the new component.
+   */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 h-9 px-3.5 rounded-lg
+           text-sm font-medium whitespace-nowrap select-none
+           transition-[background-color,color,box-shadow,transform] duration-150 ease-out-soft
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring
+           focus-visible:ring-offset-2 focus-visible:ring-offset-bg
+           disabled:pointer-events-none disabled:opacity-50;
+  }
+  .btn-primary {
+    @apply bg-primary text-primary-fg shadow-sm hover:bg-primary-hover active:translate-y-[1px];
+  }
+  .btn-secondary {
+    @apply bg-surface-muted text-fg hover:bg-surface-hover border border-border;
+  }
+  .btn-ghost {
+    @apply bg-transparent text-fg hover:bg-surface-muted;
+  }
+  .btn-outline {
+    @apply bg-surface text-fg border border-border hover:bg-surface-muted;
+  }
+  .btn-danger {
+    @apply bg-danger text-white shadow-sm hover:bg-danger/90 active:translate-y-[1px];
+  }
+
+  /* Back-compat .chip (some pages still use it directly). */
+  .chip {
+    @apply inline-flex items-center gap-1 h-6 px-2.5 rounded-full text-xs font-medium
+           bg-surface-muted text-fg-muted border border-border;
+  }
+
+  /* Skeleton shimmer (used by components/ui/Skeleton.tsx) */
+  .skeleton {
+    background-color: hsl(var(--surface-muted));
+    background-image: linear-gradient(
+      90deg,
+      hsl(var(--surface-muted)) 0%,
+      hsl(var(--surface-hover)) 50%,
+      hsl(var(--surface-muted)) 100%
+    );
+    background-size: 800px 100%;
+    @apply animate-shimmer rounded-md;
+  }
+}
+
+/*
+ * Print styles for /reports/growth and /r/[token].
+ *
+ * Goals:
+ *   - Hide the app shell (sidebar, topbar, dock) and any control with the
+ *     `.no-print` class.
+ *   - Let the report body span the full page, avoid awkward page breaks
+ *     inside cards, and render borders subtly.
+ */
+@media print {
+  html,
+  body {
+    background: #fff !important;
+    color: #111 !important;
+  }
+
+  .no-print,
+  aside,
+  nav,
+  header,
+  [data-insights-dock],
+  [data-sonner-toaster] {
+    display: none !important;
+  }
+
+  main {
+    padding: 0 !important;
+  }
+
+  .report-surface {
+    max-width: none !important;
+  }
+
+  .report-surface > * {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .report-surface .rounded-xl,
+  .report-surface .rounded-lg,
+  .report-surface .rounded-md {
+    border-radius: 6px !important;
+  }
+
+  .report-surface table {
+    page-break-inside: auto;
+  }
+
+  a[href]::after {
+    content: "";
+  }
+}

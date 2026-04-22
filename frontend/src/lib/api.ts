@@ -1,0 +1,934 @@
+import axios, { AxiosInstance } from "axios";
+
+import type {
+  AnalyticsOverview,
+  AnalyticsTimeseries,
+  BrandVoice,
+  Campaign,
+  CampaignWithRelations,
+  HealthCheck,
+  Insight,
+  CompetitorAccount,
+  CompetitorAggregate,
+  CompetitorDigestRun,
+  CompetitorPost,
+  TrendDetail,
+  TrendKind,
+  TrendRebuildSummary,
+  TrendSortBy,
+  TrendsListResponse,
+  MenaRecommendation,
+  OAuthStatus,
+  Provider,
+  PlatformBreakdown,
+  PlatformCapability,
+  PostMetric,
+  RoiResult,
+  SentimentBreakdown,
+  SentimentResult,
+  SocialAccount,
+  SyncedPost,
+  TopPost,
+  Workspace,
+  WorkspaceBrandVoice,
+} from "./types";
+
+const BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4000/api";
+
+const WORKSPACE_STORAGE_KEY = "smartmena.workspaceId";
+
+function readWorkspaceId(): string | null {
+  if (typeof window === "undefined") return null;
+  const env = process.env.NEXT_PUBLIC_WORKSPACE_ID;
+  if (env) return env;
+  try {
+    return window.localStorage.getItem(WORKSPACE_STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+export function setStoredWorkspaceId(id: string | null) {
+  if (typeof window === "undefined") return;
+  try {
+    if (id) window.localStorage.setItem(WORKSPACE_STORAGE_KEY, id);
+    else window.localStorage.removeItem(WORKSPACE_STORAGE_KEY);
+  } catch {
+    // ignore
+  }
+}
+
+function createClient(): AxiosInstance {
+  const client = axios.create({
+    baseURL: BASE_URL,
+    timeout: 60_000,
+    headers: { "Content-Type": "application/json" },
+  });
+
+  client.interceptors.request.use((config) => {
+    const wsid = readWorkspaceId();
+    if (wsid) {
+      config.headers["x-workspace-id"] = wsid;
+    }
+    return config;
+  });
+
+  client.interceptors.response.use(
+    (response) => response,
+    (error) => {
+      const data = error?.response?.data;
+      const message =
+        (data && typeof data === "object" && (data.message as string)) ||
+        error.message ||
+        "Request failed";
+      const err = new Error(message) as Error & {
+        status?: number;
+        details?: unknown;
+      };
+      err.status = error?.response?.status;
+      err.details = data?.details;
+      return Promise.reject(err);
+    },
+  );
+
+  return client;
+}
+
+const http = createClient();
+
+// ---------------------------------------------------------------------------
+// Workspaces
+// ---------------------------------------------------------------------------
+
+export const workspacesApi = {
+  list: async (): Promise<Workspace[]> => (await http.get("/workspaces")).data,
+  current: async (): Promise<Workspace> =>
+    (await http.get("/workspaces/current")).data,
+  create: async (input: {
+    name: string;
+    slug?: string;
+    region_default?: string;
+    locale_default?: "ar" | "en";
+  }): Promise<Workspace> => (await http.post("/workspaces", input)).data,
+  getById: async (id: string): Promise<Workspace> =>
+    (await http.get(`/workspaces/${id}`)).data,
+  brandVoice: async (id: string): Promise<WorkspaceBrandVoice> =>
+    (await http.get(`/workspaces/${id}/brand-voice`)).data,
+  updateBrandVoice: async (
+    id: string,
+    input: {
+      industry_hint?: string | null;
+      primary_region?: string | null;
+      brand_voice?: Partial<BrandVoice>;
+    },
+  ): Promise<WorkspaceBrandVoice> =>
+    (await http.patch(`/workspaces/${id}/brand-voice`, input)).data,
+  demoBootstrap: async (
+    id?: string,
+  ): Promise<{
+    workspaceId: string;
+    workspaceName: string;
+    accountsConnected: { id: string; provider: string; handle: string }[];
+    postsSynced: number;
+    metricsRecorded: number;
+    insightsGenerated: number;
+    recommendationsInserted: number;
+    contentScoresInserted: number;
+    warnings: string[];
+  }> => {
+    const url = id ? `/workspaces/${id}/demo-bootstrap` : `/workspaces/demo-bootstrap`;
+    return (await http.post(url, {})).data;
+  },
+};
+
+// ---------------------------------------------------------------------------
+// Social accounts
+// ---------------------------------------------------------------------------
+
+export const socialAccountsApi = {
+  list: async (): Promise<SocialAccount[]> =>
+    (await http.get("/social-accounts")).data,
+  getById: async (id: string): Promise<SocialAccount> =>
+    (await http.get(`/social-accounts/${id}`)).data,
+  connectMeta: async (input: {
+    kind: "instagram" | "facebook";
+    handle?: string;
+    displayName?: string;
+  }): Promise<SocialAccount> =>
+    (await http.post("/social-accounts/connect/meta", input)).data,
+  sync: async (
+    id: string,
+    input: { limit?: number; daysBack?: number } = {},
+  ): Promise<{
+    accountId: string;
+    provider: string;
+    postsSynced: number;
+    metricsRecorded: number;
+    syncedAt: string;
+  }> => (await http.post(`/social-accounts/${id}/sync`, input)).data,
+  remove: async (id: string): Promise<{ id: string; deleted: true }> =>
+    (await http.delete(`/social-accounts/${id}`)).data,
+};
+
+// ---------------------------------------------------------------------------
+// Synced posts
+// ---------------------------------------------------------------------------
+
+export const syncedPostsApi = {
+  list: async (params: {
+    socialAccountId?: string;
+    lang?: "ar" | "en" | "mixed";
+    postType?: string;
+    limit?: number;
+  } = {}): Promise<SyncedPost[]> =>
+    (await http.get("/synced-posts", { params })).data,
+  getById: async (id: string): Promise<SyncedPost> =>
+    (await http.get(`/synced-posts/${id}`)).data,
+  metrics: async (
+    id: string,
+    params: { from?: string; to?: string; limit?: number } = {},
+  ): Promise<PostMetric[]> =>
+    (await http.get(`/synced-posts/${id}/metrics`, { params })).data,
+};
+
+// ---------------------------------------------------------------------------
+// Analytics
+// ---------------------------------------------------------------------------
+
+export const analyticsApi = {
+  overview: async (): Promise<AnalyticsOverview> =>
+    (await http.get("/analytics/overview")).data,
+  timeseries: async (
+    params: { metric?: "engagement" | "reach" | "impressions"; groupBy?: "day" | "week" } = {},
+  ): Promise<AnalyticsTimeseries> =>
+    (await http.get("/analytics/timeseries", { params })).data,
+  platformBreakdown: async (): Promise<PlatformBreakdown> =>
+    (await http.get("/analytics/platform-breakdown")).data,
+  sentimentBreakdown: async (): Promise<SentimentBreakdown> =>
+    (await http.get("/analytics/sentiment-breakdown")).data,
+  topPosts: async (
+    params: {
+      limit?: number;
+      sortBy?: "engagement" | "reach" | "impressions" | "engagement_rate";
+    } = {},
+  ): Promise<TopPost[]> =>
+    (await http.get("/analytics/top-posts", { params })).data,
+};
+
+// ---------------------------------------------------------------------------
+// Insights
+// ---------------------------------------------------------------------------
+
+export const insightsApi = {
+  list: async (
+    params: {
+      scopeType?: string;
+      insightType?: string;
+      severity?: string;
+      limit?: number;
+    } = {},
+  ): Promise<Insight[]> => (await http.get("/insights", { params })).data,
+  generate: async (): Promise<Insight[]> =>
+    (await http.post("/insights/generate", {})).data,
+};
+
+// ---------------------------------------------------------------------------
+// Recommendations
+// ---------------------------------------------------------------------------
+
+export const recommendationsApi = {
+  mena: async (input: {
+    platform: string;
+    region: string;
+    contentType?: string;
+    budget?: number;
+    audienceSize?: number;
+  }): Promise<MenaRecommendation> =>
+    (await http.post("/recommendations/mena", input)).data,
+};
+
+// ---------------------------------------------------------------------------
+// Campaigns + analysis/prediction (v1 surface, kept compatible)
+// ---------------------------------------------------------------------------
+
+export const campaignsApi = {
+  list: async (params: { limit?: number } = {}): Promise<Campaign[]> =>
+    (await http.get("/campaigns", { params })).data,
+  getById: async (id: string): Promise<CampaignWithRelations> =>
+    (await http.get(`/campaigns/${id}`)).data,
+  create: async (input: {
+    user_id: string;
+    campaign_name: string;
+    platform: string;
+    budget: number;
+    audience_size?: number;
+    content_type?: string;
+    posting_time?: string;
+    region?: string;
+  }): Promise<Campaign> => (await http.post("/campaigns", input)).data,
+};
+
+export const analyzeApi = {
+  sentiment: async (input: {
+    postId: string;
+    text: string;
+  }): Promise<SentimentResult> =>
+    (await http.post("/analyze/sentiment", input)).data,
+};
+
+export const predictApi = {
+  roi: async (input: {
+    campaignId: string;
+    budget: number;
+    platform: string;
+    contentType: string;
+    audienceSize: number;
+    postingHour: number;
+    sentimentScore: number;
+    holidayFlag: number;
+    region: string;
+  }): Promise<RoiResult> => (await http.post("/predict/roi", input)).data,
+};
+
+// ---------------------------------------------------------------------------
+// Platform integrations (capability matrix)
+// ---------------------------------------------------------------------------
+
+export type IntegrationsCapabilitiesResponse = {
+  architecture: {
+    mode: string;
+    providerRegistry?: string;
+    integrationLayer?: string;
+    oauthEnabled: boolean;
+    notes?: string;
+  };
+  methods: string[];
+  platforms: PlatformCapability[];
+  registeredProviders: string[];
+};
+
+export const integrationsApi = {
+  capabilities: async (): Promise<IntegrationsCapabilitiesResponse> =>
+    (await http.get("/integrations/platform-capabilities")).data,
+};
+
+// ---------------------------------------------------------------------------
+// OAuth (Meta Graph v19)
+// ---------------------------------------------------------------------------
+
+export const oauthApi = {
+  metaStatus: async (): Promise<OAuthStatus> =>
+    (await http.get("/oauth/meta/status")).data,
+  metaInit: async (
+    redirectAfter?: string,
+  ): Promise<{ authorization_url: string }> =>
+    (
+      await http.get("/oauth/meta/init", {
+        params: {
+          format: "json",
+          redirect_after: redirectAfter,
+        },
+      })
+    ).data,
+  metaSync: async (): Promise<{
+    connection: { id: string; status: string };
+    sync: { accounts_synced: number; pages: number };
+  }> => (await http.post("/oauth/meta/sync")).data,
+};
+
+export const healthApi = {
+  check: async (): Promise<HealthCheck> => (await http.get("/health")).data,
+};
+
+// ---------------------------------------------------------------------------
+// Competitors
+// ---------------------------------------------------------------------------
+
+export type CreateCompetitorInput = {
+  platform: Provider;
+  handle: string;
+  display_name?: string | null;
+  region?: string | null;
+  industry?: string | null;
+  tags?: string[];
+  source?: "manual" | "ad_library" | "business_discovery" | "mock";
+  is_active?: boolean;
+  metadata?: Record<string, unknown>;
+};
+
+export const competitorsApi = {
+  list: async (params?: {
+    platform?: string;
+    include_inactive?: boolean;
+  }): Promise<CompetitorAccount[]> =>
+    (
+      await http.get("/competitors", {
+        params: {
+          platform: params?.platform,
+          include_inactive: params?.include_inactive ? "true" : undefined,
+        },
+      })
+    ).data,
+  get: async (id: string): Promise<CompetitorAccount> =>
+    (await http.get(`/competitors/${id}`)).data,
+  create: async (input: CreateCompetitorInput): Promise<CompetitorAccount> =>
+    (await http.post("/competitors", input)).data,
+  update: async (
+    id: string,
+    patch: Partial<CreateCompetitorInput>,
+  ): Promise<CompetitorAccount> =>
+    (await http.patch(`/competitors/${id}`, patch)).data,
+  remove: async (id: string): Promise<{ id: string; deleted: boolean }> =>
+    (await http.delete(`/competitors/${id}`)).data,
+  posts: async (id: string, limit = 20): Promise<CompetitorPost[]> =>
+    (await http.get(`/competitors/${id}/posts`, { params: { limit } })).data,
+  refresh: async (id: string): Promise<{ posts_upserted: number; source: string }> =>
+    (await http.post(`/competitors/${id}/refresh`)).data,
+  refreshAll: async (): Promise<{ refreshed: number; results: unknown[] }> =>
+    (await http.post(`/competitors/refresh-all`)).data,
+  latestDigest: async (): Promise<CompetitorDigestRun | null> => {
+    try {
+      return (await http.get("/competitors/digest/latest")).data;
+    } catch (err: unknown) {
+      const status = (err as { response?: { status?: number } })?.response?.status;
+      if (status === 404) return null;
+      throw err;
+    }
+  },
+  digestRuns: async (): Promise<CompetitorDigestRun[]> =>
+    (await http.get("/competitors/digest/runs")).data,
+  previewAggregate: async (windowDays = 7): Promise<CompetitorAggregate> =>
+    (
+      await http.get("/competitors/digest/preview", {
+        params: { window_days: windowDays },
+      })
+    ).data,
+  generateDigest: async (input?: {
+    window_days?: number;
+    locale?: "en" | "ar";
+    delivery_target?: string | null;
+    skip_refresh?: boolean;
+  }): Promise<{ run: CompetitorDigestRun }> =>
+    (await http.post("/competitors/digest/generate", input || {})).data,
+};
+
+// ---------------------------------------------------------------------------
+// Assistant (chat + streaming)
+// ---------------------------------------------------------------------------
+
+export type AssistantConversation = {
+  id: string;
+  workspace_id: string;
+  title: string | null;
+  feature: "assistant" | "caption_studio" | "other";
+  metadata_json: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+};
+
+export type AssistantMessage = {
+  id: string;
+  conversation_id: string;
+  role: "user" | "assistant" | "system";
+  content: string;
+  prompt_tokens: number | null;
+  completion_tokens: number | null;
+  metadata_json: Record<string, unknown>;
+  created_at: string;
+};
+
+export type AssistantStreamFrame =
+  | { type: "conversation"; conversationId: string | null }
+  | { type: "token"; delta: string }
+  | { type: "error"; code: string; message: string }
+  | {
+      type: "done";
+      message?: AssistantMessage | Record<string, unknown>;
+      usage?: { prompt_tokens: number; completion_tokens: number; total_tokens: number };
+      model?: string | null;
+      costUSD?: number;
+    };
+
+export type AssistantStreamCallbacks = {
+  onConversation?: (conversationId: string | null) => void;
+  onToken?: (delta: string) => void;
+  onError?: (code: string, message: string) => void;
+  onDone?: (frame: Extract<AssistantStreamFrame, { type: "done" }>) => void;
+};
+
+/**
+ * POST /api/assistant/chat with Server-Sent Events.
+ * Returns an AbortController the caller can use to cancel mid-stream.
+ */
+export function streamAssistantChat(
+  input: { message: string; conversationId?: string | null; locale?: "en" | "ar" },
+  callbacks: AssistantStreamCallbacks = {},
+): { done: Promise<void>; abort: () => void } {
+  const controller = new AbortController();
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    Accept: "text/event-stream",
+  };
+  const wsid = readWorkspaceId();
+  if (wsid) headers["x-workspace-id"] = wsid;
+
+  const done = (async () => {
+    let response: Response;
+    try {
+      response = await fetch(`${BASE_URL}/assistant/chat`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify(input),
+        signal: controller.signal,
+      });
+    } catch (err) {
+      if ((err as { name?: string })?.name === "AbortError") return;
+      callbacks.onError?.(
+        "NETWORK",
+        err instanceof Error ? err.message : "Network error",
+      );
+      return;
+    }
+
+    if (!response.ok || !response.body) {
+      try {
+        const json = await response.json();
+        const e = json?.error || { code: "HTTP", message: response.statusText };
+        callbacks.onError?.(e.code || "HTTP", e.message || "Request failed");
+      } catch {
+        callbacks.onError?.("HTTP", `HTTP ${response.status}`);
+      }
+      return;
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+
+    const handleFrame = (event: string, data: string) => {
+      let payload: AssistantStreamFrame | null = null;
+      try {
+        payload = data ? (JSON.parse(data) as AssistantStreamFrame) : null;
+      } catch {
+        return;
+      }
+      if (!payload) return;
+
+      switch (payload.type) {
+        case "conversation":
+          callbacks.onConversation?.(payload.conversationId);
+          break;
+        case "token":
+          callbacks.onToken?.(payload.delta);
+          break;
+        case "error":
+          callbacks.onError?.(payload.code, payload.message);
+          break;
+        case "done":
+          callbacks.onDone?.(payload);
+          break;
+        default:
+          // ignore unknown events (end, ping, etc.)
+          break;
+      }
+      // `event` captured for future use (e.g. ping). Currently unused.
+      void event;
+    };
+
+    try {
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        const { done: streamDone, value } = await reader.read();
+        if (streamDone) break;
+        buffer += decoder.decode(value, { stream: true });
+
+        let sepIdx = buffer.indexOf("\n\n");
+        while (sepIdx !== -1) {
+          const raw = buffer.slice(0, sepIdx);
+          buffer = buffer.slice(sepIdx + 2);
+
+          let evName = "message";
+          const dataLines: string[] = [];
+          for (const line of raw.split("\n")) {
+            if (line.startsWith("event:")) evName = line.slice(6).trim();
+            else if (line.startsWith("data:")) dataLines.push(line.slice(5).trim());
+          }
+          handleFrame(evName, dataLines.join("\n"));
+          sepIdx = buffer.indexOf("\n\n");
+        }
+      }
+    } catch (err) {
+      if ((err as { name?: string })?.name === "AbortError") return;
+      callbacks.onError?.(
+        "STREAM",
+        err instanceof Error ? err.message : "Stream error",
+      );
+    }
+  })();
+
+  return { done, abort: () => controller.abort() };
+}
+
+export const assistantApi = {
+  streamChat: streamAssistantChat,
+  listConversations: async (): Promise<AssistantConversation[]> =>
+    (await http.get("/assistant/conversations")).data,
+  listMessages: async (conversationId: string): Promise<AssistantMessage[]> =>
+    (await http.get(`/assistant/conversations/${conversationId}/messages`)).data,
+};
+
+// ---------------------------------------------------------------------------
+// Caption Studio (ranked variant composer)
+// ---------------------------------------------------------------------------
+
+export type ContentFormat =
+  | "post"
+  | "story"
+  | "reel_script"
+  | "thread"
+  | "tweet"
+  | "facebook_post"
+  | "ad";
+
+export type ComposeRequest = {
+  brief: string;
+  platform: string;
+  format?: ContentFormat;
+  language?: "ar" | "en" | "mix";
+  dialect?: "khaleeji" | "levantine" | "egyptian" | "maghrebi" | "msa";
+  tone?: string;
+  length?: "short" | "medium" | "long";
+  count?: number;
+  callToAction?: string;
+  hashtags?: string[];
+  audience?: string;
+  locale?: "en" | "ar";
+};
+
+export type ComposeVariantFormatMeta = {
+  hook?: string | null;
+  beats?: string[] | null;
+  cta?: string | null;
+  parts?: string[] | null;
+  emoji_set?: string[] | null;
+};
+
+export type ComposeVariantScore = {
+  predicted_sentiment: "positive" | "neutral" | "negative";
+  sentiment_confidence: number;
+  predicted_roi: number | null;
+  predicted_engagement: number | null;
+  confidence_score: number | null;
+  language_mix: string;
+  tips: Array<{ id: string; text?: string; text_en?: string; text_ar?: string; priority?: string }>;
+  recommendation_text: string;
+  recommendation_ar: string;
+  length_chars: number;
+};
+
+export type ComposeVariant = {
+  index: number;
+  rank: number;
+  is_recommended: boolean;
+  text: string;
+  language: "ar" | "en" | "mix";
+  dialect: string;
+  tone: string | null;
+  hashtags: string[];
+  length_chars: number;
+  rationale: string | null;
+  composite_score: number;
+  score: ComposeVariantScore | null;
+  score_error?: string;
+  format?: ContentFormat;
+  format_meta?: ComposeVariantFormatMeta;
+};
+
+export type ComposeResponse = {
+  workspace_id: string;
+  platform: string;
+  format?: ContentFormat;
+  brief: string;
+  language: "ar" | "en" | "mix";
+  dialect: string;
+  length: "short" | "medium" | "long";
+  tone: string | null;
+  count: number;
+  source: "llm" | "fallback";
+  llm_error: string | null;
+  variants: ComposeVariant[];
+  shared_tips: string;
+  generated_at: string;
+};
+
+export const composeApi = {
+  compose: async (input: ComposeRequest): Promise<ComposeResponse> =>
+    (await http.post("/content/compose", input)).data,
+};
+
+// ---------------------------------------------------------------------------
+// Growth Report
+// ---------------------------------------------------------------------------
+
+export type GrowthReportNarrative = {
+  executive_summary_en: string;
+  executive_summary_ar: string;
+  highlights: Array<{ label_en: string; label_ar: string; value: string }>;
+  recommended_actions_en: string[];
+  recommended_actions_ar: string[];
+  _source?: "llm" | "fallback";
+  _llm_error?: string;
+};
+
+export type GrowthReportAccountRow = {
+  social_account_id: string;
+  platform: string;
+  handle: string;
+  display_name: string | null;
+  status: string;
+  last_synced_at: string | null;
+  followers_count: number;
+  following_count?: number;
+  profile_views?: number;
+  audience_captured_at?: string | null;
+  posts_count: number;
+};
+
+export type GrowthReportPlatformRow = {
+  provider: string;
+  posts: number;
+  reach: number;
+  impressions: number;
+  engagements: number;
+};
+
+export type GrowthReportTopPost = {
+  id: string;
+  social_account_id: string;
+  caption: string | null;
+  post_type?: string | null;
+  permalink?: string | null;
+  posted_at: string | null;
+  score: number;
+  engagement: number;
+  latest_metrics?: Record<string, number | null> | null;
+};
+
+export type GrowthReportAggregate = {
+  workspace: {
+    id: string;
+    name: string;
+    slug: string;
+    region_default: string | null;
+    locale_default: string | null;
+    industry_hint: string | null;
+    primary_region: string | null;
+  } | null;
+  totals: Record<string, number> | null;
+  syncJobs: Record<string, number> | null;
+  accountsBreakdown: GrowthReportAccountRow[];
+  overview: AnalyticsOverview | null;
+  platform: GrowthReportPlatformRow[];
+  sentiment: SentimentBreakdown | null;
+  topPosts: GrowthReportTopPost[];
+  insights: Array<{
+    type: string;
+    title: string;
+    summary: string;
+    severity: string;
+  }>;
+  recommendations: Array<{
+    type: string;
+    title: string;
+    description: string | null;
+    priority: string;
+  }>;
+  warnings: string[];
+};
+
+export type GrowthReport = {
+  workspace_id: string;
+  report_type: "growth";
+  locale: "en" | "ar";
+  generated_at: string;
+  aggregate: GrowthReportAggregate;
+  narrative: GrowthReportNarrative;
+};
+
+export type ReportShare = {
+  id: string;
+  token: string;
+  report_type: "growth" | "competitor";
+  locale: "en" | "ar";
+  created_at: string;
+  expires_at: string | null;
+  revoked?: boolean;
+};
+
+export type SharedGrowthReport = {
+  token: string;
+  report_type: "growth" | "competitor";
+  locale: "en" | "ar";
+  created_at: string;
+  expires_at: string | null;
+  report: GrowthReport;
+};
+
+// ---------------------------------------------------------------------------
+// Scheduled posts + MENA calendar
+// ---------------------------------------------------------------------------
+
+export type ScheduledPostStatus =
+  | "draft"
+  | "scheduled"
+  | "publishing"
+  | "published"
+  | "failed"
+  | "cancelled";
+
+export type ScheduledPost = {
+  id: string;
+  workspace_id: string;
+  social_account_id: string | null;
+  platform: string;
+  caption: string;
+  language: "ar" | "en" | "mix" | null;
+  dialect: string | null;
+  media_urls: string[];
+  hashtags: string[];
+  scheduled_at: string;
+  status: ScheduledPostStatus;
+  published_at: string | null;
+  external_post_id: string | null;
+  error_message: string | null;
+  content_score_json: Record<string, unknown>;
+  mena_event_id: string | null;
+  metadata_json: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+};
+
+export type MenaEvent = {
+  id: string;
+  workspace_id: string | null;
+  slug: string;
+  title_en: string;
+  title_ar: string | null;
+  event_date: string; // YYYY-MM-DD
+  event_type: "holiday" | "religious" | "shopping" | "local" | "custom";
+  region: string | null;
+  description_en: string | null;
+  description_ar: string | null;
+  metadata_json: Record<string, unknown>;
+  created_at: string;
+};
+
+export type CalendarResponse = {
+  range: { from: string; to: string };
+  events: MenaEvent[];
+  scheduled_posts: ScheduledPost[];
+  warnings: string[];
+};
+
+export type CreateScheduledPostInput = {
+  social_account_id?: string | null;
+  platform: string;
+  caption: string;
+  language?: "ar" | "en" | "mix" | null;
+  dialect?: string | null;
+  media_urls?: string[];
+  hashtags?: string[];
+  scheduled_at: string;
+  status?: ScheduledPostStatus;
+  mena_event_id?: string | null;
+  content_score_json?: Record<string, unknown>;
+  metadata_json?: Record<string, unknown>;
+};
+
+export const scheduledPostsApi = {
+  list: async (params?: {
+    status?: string | string[];
+    from?: string;
+    to?: string;
+    limit?: number;
+  }): Promise<ScheduledPost[]> =>
+    (await http.get("/scheduled-posts", { params })).data,
+  get: async (id: string): Promise<ScheduledPost> =>
+    (await http.get(`/scheduled-posts/${id}`)).data,
+  create: async (input: CreateScheduledPostInput): Promise<ScheduledPost> =>
+    (await http.post("/scheduled-posts", input)).data,
+  update: async (
+    id: string,
+    input: Partial<CreateScheduledPostInput>,
+  ): Promise<ScheduledPost> =>
+    (await http.patch(`/scheduled-posts/${id}`, input)).data,
+  cancel: async (id: string): Promise<ScheduledPost> =>
+    (await http.post(`/scheduled-posts/${id}/cancel`, {})).data,
+  remove: async (id: string): Promise<{ id: string; deleted: boolean }> =>
+    (await http.delete(`/scheduled-posts/${id}`)).data,
+  publishNow: async (): Promise<{
+    claimed: number;
+    published: number;
+    failed: number;
+    rows: Array<{ id: string; status: string; error?: string }>;
+  }> => (await http.post("/scheduled-posts/publish-now", {})).data,
+  calendar: async (params?: {
+    from?: string;
+    to?: string;
+    region?: string;
+  }): Promise<CalendarResponse> =>
+    (await http.get("/workspaces/current/calendar", { params })).data,
+};
+
+export const reportsApi = {
+  growth: async (locale: "en" | "ar" = "en"): Promise<GrowthReport> =>
+    (await http.get("/reports/growth", { params: { locale } })).data,
+  share: async (input: {
+    locale?: "en" | "ar";
+    expiresInDays?: number | null;
+  } = {}): Promise<ReportShare> =>
+    (await http.post("/reports/growth/share", input)).data,
+  listShares: async (): Promise<ReportShare[]> =>
+    (await http.get("/reports/shares")).data,
+  revokeShare: async (shareId: string): Promise<{ id: string; revoked: boolean }> =>
+    (await http.delete(`/reports/shares/${shareId}`)).data,
+  getShared: async (token: string): Promise<SharedGrowthReport> => {
+    // Public route: skip workspace header so we don't leak context.
+    const client = axios.create({ baseURL: BASE_URL });
+    return (await client.get(`/reports/shared/${token}`)).data;
+  },
+};
+
+// ---------------------------------------------------------------------------
+// Trend Radar (Phase 7 Layer 1)
+// ---------------------------------------------------------------------------
+
+export type TrendsListParams = {
+  kind?: TrendKind | "all";
+  window_days?: 7 | 14 | 30 | number;
+  sort_by?: TrendSortBy;
+  limit?: number;
+  platform?: string;
+  source?: "own" | "competitor" | "all";
+  search?: string;
+};
+
+export const trendsApi = {
+  list: async (params?: TrendsListParams): Promise<TrendsListResponse> =>
+    (await http.get("/trends", { params })).data,
+  detail: async (
+    id: string,
+    windowDays = 30,
+  ): Promise<TrendDetail> =>
+    (
+      await http.get(`/trends/${id}`, {
+        params: { window_days: windowDays },
+      })
+    ).data,
+  rebuild: async (input?: {
+    window_days?: number;
+    allow_llm?: boolean;
+  }): Promise<TrendRebuildSummary> =>
+    (await http.post("/trends/rebuild", input || {})).data,
+};

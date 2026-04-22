@@ -1,0 +1,112 @@
+[
+  {
+    "id": "ramadan-2026",
+    "name_en": "Ramadan",
+    "name_ar": "شهر رمضان",
+    "type": "religious",
+    "regions": ["LB", "AE", "SA", "EG", "JO"],
+    "startDate": "2026-02-17",
+    "endDate": "2026-03-19",
+    "notes_en": "Audiences are online late evenings after Iftar; family and food content performs best.",
+    "notes_ar": "الجمهور نشط ليلاً بعد الإفطار؛ المحتوى العائلي والأكل يحقق أعلى تفاعل."
+  },
+  {
+    "id": "eid-alfitr-2026",
+    "name_en": "Eid Al-Fitr",
+    "name_ar": "عيد الفطر",
+    "type": "religious",
+    "regions": ["LB", "AE", "SA", "EG", "JO"],
+    "startDate": "2026-03-20",
+    "endDate": "2026-03-22",
+    "notes_en": "Gift, apparel, and F&B campaigns peak. Bilingual creatives increase reach by ~15%.",
+    "notes_ar": "تزداد حملات الهدايا والأزياء والمطاعم. الإبداعات ثنائية اللغة ترفع الوصول بنحو 15%."
+  },
+  {
+    "id": "eid-aladha-2026",
+    "name_en": "Eid Al-Adha",
+    "name_ar": "عيد الأضحى",
+    "type": "religious",
+    "regions": ["LB", "AE", "SA", "EG", "JO"],
+    "startDate": "2026-05-27",
+    "endDate": "2026-05-30",
+    "notes_en": "Short, festive video content performs best in morning and late evening.",
+    "notes_ar": "الفيديوهات القصيرة الاحتفالية تتصدر في الصباح والمساء المتأخر."
+  },
+  {
+    "id": "uae-national-day-2026",
+    "name_en": "UAE National Day",
+    "name_ar": "اليوم الوطني لدولة الإمارات",
+    "type": "national",
+    "regions": ["AE"],
+    "startDate": "2026-12-02",
+    "endDate": "2026-12-03",
+    "notes_en": "Patriotic hashtags (#UAE55) and red-white-green-black palettes resonate strongly.",
+    "notes_ar": "الهاشتاجات الوطنية والألوان الوطنية تحقق تفاعلاً مرتفعاً."
+  },
+  {
+    "id": "ksa-national-day-2026",
+    "name_en": "Saudi National Day",
+    "name_ar": "اليوم الوطني السعودي",
+    "type": "national",
+    "regions": ["SA"],
+    "startDate": "2026-09-23",
+    "endDate": "2026-09-23",
+    "notes_en": "Green color themes and Vision 2030 messaging outperform generic promos.",
+    "notes_ar": "محتوى رؤية 2030 واللون الأخضر يتفوق على العروض العامة."
+  },
+  {
+    "id": "lb-independence-2026",
+    "name_en": "Lebanon Independence Day",
+    "name_ar": "عيد الاستقلال اللبناني",
+    "type": "national",
+    "regions": ["LB"],
+    "startDate": "2026-11-22",
+    "endDate": "2026-11-22",
+    "notes_en": "Local heritage and cedar-tree creatives perform well.",
+    "notes_ar": "المحتوى التراثي ورمز شجرة الأرز يحقق نتائج جيدة."
+  },
+  {
+    "id": "eg-revolution-2026",
+    "name_en": "Egypt Revolution Day",
+    "name_ar": "عيد ثورة 25 يناير",
+    "type": "national",
+    "regions": ["EG"],
+    "startDate": "2026-01-25",
+    "endDate": "2026-01-25",
+    "notes_en": "Civic pride messaging and historical callbacks work well in Cairo/Alexandria.",
+    "notes_ar": "المحتوى الوطني والتاريخي يحقق صدى في القاهرة والإسكندرية."
+  },
+  {
+    "id": "jo-independence-2026",
+    "name_en": "Jordan Independence Day",
+    "name_ar": "عيد الاستقلال الأردني",
+    "type": "national",
+    "regions": ["JO"],
+    "startDate": "2026-05-25",
+    "endDate": "2026-05-25",
+    "notes_en": "Short form reels with patriotic music outperform static imagery.",
+    "notes_ar": "الفيديوهات القصيرة مع الموسيقى الوطنية تتفوق على الصور الثابتة."
+  },
+  {
+    "id": "back-to-school-2026",
+    "name_en": "Back to School",
+    "name_ar": "العودة إلى المدارس",
+    "type": "seasonal",
+    "regions": ["LB", "AE", "SA", "EG", "JO"],
+    "startDate": "2026-08-20",
+    "endDate": "2026-09-15",
+    "notes_en": "Carousel posts listing discounts + bundles perform best.",
+    "notes_ar": "منشورات الكاروسيل مع العروض والباقات تحقق أعلى أداء."
+  },
+  {
+    "id": "white-friday-2026",
+    "name_en": "White Friday",
+    "name_ar": "الجمعة البيضاء",
+    "type": "seasonal",
+    "regions": ["AE", "SA", "EG", "JO"],
+    "startDate": "2026-11-27",
+    "endDate": "2026-11-29",
+    "notes_en": "Flash-sale reels + countdown stories drive the highest conversion.",
+    "notes_ar": "ريلز التخفيضات الخاطفة وقصص العد التنازلي تحقق أعلى تحويل."
+  }
+]

@@ -1,0 +1,16 @@
+# --- web service ---
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+pydantic==2.9.2
+
+# --- ML (ROI model + data handling) ---
+scikit-learn==1.5.2
+pandas==2.2.3
+numpy==1.26.4
+joblib==1.4.2
+
+# --- NLP (Arabic sentiment) ---
+# torch >= 2.5 has official Python 3.13 wheels.
+# transformers >= 4.46 supports Python 3.13 + pydantic 2.
+transformers>=4.46.0,<5.0.0
+torch>=2.5.0,<3.0.0
