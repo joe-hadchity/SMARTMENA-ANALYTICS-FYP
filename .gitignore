@@ -7,7 +7,7 @@ yarn-error.log*
 dist/
 build/
 coverage/
-.tsbuildinfo
+*.tsbuildinfo
 
 # Env
 .env
@@ -34,6 +34,9 @@ ml-service/artifacts/*
 # HuggingFace cache (if it ends up inside the repo)
 .cache/
 hf_cache/
+
+# Claude Code
+.claude/settings.local.json
 
 # IDE / OS
 .vscode/

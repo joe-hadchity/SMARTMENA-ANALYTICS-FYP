@@ -269,6 +269,209 @@ export const campaignsApi = {
   }): Promise<Campaign> => (await http.post("/campaigns", input)).data,
 };
 
+// ---------------------------------------------------------------------------
+// Meta Ads Manager  (/api/campaigns/meta-ads/*)
+// ---------------------------------------------------------------------------
+
+export type MetaAdsStatus = "live" | "not_implemented" | "live_error";
+
+export type MetaAdAccount = {
+  id: string;
+  name: string;
+  currency: string;
+  account_status: number;
+  timezone_name: string;
+};
+
+export type MetaAdsCampaign = {
+  id: string;
+  name: string;
+  status: "ACTIVE" | "PAUSED" | "ARCHIVED" | "DELETED";
+  effective_status: string;
+  objective: string;
+  buying_type: string;
+  daily_budget?: string;
+  lifetime_budget?: string;
+  start_time?: string;
+  end_time?: string;
+  created_time: string;
+  updated_time: string;
+};
+
+export type MetaAdset = {
+  id: string;
+  name: string;
+  campaign_id: string;
+  status: "ACTIVE" | "PAUSED" | "ARCHIVED" | "DELETED";
+  effective_status: string;
+  daily_budget?: string;
+  lifetime_budget?: string;
+  bid_amount?: string;
+  optimization_goal: string;
+  billing_event: string;
+  targeting: Record<string, unknown>;
+  start_time?: string;
+  end_time?: string;
+  created_time: string;
+  updated_time: string;
+};
+
+export type MetaAdCreative = {
+  id: string;
+  name: string;
+  object_story_spec?: Record<string, unknown>;
+  body?: string | null;
+  title?: string | null;
+  call_to_action_type?: string | null;
+  created_time: string;
+  updated_time: string;
+};
+
+export type MetaAdsListResponse<T> = {
+  _status: MetaAdsStatus;
+  _note?: string;
+  _errorMessage?: string;
+  data: T[];
+  paging?: { cursors: { before: string; after: string }; next?: string };
+};
+
+export type MetaAdsSingleResponse<T> = {
+  _status: MetaAdsStatus;
+  _note?: string;
+  _errorMessage?: string;
+  data: T | null;
+};
+
+export type MetaAdsMutationResponse = {
+  _status: MetaAdsStatus;
+  _note?: string;
+  _errorMessage?: string;
+  data: { id?: string; success?: boolean } | null;
+};
+
+export type CreateMetaCampaignInput = {
+  adAccountId: string;
+  name: string;
+  objective: string;
+  status?: "ACTIVE" | "PAUSED";
+  buyingType?: string;
+  dailyBudget?: number;
+  lifetimeBudget?: number;
+  startTime?: string;
+  endTime?: string;
+  specialAdCategories?: string[];
+};
+
+export type UpdateMetaCampaignInput = {
+  name?: string;
+  status?: "ACTIVE" | "PAUSED" | "ARCHIVED" | "DELETED";
+  dailyBudget?: number;
+  lifetimeBudget?: number;
+  startTime?: string;
+  endTime?: string;
+};
+
+export type CreateAdsetInput = {
+  adAccountId: string;
+  campaignId: string;
+  name: string;
+  optimizationGoal: string;
+  billingEvent: string;
+  dailyBudget?: number;
+  lifetimeBudget?: number;
+  bidAmount?: number;
+  targeting: Record<string, unknown>;
+  status?: "ACTIVE" | "PAUSED";
+  startTime?: string;
+  endTime?: string;
+};
+
+export type CreateCreativeInput = {
+  adAccountId: string;
+  name: string;
+  objectStorySpec: {
+    pageId: string;
+    linkData: {
+      link: string;
+      message: string;
+      name?: string;
+      description?: string;
+      imageHash?: string;
+      callToAction?: { type: string; link: string };
+    };
+  };
+};
+
+export const metaAdsApi = {
+  // Ad Accounts
+  accounts: async (): Promise<MetaAdsListResponse<MetaAdAccount>> =>
+    (await http.get("/campaigns/meta-ads/accounts")).data,
+
+  // Campaigns
+  listCampaigns: async (params: {
+    adAccountId: string;
+    effectiveStatus?: string;
+  }): Promise<MetaAdsListResponse<MetaAdsCampaign>> =>
+    (await http.get("/campaigns/meta-ads", { params })).data,
+
+  getCampaign: async (id: string): Promise<MetaAdsSingleResponse<MetaAdsCampaign>> =>
+    (await http.get(`/campaigns/meta-ads/${id}`)).data,
+
+  createCampaign: async (
+    input: CreateMetaCampaignInput,
+  ): Promise<MetaAdsMutationResponse> =>
+    (await http.post("/campaigns/meta-ads", input)).data,
+
+  updateCampaign: async (
+    id: string,
+    patch: UpdateMetaCampaignInput,
+  ): Promise<MetaAdsMutationResponse> =>
+    (await http.patch(`/campaigns/meta-ads/${id}`, patch)).data,
+
+  deleteCampaign: async (id: string): Promise<MetaAdsMutationResponse> =>
+    (await http.delete(`/campaigns/meta-ads/${id}`)).data,
+
+  // Ad Sets
+  listAdsets: async (
+    campaignId: string,
+  ): Promise<MetaAdsListResponse<MetaAdset>> =>
+    (await http.get(`/campaigns/meta-ads/${campaignId}/adsets`)).data,
+
+  createAdset: async (
+    campaignId: string,
+    input: CreateAdsetInput,
+  ): Promise<MetaAdsMutationResponse> =>
+    (await http.post(`/campaigns/meta-ads/${campaignId}/adsets`, input)).data,
+
+  updateAdset: async (
+    adsetId: string,
+    patch: Partial<CreateAdsetInput>,
+  ): Promise<MetaAdsMutationResponse> =>
+    (await http.patch(`/campaigns/meta-ads/adsets/${adsetId}`, patch)).data,
+
+  deleteAdset: async (adsetId: string): Promise<MetaAdsMutationResponse> =>
+    (await http.delete(`/campaigns/meta-ads/adsets/${adsetId}`)).data,
+
+  // Ad Creatives
+  listCreatives: async (params: {
+    adAccountId: string;
+  }): Promise<MetaAdsListResponse<MetaAdCreative>> =>
+    (await http.get("/campaigns/meta-ads/creatives", { params })).data,
+
+  getCreative: async (
+    creativeId: string,
+  ): Promise<MetaAdsSingleResponse<MetaAdCreative>> =>
+    (await http.get(`/campaigns/meta-ads/creatives/${creativeId}`)).data,
+
+  createCreative: async (
+    input: CreateCreativeInput,
+  ): Promise<MetaAdsMutationResponse> =>
+    (await http.post("/campaigns/meta-ads/creatives", input)).data,
+
+  deleteCreative: async (creativeId: string): Promise<MetaAdsMutationResponse> =>
+    (await http.delete(`/campaigns/meta-ads/creatives/${creativeId}`)).data,
+};
+
 export const analyzeApi = {
   sentiment: async (input: {
     postId: string;

@@ -43,7 +43,7 @@ const env = {
   META_REDIRECT_URI:
     process.env.META_REDIRECT_URI ||
     `http://localhost:${Number(process.env.PORT) || 4000}/api/oauth/meta/callback`,
-  META_GRAPH_VERSION: process.env.META_GRAPH_VERSION || "v19.0",
+  META_GRAPH_VERSION: process.env.META_GRAPH_VERSION || "v22.0",
   META_OAUTH_ENABLED: Boolean(
     process.env.META_APP_ID &&
       process.env.META_APP_SECRET &&
