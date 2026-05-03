@@ -24,11 +24,11 @@ export default function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen flex bg-bg">
-      {/* Desktop sidebar */}
+      {/* Desktop sidebar - Claude Design dimensions: 208px expanded, 52px collapsed */}
       <div
         className={cn(
           "hidden lg:flex shrink-0 transition-[width] duration-200 ease-out-soft",
-          collapsed ? "w-[72px]" : "w-64",
+          collapsed ? "w-[52px]" : "w-52",
         )}
       >
         <Sidebar collapsed={collapsed} onToggleCollapse={() => setCollapsed((c) => !c)} />

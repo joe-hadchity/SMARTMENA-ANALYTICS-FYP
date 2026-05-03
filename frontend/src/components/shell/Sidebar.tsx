@@ -93,31 +93,29 @@ export default function Sidebar({
   return (
     <aside
       className={cn(
-        "h-screen sticky top-0 w-full bg-bg-elevated border-e border-border",
-        "flex flex-col overflow-hidden",
+        "h-screen sticky top-0 w-full flex flex-col overflow-hidden",
+        // Dark-always sidebar using custom tokens
+        "bg-[oklch(var(--sidebar-bg))] border-e border-[oklch(var(--sidebar-border))]",
       )}
+      style={{
+        // Force dark text colors regardless of theme
+        color: "oklch(var(--sidebar-fg))",
+      }}
     >
       {/* Header / brand */}
-      <div className="px-3 py-3 flex items-center gap-2">
+      <div className="px-4 py-4 flex items-center gap-3">
         <Link
           href="/"
-          className="flex items-center gap-2.5 min-w-0 rounded-lg px-1.5 py-1.5 hover:bg-surface-muted transition-colors"
+          className="flex items-center gap-3 min-w-0"
         >
-          <div className="relative h-8 w-8 shrink-0">
-            <div className="absolute inset-0 rounded-lg gradient-tile blur-[8px] opacity-70" />
-            <div className="relative h-8 w-8 rounded-lg gradient-tile grid place-items-center text-white font-bold shadow-sm">
-              S
-            </div>
+          {/* Teal logo icon */}
+          <div className="h-7 w-7 shrink-0 rounded-lg bg-[oklch(52%_0.13_195)] grid place-items-center shadow-sm">
+            <LineChart className="h-3.5 w-3.5 text-white" />
           </div>
           {!collapsed ? (
-            <div className="min-w-0">
-              <div className="text-sm font-semibold leading-tight truncate">
-                SmartMENA
-              </div>
-              <div className="text-[10px] text-fg-subtle leading-tight tracking-wider uppercase">
-                Analytics
-              </div>
-            </div>
+            <span className="text-sm font-bold tracking-tight text-[oklch(var(--sidebar-fg))]">
+              {locale === "ar" ? "سمارت مينا" : "SmartMENA"}
+            </span>
           ) : null}
         </Link>
         {!collapsed ? (
@@ -126,7 +124,16 @@ export default function Sidebar({
               <button
                 type="button"
                 onClick={onToggleCollapse}
-                className="ms-auto p-1.5 rounded-md text-fg-muted hover:bg-surface-muted hover:text-fg transition-colors"
+                className="ms-auto p-1.5 rounded-md transition-colors"
+                style={{
+                  color: "oklch(var(--sidebar-fg) / 0.42)",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = "oklch(var(--sidebar-fg) / 0.72)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = "oklch(var(--sidebar-fg) / 0.42)";
+                }}
                 aria-label={isMobile ? "Close navigation" : "Collapse sidebar"}
               >
                 {locale === "ar" ? (
@@ -153,11 +160,17 @@ export default function Sidebar({
         {SECTIONS.map((section) => (
           <div key={section.titleKey}>
             {!collapsed ? (
-              <div className="px-2.5 pb-1.5 text-[10px] uppercase tracking-widest text-fg-subtle font-semibold">
+              <div
+                className="px-2.5 pb-1.5 text-[9px] uppercase tracking-widest font-bold"
+                style={{ color: "oklch(var(--sidebar-fg) / 0.22)" }}
+              >
                 {t(section.titleKey)}
               </div>
             ) : (
-              <div className="mx-2 my-1.5 h-px bg-border" />
+              <div
+                className="mx-2 my-1.5 h-px"
+                style={{ backgroundColor: "oklch(var(--sidebar-fg) / 0.07)" }}
+              />
             )}
             <div className="space-y-0.5">
               {section.items.map((item) => {
@@ -168,27 +181,47 @@ export default function Sidebar({
                     key={item.href}
                     href={item.href}
                     className={cn(
-                      "relative group flex items-center gap-2.5 rounded-lg text-sm transition-colors",
+                      "relative group flex items-center gap-2.5 rounded-lg text-sm transition-all duration-150",
                       collapsed ? "justify-center h-9 w-9 mx-auto" : "px-2.5 py-1.5",
-                      active
-                        ? "bg-primary-soft text-primary font-medium"
-                        : "text-fg-muted hover:text-fg hover:bg-surface-muted",
+                      active ? "font-medium" : "",
+                      // Active indicator border
+                      active && !collapsed
+                        ? locale === "ar"
+                          ? "border-r-[2.5px] border-r-[oklch(70%_0.09_195)]"
+                          : "border-l-[2.5px] border-l-[oklch(70%_0.09_195)]"
+                        : "",
                     )}
+                    style={{
+                      backgroundColor: active
+                        ? "oklch(var(--sidebar-active) / 0.4)"
+                        : "transparent",
+                      color: active
+                        ? "oklch(var(--sidebar-fg) / 0.92)"
+                        : "oklch(var(--sidebar-fg) / 0.42)",
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!active) {
+                        e.currentTarget.style.backgroundColor =
+                          "oklch(var(--sidebar-hover) / 0.5)";
+                        e.currentTarget.style.color = "oklch(var(--sidebar-fg) / 0.72)";
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!active) {
+                        e.currentTarget.style.backgroundColor = "transparent";
+                        e.currentTarget.style.color = "oklch(var(--sidebar-fg) / 0.42)";
+                      }
+                    }}
                   >
-                    {active ? (
-                      <span
-                        className={cn(
-                          "absolute top-1.5 bottom-1.5 w-[3px] rounded-full bg-primary",
-                          collapsed ? "start-0" : "-start-2",
-                        )}
-                      />
-                    ) : null}
                     <Icon className="h-4 w-4 shrink-0" />
                     {!collapsed ? (
                       <>
                         <span className="truncate">{t(item.labelKey)}</span>
                         {item.shortcut ? (
-                          <span className="ms-auto text-[10px] text-fg-subtle tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
+                          <span
+                            className="ms-auto text-[10px] tracking-widest opacity-0 group-hover:opacity-100 transition-opacity"
+                            style={{ color: "oklch(var(--sidebar-fg) / 0.42)" }}
+                          >
                             {item.shortcut}
                           </span>
                         ) : null}
@@ -211,7 +244,10 @@ export default function Sidebar({
       </nav>
 
       {/* Footer / user */}
-      <div className="mt-auto px-2 pb-3 pt-2 border-t border-border">
+      <div
+        className="mt-auto px-2 pb-3 pt-2 border-t"
+        style={{ borderColor: "oklch(var(--sidebar-fg) / 0.07)" }}
+      >
         <UserMenu collapsed={collapsed} />
       </div>
 
@@ -219,7 +255,19 @@ export default function Sidebar({
         <button
           type="button"
           onClick={onToggleCollapse}
-          className="absolute -end-3 top-16 h-6 w-6 rounded-full border border-border bg-bg-elevated text-fg-muted hover:text-fg shadow-sm grid place-items-center"
+          className="absolute -end-3 top-16 h-6 w-6 rounded-full shadow-sm grid place-items-center transition-colors"
+          style={{
+            backgroundColor: "oklch(var(--sidebar-bg))",
+            borderColor: "oklch(var(--sidebar-fg) / 0.12)",
+            color: "oklch(var(--sidebar-fg) / 0.42)",
+            border: "1px solid",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.color = "oklch(var(--sidebar-fg) / 0.72)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.color = "oklch(var(--sidebar-fg) / 0.42)";
+          }}
           aria-label="Expand sidebar"
         >
           {locale === "ar" ? (
@@ -249,20 +297,30 @@ function WorkspaceSwitcher({ collapsed }: { collapsed: boolean }) {
     <button
       type="button"
       className={cn(
-        "w-full flex items-center gap-2 rounded-lg border border-border bg-surface px-2 py-1.5",
-        "text-sm hover:bg-surface-muted transition-colors",
+        "w-full flex items-center gap-2 rounded-lg border text-sm transition-colors px-2 py-1.5",
         collapsed && "justify-center px-0 py-2",
       )}
+      style={{
+        backgroundColor: "oklch(var(--sidebar-hover) / 0.6)",
+        borderColor: "oklch(var(--sidebar-fg) / 0.12)",
+        color: "oklch(var(--sidebar-fg))",
+      }}
     >
-      <div className="h-6 w-6 shrink-0 rounded-md gradient-tile grid place-items-center text-white text-xs font-semibold">
+      <div className="h-6 w-6 shrink-0 rounded-md bg-[oklch(52%_0.13_195)] grid place-items-center text-white text-xs font-semibold">
         {current?.name?.charAt(0).toUpperCase() || "S"}
       </div>
       {!collapsed ? (
         <div className="min-w-0 text-start flex-1">
-          <div className="text-sm font-medium truncate leading-tight">
+          <div
+            className="text-sm font-medium truncate leading-tight"
+            style={{ color: "oklch(var(--sidebar-fg) / 0.92)" }}
+          >
             {current?.name ?? t("common.loading")}
           </div>
-          <div className="text-[10px] text-fg-subtle truncate leading-tight uppercase tracking-wider">
+          <div
+            className="text-[10px] truncate leading-tight uppercase tracking-wider"
+            style={{ color: "oklch(var(--sidebar-fg) / 0.42)" }}
+          >
             {current?.region_default ?? "MENA"}
           </div>
         </div>
@@ -295,7 +353,7 @@ function WorkspaceSwitcher({ collapsed }: { collapsed: boolean }) {
               if (typeof window !== "undefined") window.location.reload();
             }}
           >
-            <div className="h-5 w-5 rounded-md gradient-tile grid place-items-center text-white text-[10px] font-semibold">
+            <div className="h-5 w-5 rounded-md bg-[oklch(52%_0.13_195)] grid place-items-center text-white text-[10px] font-semibold">
               {ws.name?.charAt(0).toUpperCase() || "W"}
             </div>
             <span className="truncate">{ws.name}</span>
@@ -331,20 +389,34 @@ function UserMenu({ collapsed }: { collapsed: boolean }) {
     <button
       type="button"
       className={cn(
-        "w-full flex items-center gap-2.5 rounded-lg px-2 py-1.5",
-        "hover:bg-surface-muted transition-colors",
+        "w-full flex items-center gap-2.5 rounded-lg px-2 py-1.5 transition-colors",
         collapsed && "justify-center px-0 py-2",
       )}
+      style={{
+        color: "oklch(var(--sidebar-fg))",
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.backgroundColor = "oklch(var(--sidebar-hover) / 0.5)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.backgroundColor = "transparent";
+      }}
     >
-      <div className="h-7 w-7 rounded-full bg-primary-soft text-primary grid place-items-center">
+      <div className="h-7 w-7 rounded-full bg-[oklch(96%_0.015_195)] text-[oklch(52%_0.13_195)] grid place-items-center">
         <User className="h-3.5 w-3.5" />
       </div>
       {!collapsed ? (
         <div className="min-w-0 text-start flex-1">
-          <div className="text-xs font-medium leading-tight truncate">
+          <div
+            className="text-xs font-medium leading-tight truncate"
+            style={{ color: "oklch(var(--sidebar-fg) / 0.88)" }}
+          >
             {t("user.demo", "Demo founder")}
           </div>
-          <div className="text-[10px] text-fg-subtle leading-tight truncate">
+          <div
+            className="text-[10px] leading-tight truncate"
+            style={{ color: "oklch(var(--sidebar-fg) / 0.42)" }}
+          >
             beta access
           </div>
         </div>

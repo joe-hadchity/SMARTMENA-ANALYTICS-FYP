@@ -12,6 +12,7 @@ import { useI18n } from "@/i18n/I18nProvider";
 import { campaignsApi, metaAdsApi } from "@/lib/api";
 import type { MetaAdsCampaign, MetaAdsListResponse } from "@/lib/api";
 import { formatDate, formatNumber } from "@/lib/format";
+import type { Locale } from "@/lib/types";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -40,7 +41,7 @@ function campaignStatusTone(status: string): ChipTone {
   return "red";
 }
 
-function formatBudget(campaign: MetaAdsCampaign, locale: string): string {
+function formatBudget(campaign: MetaAdsCampaign, locale: Locale): string {
   if (campaign.daily_budget) {
     return `$${formatNumber(Number(campaign.daily_budget) / 100, locale)}/day`;
   }
@@ -59,7 +60,7 @@ function MetaAdsCampaignsTable({
   locale,
 }: {
   campaigns: MetaAdsCampaign[];
-  locale: string;
+  locale: Locale;
 }) {
   return (
     <div className="overflow-x-auto rounded-lg border border-border">
@@ -113,7 +114,7 @@ function MetaAdsCampaignsTable({
 // Meta Ads tab content
 // ---------------------------------------------------------------------------
 
-function MetaAdsTab({ locale }: { locale: string }) {
+function MetaAdsTab({ locale }: { locale: Locale }) {
   const accountsQ = useQuery({
     queryKey: ["metaAds", "accounts"],
     queryFn: () => metaAdsApi.accounts(),

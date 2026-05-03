@@ -63,10 +63,12 @@ export default function Topbar({
 
   const crumbs = buildBreadcrumbs(pathname, (k) => t(k));
 
+  const isDashboard = pathname === "/";
+
   return (
     <header
       className={cn(
-        "sticky top-0 z-30 h-14 border-b border-border bg-bg-elevated/80 backdrop-blur",
+        "sticky top-0 z-30 h-12 border-b border-border bg-bg-elevated/80 backdrop-blur",
         "px-3 md:px-5 flex items-center gap-3",
       )}
     >
@@ -104,6 +106,26 @@ export default function Topbar({
           </span>
         ))}
       </nav>
+
+      {/* Period tabs - only on dashboard */}
+      {isDashboard && (
+        <div className="hidden md:flex items-center gap-0.5 ms-4">
+          {["7D", "30D", "90D"].map((period) => (
+            <button
+              key={period}
+              className={cn(
+                "px-3 py-1 text-xs font-mono transition-all duration-150",
+                "border-b-2",
+                period === "30D"
+                  ? "border-primary text-primary font-semibold"
+                  : "border-transparent text-fg-muted hover:text-fg"
+              )}
+            >
+              {period}
+            </button>
+          ))}
+        </div>
+      )}
 
       <div className="ms-auto" />
 

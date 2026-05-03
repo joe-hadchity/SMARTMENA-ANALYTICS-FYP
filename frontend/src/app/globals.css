@@ -3,102 +3,124 @@
 @tailwind utilities;
 
 /*
- * Theme tokens.
- * HSL triplets (without the hsl() wrapper) so Tailwind's
- * `hsl(var(--token) / <alpha>)` pattern can apply alpha channels.
+ * Theme tokens - Warm Desert Modernism (OKLCH color space).
+ * OKLCH triplets (without the oklch() wrapper) so Tailwind's
+ * `oklch(var(--token) / <alpha>)` pattern can apply alpha channels.
+ * Format: Lightness% Chroma Hue
  */
 :root {
-  /* surfaces */
-  --bg:              220 33% 98%;   /* page background */
-  --bg-elevated:     0 0% 100%;     /* nav, modals */
-  --surface:         0 0% 100%;     /* cards */
-  --surface-muted:   220 20% 97%;
-  --surface-hover:   220 25% 96%;
+  /* surfaces - warm sand tones */
+  --bg:              97.8% 0.007 72;   /* warm off-white background */
+  --bg-elevated:     99.8% 0.003 72;   /* cards, elevated surfaces */
+  --surface:         99.8% 0.003 72;   /* card surfaces */
+  --surface-muted:   95.5% 0.009 72;   /* muted backgrounds */
+  --surface-hover:   95.5% 0.009 72;   /* hover states */
 
-  /* borders */
-  --border:          220 20% 92%;
-  --border-strong:   220 16% 85%;
+  /* borders - subtle warm gray */
+  --border:          90% 0.008 60;     /* default borders */
+  --border-strong:   84% 0.010 60;     /* emphasized borders */
 
-  /* text */
-  --fg:              225 25% 11%;
-  --fg-muted:        225 10% 38%;
-  --fg-subtle:       225 10% 55%;
-  --fg-inverse:      0 0% 100%;
+  /* text - warm inkstone */
+  --fg:              14% 0.015 50;     /* primary text */
+  --fg-muted:        38% 0.013 50;     /* secondary text */
+  --fg-subtle:       50% 0.010 50;     /* subtle text */
+  --fg-inverse:      98% 0.004 75;     /* inverse text (on dark) */
 
-  /* brand primary (SmartMENA blue) */
-  --primary:         220 94% 49%;
-  --primary-fg:      0 0% 100%;
-  --primary-soft:    220 100% 96%;
-  --primary-hover:   220 94% 43%;
+  /* brand primary - Deep Teal */
+  --primary:         52% 0.13 195;     /* primary action color */
+  --primary-fg:      100% 0 0;         /* white */
+  --primary-soft:    96% 0.015 195;    /* teal tint background */
+  --primary-hover:   46% 0.12 195;     /* darker teal on hover */
 
   /* semantic */
-  --success:         152 70% 40%;
-  --success-soft:    152 76% 95%;
-  --warning:         35 92% 50%;
-  --warning-soft:    42 96% 95%;
-  --danger:          0 78% 55%;
-  --danger-soft:     0 86% 96%;
-  --info:            205 90% 50%;
-  --info-soft:       205 100% 96%;
+  --success:         54% 0.13 148;     /* green */
+  --success-soft:    96% 0.04 148;     /* light green bg */
+  --warning:         70% 0.18 60;      /* warm amber */
+  --warning-soft:    98% 0.02 60;      /* light amber bg */
+  --danger:          54% 0.18 20;      /* red */
+  --danger-soft:     97% 0.04 20;      /* light red bg */
+  --info:            52% 0.13 195;     /* same as primary teal */
+  --info-soft:       96% 0.015 195;    /* light teal bg */
 
-  --ring:            220 94% 55%;
+  --ring:            52% 0.13 195;     /* focus ring = primary */
 
-  /* data-viz (primary teal-blue story; warm accents for secondary categories) */
-  --viz-1:           220 94% 49%;   /* primary blue */
-  --viz-2:           186 72% 44%;   /* teal */
-  --viz-3:           272 70% 58%;   /* violet */
-  --viz-4:           25 93% 58%;    /* amber */
-  --viz-5:           340 82% 58%;   /* rose */
-  --viz-6:           160 60% 42%;   /* emerald */
+  /* data-viz - warm palette for charts */
+  --viz-1:           52% 0.13 195;     /* teal */
+  --viz-2:           70% 0.18 60;      /* amber */
+  --viz-3:           60% 0.14 30;      /* terracotta */
+  --viz-4:           58% 0.12 140;     /* sage */
+  --viz-5:           56% 0.13 295;     /* plum */
+  --viz-6:           60% 0.11 240;     /* sky blue */
+
+  /* sidebar - always dark */
+  --sidebar-bg:      15% 0.014 48;     /* dark background */
+  --sidebar-fg:      92% 0.01 80;      /* light text */
+  --sidebar-hover:   22% 0.016 50;     /* hover state */
+  --sidebar-active:  26% 0.018 195;    /* active item (teal tint) */
+  --sidebar-border:  0% 0 0 / 0.07;    /* transparent white border */
 
   /* fonts */
-  --font-sans:       "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-sans:       "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-arabic:     "IBM Plex Sans Arabic", "Noto Sans Arabic", "Tajawal", system-ui, sans-serif;
+  --font-mono:       "IBM Plex Mono", "JetBrains Mono", "Fira Code", monospace;
 }
 
 html.dark {
-  --bg:              228 25% 6%;
-  --bg-elevated:     228 22% 9%;
-  --surface:         228 22% 10%;
-  --surface-muted:   228 22% 12%;
-  --surface-hover:   228 22% 14%;
+  /* surfaces - still warm, not cold gray */
+  --bg:              14% 0.012 50;     /* warm dark background */
+  --bg-elevated:     17% 0.013 50;     /* slightly lighter */
+  --surface:         20% 0.013 50;     /* card surfaces */
+  --surface-muted:   22% 0.016 50;     /* muted backgrounds */
+  --surface-hover:   24% 0.018 50;     /* hover states */
 
-  --border:          228 16% 18%;
-  --border-strong:   228 14% 26%;
+  /* borders */
+  --border:          28% 0.014 60;     /* subtle borders */
+  --border-strong:   38% 0.016 60;     /* emphasized borders */
 
-  --fg:              220 20% 96%;
-  --fg-muted:        220 14% 68%;
-  --fg-subtle:       220 12% 52%;
-  --fg-inverse:      225 25% 11%;
+  /* text */
+  --fg:              92% 0.01 80;      /* primary text (warm white) */
+  --fg-muted:        72% 0.009 60;     /* secondary text */
+  --fg-subtle:       55% 0.008 60;     /* subtle text */
+  --fg-inverse:      14% 0.015 50;     /* inverse text (on light) */
 
-  --primary:         220 94% 62%;
-  --primary-fg:      0 0% 100%;
-  --primary-soft:    220 60% 16%;
-  --primary-hover:   220 94% 68%;
+  /* brand primary - lightened for dark mode */
+  --primary:         60% 0.11 195;     /* lighter teal */
+  --primary-fg:      100% 0 0;         /* white */
+  --primary-soft:    26% 0.06 195;     /* dark teal tint */
+  --primary-hover:   68% 0.10 195;     /* even lighter on hover */
 
-  --success:         152 65% 48%;
-  --success-soft:    152 50% 14%;
-  --warning:         35 92% 60%;
-  --warning-soft:    42 60% 14%;
-  --danger:          0 78% 62%;
-  --danger-soft:     0 60% 16%;
-  --info:            205 90% 62%;
-  --info-soft:       205 60% 14%;
+  /* semantic */
+  --success:         58% 0.12 148;     /* lighter green */
+  --success-soft:    22% 0.06 148;     /* dark green bg */
+  --warning:         75% 0.16 60;      /* lighter amber */
+  --warning-soft:    24% 0.08 60;      /* dark amber bg */
+  --danger:          62% 0.16 20;      /* lighter red */
+  --danger-soft:     24% 0.08 20;      /* dark red bg */
+  --info:            60% 0.11 195;     /* lighter teal */
+  --info-soft:       26% 0.06 195;     /* dark teal bg */
 
-  --ring:            220 94% 62%;
+  --ring:            60% 0.11 195;     /* focus ring = primary */
 
-  --viz-1:           220 94% 62%;
-  --viz-2:           186 72% 54%;
-  --viz-3:           272 72% 68%;
-  --viz-4:           25 93% 62%;
-  --viz-5:           340 82% 65%;
-  --viz-6:           160 60% 52%;
+  /* data-viz - adjusted for dark mode */
+  --viz-1:           60% 0.11 195;     /* teal */
+  --viz-2:           75% 0.16 60;      /* amber */
+  --viz-3:           68% 0.12 30;      /* terracotta */
+  --viz-4:           65% 0.10 140;     /* sage */
+  --viz-5:           65% 0.11 295;     /* plum */
+  --viz-6:           68% 0.10 240;     /* sky blue */
+
+  /* sidebar - same as light theme (always dark) */
+  --sidebar-bg:      15% 0.014 48;     /* dark background */
+  --sidebar-fg:      92% 0.01 80;      /* light text */
+  --sidebar-hover:   22% 0.016 50;     /* hover state */
+  --sidebar-active:  26% 0.018 195;    /* active item (teal tint) */
+  --sidebar-border:  0% 0 0 / 0.07;    /* transparent white border */
 }
 
 html,
 body {
-  color: hsl(var(--fg));
-  background: hsl(var(--bg));
+  color: oklch(var(--fg));
+  background: oklch(var(--bg));
   font-family: var(--font-sans);
   font-feature-settings: "cv11", "ss01";
   text-rendering: optimizeLegibility;
@@ -125,13 +147,13 @@ html.color-theme-in-transition * {
   height: 10px;
 }
 *::-webkit-scrollbar-thumb {
-  background: hsl(var(--border-strong));
+  background: oklch(var(--border-strong));
   border-radius: 8px;
   border: 2px solid transparent;
   background-clip: content-box;
 }
 *::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--fg-subtle));
+  background: oklch(var(--fg-subtle));
   background-clip: content-box;
 }
 *::-webkit-scrollbar-track {
@@ -143,15 +165,15 @@ html.color-theme-in-transition * {
   outline: none;
 }
 *:focus-visible {
-  outline: 2px solid hsl(var(--ring));
+  outline: 2px solid oklch(var(--ring));
   outline-offset: 2px;
   border-radius: 6px;
 }
 
 /* Text selection */
 ::selection {
-  background: hsl(var(--primary) / 0.2);
-  color: hsl(var(--fg));
+  background: oklch(var(--primary) / 0.2);
+  color: oklch(var(--fg));
 }
 
 /*
@@ -184,11 +206,11 @@ html.color-theme-in-transition * {
   /* Marketing-grade gradient tile used in logo, empty states, illustrations. */
   .gradient-tile {
     background-image:
-      radial-gradient(120% 120% at 0% 0%, hsl(var(--viz-2) / 0.55) 0%, transparent 60%),
-      linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--viz-3)) 100%);
+      radial-gradient(120% 120% at 0% 0%, oklch(var(--viz-2) / 0.55) 0%, transparent 60%),
+      linear-gradient(135deg, oklch(var(--primary)) 0%, oklch(var(--viz-3)) 100%);
   }
   .gradient-text {
-    background: linear-gradient(90deg, hsl(var(--primary)) 0%, hsl(var(--viz-3)) 100%);
+    background: linear-gradient(90deg, oklch(var(--primary)) 0%, oklch(var(--viz-3)) 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
@@ -197,16 +219,16 @@ html.color-theme-in-transition * {
   /* Subtle background orbs for hero / empty states (pure CSS, no assets). */
   .bg-orbs {
     background-image:
-      radial-gradient(60% 70% at 10% 0%, hsl(var(--primary) / 0.12) 0%, transparent 60%),
-      radial-gradient(55% 65% at 100% 20%, hsl(var(--viz-3) / 0.10) 0%, transparent 60%),
-      radial-gradient(40% 50% at 50% 100%, hsl(var(--viz-2) / 0.10) 0%, transparent 60%);
+      radial-gradient(60% 70% at 10% 0%, oklch(var(--primary) / 0.12) 0%, transparent 60%),
+      radial-gradient(55% 65% at 100% 20%, oklch(var(--viz-3) / 0.10) 0%, transparent 60%),
+      radial-gradient(40% 50% at 50% 100%, oklch(var(--viz-2) / 0.10) 0%, transparent 60%);
   }
 
   /* Subtle grid backdrop for dashboards (CSS mask fades the edges). */
   .bg-grid {
     background-image:
-      linear-gradient(hsl(var(--border) / 0.7) 1px, transparent 1px),
-      linear-gradient(90deg, hsl(var(--border) / 0.7) 1px, transparent 1px);
+      linear-gradient(oklch(var(--border) / 0.7) 1px, transparent 1px),
+      linear-gradient(90deg, oklch(var(--border) / 0.7) 1px, transparent 1px);
     background-size: 28px 28px;
     -webkit-mask-image:
       radial-gradient(ellipse at top, rgba(0, 0, 0, 0.8), transparent 70%);
@@ -253,12 +275,12 @@ html.color-theme-in-transition * {
 
   /* Skeleton shimmer (used by components/ui/Skeleton.tsx) */
   .skeleton {
-    background-color: hsl(var(--surface-muted));
+    background-color: oklch(var(--surface-muted));
     background-image: linear-gradient(
       90deg,
-      hsl(var(--surface-muted)) 0%,
-      hsl(var(--surface-hover)) 50%,
-      hsl(var(--surface-muted)) 100%
+      oklch(var(--surface-muted)) 0%,
+      oklch(var(--surface-hover)) 50%,
+      oklch(var(--surface-muted)) 100%
     );
     background-size: 800px 100%;
     @apply animate-shimmer rounded-md;
