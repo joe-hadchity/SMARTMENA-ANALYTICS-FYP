@@ -8,14 +8,13 @@ import {
   CalendarDays,
   ChevronsLeft,
   ChevronsRight,
+  Activity,
   FileText,
-  Flame,
   LineChart,
   Megaphone,
-  PenLine,
-  Swords,
   Plus,
   Settings,
+  Swords,
   User,
   type LucideIcon,
 } from "lucide-react";
@@ -59,11 +58,10 @@ const SECTIONS: NavSection[] = [
   {
     titleKey: "nav.section.grow",
     items: [
-      { href: "/compose", labelKey: "nav.compose", icon: PenLine, shortcut: "G N" },
       { href: "/calendar", labelKey: "nav.calendar", icon: CalendarDays, shortcut: "G K" },
       { href: "/campaigns", labelKey: "nav.campaigns", icon: Megaphone },
       { href: "/reports/growth", labelKey: "nav.reports", icon: LineChart, shortcut: "G R" },
-      { href: "/trends", labelKey: "nav.trends", icon: Flame, shortcut: "G T" },
+      { href: "/trend-intelligence", labelKey: "nav.trendIntelligence", icon: Activity, shortcut: "G T" },
       { href: "/competitors", labelKey: "nav.competitors", icon: Swords, shortcut: "G X" },
     ],
   },
@@ -93,7 +91,7 @@ export default function Sidebar({
   return (
     <aside
       className={cn(
-        "h-screen sticky top-0 w-full bg-bg-elevated border-e border-border",
+        "h-screen sticky top-0 w-full bg-bg-elevated/95 border-e border-border",
         "flex flex-col overflow-hidden",
       )}
     >
@@ -101,13 +99,10 @@ export default function Sidebar({
       <div className="px-3 py-3 flex items-center gap-2">
         <Link
           href="/"
-          className="flex items-center gap-2.5 min-w-0 rounded-lg px-1.5 py-1.5 hover:bg-surface-muted transition-colors"
+          className="flex items-center gap-2.5 min-w-0 rounded-md px-1.5 py-1.5 hover:bg-surface-muted transition-colors"
         >
-          <div className="relative h-8 w-8 shrink-0">
-            <div className="absolute inset-0 rounded-lg gradient-tile blur-[8px] opacity-70" />
-            <div className="relative h-8 w-8 rounded-lg gradient-tile grid place-items-center text-white font-bold shadow-sm">
-              S
-            </div>
+          <div className="h-8 w-8 shrink-0 rounded-md gradient-tile grid place-items-center text-white font-bold shadow-xs">
+            S
           </div>
           {!collapsed ? (
             <div className="min-w-0">
@@ -168,10 +163,10 @@ export default function Sidebar({
                     key={item.href}
                     href={item.href}
                     className={cn(
-                      "relative group flex items-center gap-2.5 rounded-lg text-sm transition-colors",
+                      "relative group flex items-center gap-2.5 rounded-md text-sm transition-colors",
                       collapsed ? "justify-center h-9 w-9 mx-auto" : "px-2.5 py-1.5",
                       active
-                        ? "bg-primary-soft text-primary font-medium"
+                        ? "bg-surface-muted text-fg font-semibold shadow-[inset_0_0_0_1px_hsl(var(--border))]"
                         : "text-fg-muted hover:text-fg hover:bg-surface-muted",
                     )}
                   >
@@ -249,8 +244,8 @@ function WorkspaceSwitcher({ collapsed }: { collapsed: boolean }) {
     <button
       type="button"
       className={cn(
-        "w-full flex items-center gap-2 rounded-lg border border-border bg-surface px-2 py-1.5",
-        "text-sm hover:bg-surface-muted transition-colors",
+        "w-full flex items-center gap-2 rounded-md border border-border bg-surface px-2 py-1.5",
+        "text-sm hover:bg-surface-muted transition-colors shadow-xs",
         collapsed && "justify-center px-0 py-2",
       )}
     >
@@ -331,12 +326,12 @@ function UserMenu({ collapsed }: { collapsed: boolean }) {
     <button
       type="button"
       className={cn(
-        "w-full flex items-center gap-2.5 rounded-lg px-2 py-1.5",
+        "w-full flex items-center gap-2.5 rounded-md px-2 py-1.5",
         "hover:bg-surface-muted transition-colors",
         collapsed && "justify-center px-0 py-2",
       )}
     >
-      <div className="h-7 w-7 rounded-full bg-primary-soft text-primary grid place-items-center">
+      <div className="h-7 w-7 rounded-md border border-border bg-surface-muted text-fg-muted grid place-items-center">
         <User className="h-3.5 w-3.5" />
       </div>
       {!collapsed ? (

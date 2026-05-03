@@ -5,7 +5,10 @@ dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 
 const AZURE_ENDPOINT = (process.env.AZURE_OPENAI_ENDPOINT || "").replace(/\/+$/, "");
 const AZURE_KEY = process.env.AZURE_OPENAI_API_KEY || "";
-const AZURE_DEPLOYMENT = process.env.AZURE_OPENAI_DEPLOYMENT || "";
+const AZURE_DEPLOYMENT =
+  process.env.AZURE_OPENAI_DEPLOYMENT ||
+  process.env.AZURE_OPENAI_DEPLOYMENT_NAME ||
+  "";
 const AZURE_API_VERSION = process.env.AZURE_OPENAI_API_VERSION || "2024-08-01-preview";
 
 const env = {
@@ -26,9 +29,27 @@ const env = {
   AZURE_OPENAI_DEPLOYMENT: AZURE_DEPLOYMENT,
   AZURE_OPENAI_API_VERSION: AZURE_API_VERSION,
   AZURE_OPENAI_ENABLED: Boolean(AZURE_ENDPOINT && AZURE_KEY && AZURE_DEPLOYMENT),
+  DEMO_MODE: String(process.env.DEMO_MODE || "").toLowerCase() === "true",
 
   // Per-workspace monthly soft cap on total tokens (prompt + completion).
   LLM_MONTHLY_TOKEN_BUDGET: Number(process.env.LLM_MONTHLY_TOKEN_BUDGET) || 100000,
+
+  // ---------------------------------------------------------------------
+  // Trend intelligence discovery search (optional).
+  // ---------------------------------------------------------------------
+  TREND_SEARCH_COUNTRY: (process.env.TREND_SEARCH_COUNTRY || "").toUpperCase(),
+  TREND_SEARCH_LANG: process.env.TREND_SEARCH_LANG || "en",
+  BRAVE_SEARCH_API_KEY: process.env.BRAVE_SEARCH_API_KEY || "",
+  YOUTUBE_API_KEY: process.env.YOUTUBE_API_KEY || "",
+  COMPETITOR_SEARCH_COUNTRY: (
+    process.env.COMPETITOR_SEARCH_COUNTRY ||
+    process.env.TREND_SEARCH_COUNTRY ||
+    ""
+  ).toUpperCase(),
+  COMPETITOR_SEARCH_LANG:
+    process.env.COMPETITOR_SEARCH_LANG ||
+    process.env.TREND_SEARCH_LANG ||
+    "en",
 
   // ---------------------------------------------------------------------
   // Meta Graph API OAuth (Phase 5).
@@ -44,6 +65,10 @@ const env = {
     process.env.META_REDIRECT_URI ||
     `http://localhost:${Number(process.env.PORT) || 4000}/api/oauth/meta/callback`,
   META_GRAPH_VERSION: process.env.META_GRAPH_VERSION || "v22.0",
+  META_OAUTH_SCOPES: (process.env.META_OAUTH_SCOPES || "")
+    .split(/[,\s]+/)
+    .map((scope) => scope.trim())
+    .filter(Boolean),
   META_OAUTH_ENABLED: Boolean(
     process.env.META_APP_ID &&
       process.env.META_APP_SECRET &&

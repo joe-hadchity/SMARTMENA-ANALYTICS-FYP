@@ -2,8 +2,8 @@
  * Shared Azure OpenAI client for SmartMENA.
  *
  * One place that knows how to talk to Azure OpenAI from the backend. Every
- * LLM-powered feature in the product (assistant dock, caption studio, report
- * narrative, competitor digest) should import from here and NEVER re-wire
+ * LLM-powered feature in the product (assistant dock, report narrative) should
+ * import from here and NEVER re-wire
  * Azure config on its own.
  *
  * Design notes
@@ -55,6 +55,10 @@ function isEnabled() {
   return Boolean(env.AZURE_OPENAI_ENABLED);
 }
 
+function isReasoningDeployment() {
+  return /^o\d/i.test(env.AZURE_OPENAI_DEPLOYMENT || "");
+}
+
 /**
  * Rough USD cost estimator. Azure bills per 1K tokens, priced by deployment.
  * We use a conservative default of gpt-4o-mini-ish rates. When a real price
@@ -94,9 +98,13 @@ async function chat({
     // the SDK but ignored by Azure (the deployment in the URL wins).
     model: env.AZURE_OPENAI_DEPLOYMENT,
     messages,
-    temperature,
-    max_tokens: maxTokens,
   };
+  if (isReasoningDeployment()) {
+    params.max_completion_tokens = maxTokens;
+  } else {
+    params.temperature = temperature;
+    params.max_tokens = maxTokens;
+  }
   if (responseFormat) params.response_format = responseFormat;
 
   const completion = await client.chat.completions.create(params);
@@ -142,14 +150,20 @@ async function* streamChat({
   const client = getClient();
   if (!client) throw new LLMDisabledError();
 
-  const stream = await client.chat.completions.create({
+  const params = {
     model: env.AZURE_OPENAI_DEPLOYMENT,
     messages,
-    temperature,
-    max_tokens: maxTokens,
     stream: true,
     stream_options: { include_usage: true },
-  });
+  };
+  if (isReasoningDeployment()) {
+    params.max_completion_tokens = maxTokens;
+  } else {
+    params.temperature = temperature;
+    params.max_tokens = maxTokens;
+  }
+
+  const stream = await client.chat.completions.create(params);
 
   let fullText = "";
   let usage = { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
@@ -183,6 +197,7 @@ module.exports = {
   chat,
   streamChat,
   isEnabled,
+  isReasoningDeployment,
   estimateCostUSD,
   LLMDisabledError,
 };

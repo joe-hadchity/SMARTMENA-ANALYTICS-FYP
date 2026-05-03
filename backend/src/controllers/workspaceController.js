@@ -60,13 +60,18 @@ async function listRecommendationsForWorkspace(req, res) {
   res.json(rows);
 }
 
-async function getBrandVoice(req, res) {
-  const row = await workspaceService.getBrandVoice(req.params.id);
+async function getBusinessProfile(req, res) {
+  const row = await workspaceService.getBusinessProfile(req.params.id);
   res.json(row);
 }
 
-async function updateBrandVoice(req, res) {
-  const row = await workspaceService.upsertBrandVoice(req.params.id, req.body);
+async function updateBusinessProfile(req, res) {
+  const row = await workspaceService.upsertBusinessProfile(req.params.id, req.body);
+  res.json(row);
+}
+
+async function applyBorn2HikeProfile(req, res) {
+  const row = await workspaceService.applyBorn2HikeProfile(req.params.id);
   res.json(row);
 }
 
@@ -100,7 +105,8 @@ module.exports = {
   listSyncJobsForWorkspace,
   listInsightsForWorkspace,
   listRecommendationsForWorkspace,
-  getBrandVoice,
-  updateBrandVoice,
+  getBusinessProfile,
+  updateBusinessProfile,
+  applyBorn2HikeProfile,
   demoBootstrap,
 };

@@ -121,9 +121,9 @@ const config: Config = {
         xs: "4px",
         sm: "6px",
         md: "8px",
-        lg: "12px",
-        xl: "16px",
-        "2xl": "20px",
+        lg: "8px",
+        xl: "8px",
+        "2xl": "10px",
       },
       boxShadow: {
         xs: "0 1px 2px rgba(10, 12, 20, 0.05)",

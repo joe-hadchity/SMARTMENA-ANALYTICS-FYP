@@ -11,14 +11,15 @@ import Topbar from "./Topbar";
 
 // Routes that should render without the app chrome (sidebar + topbar + dock).
 // Public share pages are served standalone so they render cleanly for guests.
-const BARE_ROUTES = ["/r/"];
+const BARE_ROUTES = ["/r/", "/onboarding"];
 
 export default function AppShell({ children }: { children: ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname() || "";
+  const isBareRoute = BARE_ROUTES.some((prefix) => pathname.startsWith(prefix));
 
-  if (BARE_ROUTES.some((prefix) => pathname.startsWith(prefix))) {
+  if (isBareRoute) {
     return <>{children}</>;
   }
 

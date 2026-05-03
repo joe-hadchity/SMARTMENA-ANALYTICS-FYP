@@ -25,11 +25,11 @@
   --fg-subtle:       225 10% 55%;
   --fg-inverse:      0 0% 100%;
 
-  /* brand primary (SmartMENA blue) */
-  --primary:         220 94% 49%;
+  /* brand primary (SmartMENA blue, tuned down for product surfaces) */
+  --primary:         217 82% 45%;
   --primary-fg:      0 0% 100%;
   --primary-soft:    220 100% 96%;
-  --primary-hover:   220 94% 43%;
+  --primary-hover:   217 82% 39%;
 
   /* semantic */
   --success:         152 70% 40%;
@@ -46,7 +46,7 @@
   /* data-viz (primary teal-blue story; warm accents for secondary categories) */
   --viz-1:           220 94% 49%;   /* primary blue */
   --viz-2:           186 72% 44%;   /* teal */
-  --viz-3:           272 70% 58%;   /* violet */
+  --viz-3:           250 54% 58%;   /* indigo */
   --viz-4:           25 93% 58%;    /* amber */
   --viz-5:           340 82% 58%;   /* rose */
   --viz-6:           160 60% 42%;   /* emerald */
@@ -71,10 +71,10 @@ html.dark {
   --fg-subtle:       220 12% 52%;
   --fg-inverse:      225 25% 11%;
 
-  --primary:         220 94% 62%;
+  --primary:         217 82% 62%;
   --primary-fg:      0 0% 100%;
   --primary-soft:    220 60% 16%;
-  --primary-hover:   220 94% 68%;
+  --primary-hover:   217 82% 68%;
 
   --success:         152 65% 48%;
   --success-soft:    152 50% 14%;
@@ -89,7 +89,7 @@ html.dark {
 
   --viz-1:           220 94% 62%;
   --viz-2:           186 72% 54%;
-  --viz-3:           272 72% 68%;
+  --viz-3:           250 58% 68%;
   --viz-4:           25 93% 62%;
   --viz-5:           340 82% 65%;
   --viz-6:           160 60% 52%;
@@ -160,14 +160,14 @@ html.color-theme-in-transition * {
  */
 @layer components {
   .card {
-    @apply bg-surface border border-border rounded-xl shadow-sm;
+    @apply bg-surface border border-border rounded-md shadow-xs;
   }
   .card-elevated {
-    @apply bg-surface border border-border rounded-xl shadow-md;
+    @apply bg-surface border border-border rounded-md shadow-sm;
   }
 
   .input {
-    @apply w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm
+    @apply w-full rounded-md border border-border bg-surface px-3 py-2 text-sm
            placeholder:text-fg-subtle
            focus-visible:border-primary focus-visible:shadow-glow
            disabled:opacity-60 disabled:cursor-not-allowed transition-colors;
@@ -184,22 +184,20 @@ html.color-theme-in-transition * {
   /* Marketing-grade gradient tile used in logo, empty states, illustrations. */
   .gradient-tile {
     background-image:
-      radial-gradient(120% 120% at 0% 0%, hsl(var(--viz-2) / 0.55) 0%, transparent 60%),
-      linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--viz-3)) 100%);
+      linear-gradient(135deg, hsl(222 34% 18%) 0%, hsl(var(--primary)) 56%, hsl(var(--viz-2)) 100%);
   }
   .gradient-text {
-    background: linear-gradient(90deg, hsl(var(--primary)) 0%, hsl(var(--viz-3)) 100%);
+    background: linear-gradient(90deg, hsl(var(--primary)) 0%, hsl(var(--viz-2)) 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
   }
 
-  /* Subtle background orbs for hero / empty states (pure CSS, no assets). */
+  /* Quiet page wash retained for older call sites that still use this class. */
   .bg-orbs {
     background-image:
-      radial-gradient(60% 70% at 10% 0%, hsl(var(--primary) / 0.12) 0%, transparent 60%),
-      radial-gradient(55% 65% at 100% 20%, hsl(var(--viz-3) / 0.10) 0%, transparent 60%),
-      radial-gradient(40% 50% at 50% 100%, hsl(var(--viz-2) / 0.10) 0%, transparent 60%);
+      linear-gradient(180deg, hsl(var(--surface-muted) / 0.8) 0%, transparent 44%),
+      linear-gradient(90deg, hsl(var(--primary) / 0.04), hsl(var(--viz-2) / 0.04));
   }
 
   /* Subtle grid backdrop for dashboards (CSS mask fades the edges). */
@@ -222,7 +220,7 @@ html.color-theme-in-transition * {
    * correctly until their call sites are swept to the new component.
    */
   .btn {
-    @apply inline-flex items-center justify-center gap-2 h-9 px-3.5 rounded-lg
+    @apply inline-flex items-center justify-center gap-2 h-9 px-3.5 rounded-md
            text-sm font-medium whitespace-nowrap select-none
            transition-[background-color,color,box-shadow,transform] duration-150 ease-out-soft
            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring

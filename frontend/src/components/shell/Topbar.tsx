@@ -31,6 +31,7 @@ import { useI18n } from "@/i18n/I18nProvider";
 import { healthApi } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
+import Born2HikeDemoSwitch from "./Born2HikeDemoSwitch";
 import { ThemeToggle } from "./ThemeToggle";
 
 const PATH_LABEL_KEYS: Record<string, string> = {
@@ -106,6 +107,8 @@ export default function Topbar({
       </nav>
 
       <div className="ms-auto" />
+
+      <Born2HikeDemoSwitch />
 
       {/* Search / command palette trigger */}
       <button

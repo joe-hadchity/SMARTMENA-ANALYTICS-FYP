@@ -224,7 +224,7 @@ function ReportBody({
         <Badge tone={isFallback ? "warning" : "success"}>
           {isFallback
             ? t("reports.growth.fallbackNote")
-            : t("compose.source.llm", "Azure OpenAI")}
+            : "Azure OpenAI"}
         </Badge>
         {llmError && !isFallback ? (
           <Badge tone="warning" title={llmError}>
@@ -625,8 +625,8 @@ function SharesCard({
                   }
                 >
                   {copiedId === s.token
-                    ? t("compose.copied", "Copied")
-                    : t("compose.copy", "Copy")}
+                    ? "Copied"
+                    : t("common.copy", "Copy")}
                 </Button>
                 <Button
                   variant="ghost"

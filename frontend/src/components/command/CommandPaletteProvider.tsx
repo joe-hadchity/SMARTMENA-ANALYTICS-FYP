@@ -2,6 +2,7 @@
 
 import { Command } from "cmdk";
 import {
+  Activity,
   BarChart3,
   Cable,
   CalendarDays,
@@ -9,13 +10,11 @@ import {
   LineChart,
   Megaphone,
   Moon,
-  PenLine,
   Search,
   Settings,
   Sun,
   SunMoon,
   Swords,
-  Flame,
   Globe,
   type LucideIcon,
 } from "lucide-react";
@@ -54,11 +53,10 @@ const NAV_COMMANDS: NavCmd[] = [
   { href: "/", labelKey: "nav.overview", icon: BarChart3, shortcut: "G O" },
   { href: "/connections", labelKey: "nav.connections", icon: Cable, shortcut: "G C" },
   { href: "/posts", labelKey: "nav.posts", icon: FileText, shortcut: "G P" },
-  { href: "/compose", labelKey: "nav.compose", icon: PenLine, shortcut: "G N" },
   { href: "/calendar", labelKey: "nav.calendar", icon: CalendarDays, shortcut: "G K" },
   { href: "/campaigns", labelKey: "nav.campaigns", icon: Megaphone },
   { href: "/reports/growth", labelKey: "nav.reports", icon: LineChart, shortcut: "G R" },
-  { href: "/trends", labelKey: "nav.trends", icon: Flame, shortcut: "G T" },
+  { href: "/trend-intelligence", labelKey: "nav.trendIntelligence", icon: Activity, shortcut: "G T" },
   { href: "/competitors", labelKey: "nav.competitors", icon: Swords, shortcut: "G X" },
   { href: "/settings", labelKey: "nav.settings", icon: Settings },
 ];

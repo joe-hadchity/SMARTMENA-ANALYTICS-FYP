@@ -24,7 +24,7 @@ import { cn } from "@/lib/utils";
 const buttonStyles = cva(
   [
     "inline-flex items-center justify-center gap-2 select-none",
-    "text-sm font-medium whitespace-nowrap rounded-lg",
+    "text-sm font-medium whitespace-nowrap rounded-md",
     "transition-[background-color,color,box-shadow,transform] duration-150 ease-out-soft",
     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-bg",
     "disabled:pointer-events-none disabled:opacity-50",
@@ -33,7 +33,7 @@ const buttonStyles = cva(
     variants: {
       variant: {
         primary:
-          "bg-primary text-primary-fg shadow-sm hover:bg-primary-hover active:translate-y-[1px]",
+          "bg-primary text-primary-fg shadow-xs hover:bg-primary-hover active:translate-y-[1px]",
         secondary:
           "bg-surface-muted text-fg hover:bg-surface-hover border border-border",
         outline:
@@ -42,7 +42,7 @@ const buttonStyles = cva(
         subtle:
           "bg-primary-soft text-primary hover:bg-primary/10",
         danger:
-          "bg-danger text-white shadow-sm hover:bg-danger/90 active:translate-y-[1px]",
+          "bg-danger text-white shadow-xs hover:bg-danger/90 active:translate-y-[1px]",
         link: "text-primary underline-offset-4 hover:underline px-0 py-0 h-auto",
       },
       size: {

@@ -3,20 +3,16 @@ import axios, { AxiosInstance } from "axios";
 import type {
   AnalyticsOverview,
   AnalyticsTimeseries,
-  BrandVoice,
+  BusinessProfile,
   Campaign,
   CampaignWithRelations,
+  CompetitorAccount,
+  CompetitorCandidate,
+  CompetitorComparisonResponse,
+  CompetitorDiscoveryResponse,
   HealthCheck,
   Insight,
-  CompetitorAccount,
-  CompetitorAggregate,
-  CompetitorDigestRun,
-  CompetitorPost,
-  TrendDetail,
-  TrendKind,
-  TrendRebuildSummary,
-  TrendSortBy,
-  TrendsListResponse,
+  TrendIntelligenceResponse,
   MenaRecommendation,
   OAuthStatus,
   Provider,
@@ -30,7 +26,6 @@ import type {
   SyncedPost,
   TopPost,
   Workspace,
-  WorkspaceBrandVoice,
 } from "./types";
 
 const BASE_URL =
@@ -110,20 +105,19 @@ export const workspacesApi = {
     slug?: string;
     region_default?: string;
     locale_default?: "ar" | "en";
+    industry?: string;
   }): Promise<Workspace> => (await http.post("/workspaces", input)).data,
   getById: async (id: string): Promise<Workspace> =>
     (await http.get(`/workspaces/${id}`)).data,
-  brandVoice: async (id: string): Promise<WorkspaceBrandVoice> =>
-    (await http.get(`/workspaces/${id}/brand-voice`)).data,
-  updateBrandVoice: async (
+  businessProfile: async (id: string): Promise<BusinessProfile> =>
+    (await http.get(`/workspaces/${id}/business-profile`)).data,
+  updateBusinessProfile: async (
     id: string,
-    input: {
-      industry_hint?: string | null;
-      primary_region?: string | null;
-      brand_voice?: Partial<BrandVoice>;
-    },
-  ): Promise<WorkspaceBrandVoice> =>
-    (await http.patch(`/workspaces/${id}/brand-voice`, input)).data,
+    input: Partial<BusinessProfile>,
+  ): Promise<BusinessProfile> =>
+    (await http.patch(`/workspaces/${id}/business-profile`, input)).data,
+  applyBorn2HikeProfile: async (id: string): Promise<BusinessProfile> =>
+    (await http.post(`/workspaces/${id}/business-profile/born2hike`, {})).data,
   demoBootstrap: async (
     id?: string,
   ): Promise<{
@@ -134,12 +128,27 @@ export const workspacesApi = {
     metricsRecorded: number;
     insightsGenerated: number;
     recommendationsInserted: number;
-    contentScoresInserted: number;
     warnings: string[];
   }> => {
     const url = id ? `/workspaces/${id}/demo-bootstrap` : `/workspaces/demo-bootstrap`;
     return (await http.post(url, {})).data;
   },
+};
+
+export const trendIntelligenceApi = {
+  get: async (
+    workspaceId: string,
+    params: {
+      scope?: "micro" | "macro" | "all";
+      limit?: number;
+      brand_id?: string;
+    } = {},
+  ): Promise<TrendIntelligenceResponse> =>
+    (
+      await http.get(`/workspaces/${workspaceId}/trend-intelligence`, {
+        params,
+      })
+    ).data,
 };
 
 // ---------------------------------------------------------------------------
@@ -548,21 +557,30 @@ export const healthApi = {
 // Competitors
 // ---------------------------------------------------------------------------
 
-export type CreateCompetitorInput = {
-  platform: Provider;
+export type CompetitorDiscoveryInput = {
+  platform?: Provider;
+  category?: string;
+  location?: string;
+  page_name?: string;
+  keywords?: string[];
+  hashtags?: string[];
+  audience_size?: string | number;
+  limit?: number;
+};
+
+export type ManualCompetitorInput = {
+  platform?: Provider;
   handle: string;
-  display_name?: string | null;
-  region?: string | null;
-  industry?: string | null;
+  display_name?: string;
+  profile_url?: string;
+  region?: string;
+  industry?: string;
   tags?: string[];
-  source?: "manual" | "ad_library" | "business_discovery" | "mock";
-  is_active?: boolean;
-  metadata?: Record<string, unknown>;
 };
 
 export const competitorsApi = {
   list: async (params?: {
-    platform?: string;
+    platform?: Provider;
     include_inactive?: boolean;
   }): Promise<CompetitorAccount[]> =>
     (
@@ -573,47 +591,44 @@ export const competitorsApi = {
         },
       })
     ).data,
-  get: async (id: string): Promise<CompetitorAccount> =>
-    (await http.get(`/competitors/${id}`)).data,
-  create: async (input: CreateCompetitorInput): Promise<CompetitorAccount> =>
+  candidates: async (params?: {
+    status?: "pending" | "approved" | "rejected" | "all";
+    limit?: number;
+  }): Promise<CompetitorCandidate[]> =>
+    (await http.get("/competitors/candidates", { params })).data,
+  discover: async (
+    input: CompetitorDiscoveryInput,
+  ): Promise<CompetitorDiscoveryResponse> =>
+    (await http.post("/competitors/discover", input)).data,
+  manualAdd: async (
+    input: ManualCompetitorInput,
+  ): Promise<{ competitor: CompetitorAccount; candidate: CompetitorCandidate; warnings: string[] }> =>
     (await http.post("/competitors", input)).data,
-  update: async (
+  approve: async (
     id: string,
-    patch: Partial<CreateCompetitorInput>,
-  ): Promise<CompetitorAccount> =>
-    (await http.patch(`/competitors/${id}`, patch)).data,
-  remove: async (id: string): Promise<{ id: string; deleted: boolean }> =>
-    (await http.delete(`/competitors/${id}`)).data,
-  posts: async (id: string, limit = 20): Promise<CompetitorPost[]> =>
-    (await http.get(`/competitors/${id}/posts`, { params: { limit } })).data,
-  refresh: async (id: string): Promise<{ posts_upserted: number; source: string }> =>
+  ): Promise<{ competitor: CompetitorAccount; candidate: CompetitorCandidate }> =>
+    (await http.post(`/competitors/candidates/${id}/approve`)).data,
+  reject: async (id: string): Promise<CompetitorCandidate> =>
+    (await http.post(`/competitors/candidates/${id}/reject`)).data,
+  refresh: async (
+    id: string,
+  ): Promise<{ competitor: CompetitorAccount; snapshot: unknown; warnings: string[] }> =>
     (await http.post(`/competitors/${id}/refresh`)).data,
-  refreshAll: async (): Promise<{ refreshed: number; results: unknown[] }> =>
-    (await http.post(`/competitors/refresh-all`)).data,
-  latestDigest: async (): Promise<CompetitorDigestRun | null> => {
-    try {
-      return (await http.get("/competitors/digest/latest")).data;
-    } catch (err: unknown) {
-      const status = (err as { response?: { status?: number } })?.response?.status;
-      if (status === 404) return null;
-      throw err;
-    }
-  },
-  digestRuns: async (): Promise<CompetitorDigestRun[]> =>
-    (await http.get("/competitors/digest/runs")).data,
-  previewAggregate: async (windowDays = 7): Promise<CompetitorAggregate> =>
+  remove: async (id: string): Promise<CompetitorAccount> =>
+    (await http.delete(`/competitors/${id}`)).data,
+  summary: async (): Promise<{
+    approved_count: number;
+    pending_count: number;
+    rejected_count: number;
+    approved: CompetitorAccount[];
+    pending: CompetitorCandidate[];
+  }> => (await http.get("/competitors/summary")).data,
+  comparison: async (windowDays = 30): Promise<CompetitorComparisonResponse> =>
     (
-      await http.get("/competitors/digest/preview", {
+      await http.get("/competitors/comparison", {
         params: { window_days: windowDays },
       })
     ).data,
-  generateDigest: async (input?: {
-    window_days?: number;
-    locale?: "en" | "ar";
-    delivery_target?: string | null;
-    skip_refresh?: boolean;
-  }): Promise<{ run: CompetitorDigestRun }> =>
-    (await http.post("/competitors/digest/generate", input || {})).data,
 };
 
 // ---------------------------------------------------------------------------
@@ -624,7 +639,7 @@ export type AssistantConversation = {
   id: string;
   workspace_id: string;
   title: string | null;
-  feature: "assistant" | "caption_studio" | "other";
+  feature: "assistant" | "report_narrative" | "other";
   metadata_json: Record<string, unknown>;
   created_at: string;
   updated_at: string;
@@ -782,95 +797,6 @@ export const assistantApi = {
 };
 
 // ---------------------------------------------------------------------------
-// Caption Studio (ranked variant composer)
-// ---------------------------------------------------------------------------
-
-export type ContentFormat =
-  | "post"
-  | "story"
-  | "reel_script"
-  | "thread"
-  | "tweet"
-  | "facebook_post"
-  | "ad";
-
-export type ComposeRequest = {
-  brief: string;
-  platform: string;
-  format?: ContentFormat;
-  language?: "ar" | "en" | "mix";
-  dialect?: "khaleeji" | "levantine" | "egyptian" | "maghrebi" | "msa";
-  tone?: string;
-  length?: "short" | "medium" | "long";
-  count?: number;
-  callToAction?: string;
-  hashtags?: string[];
-  audience?: string;
-  locale?: "en" | "ar";
-};
-
-export type ComposeVariantFormatMeta = {
-  hook?: string | null;
-  beats?: string[] | null;
-  cta?: string | null;
-  parts?: string[] | null;
-  emoji_set?: string[] | null;
-};
-
-export type ComposeVariantScore = {
-  predicted_sentiment: "positive" | "neutral" | "negative";
-  sentiment_confidence: number;
-  predicted_roi: number | null;
-  predicted_engagement: number | null;
-  confidence_score: number | null;
-  language_mix: string;
-  tips: Array<{ id: string; text?: string; text_en?: string; text_ar?: string; priority?: string }>;
-  recommendation_text: string;
-  recommendation_ar: string;
-  length_chars: number;
-};
-
-export type ComposeVariant = {
-  index: number;
-  rank: number;
-  is_recommended: boolean;
-  text: string;
-  language: "ar" | "en" | "mix";
-  dialect: string;
-  tone: string | null;
-  hashtags: string[];
-  length_chars: number;
-  rationale: string | null;
-  composite_score: number;
-  score: ComposeVariantScore | null;
-  score_error?: string;
-  format?: ContentFormat;
-  format_meta?: ComposeVariantFormatMeta;
-};
-
-export type ComposeResponse = {
-  workspace_id: string;
-  platform: string;
-  format?: ContentFormat;
-  brief: string;
-  language: "ar" | "en" | "mix";
-  dialect: string;
-  length: "short" | "medium" | "long";
-  tone: string | null;
-  count: number;
-  source: "llm" | "fallback";
-  llm_error: string | null;
-  variants: ComposeVariant[];
-  shared_tips: string;
-  generated_at: string;
-};
-
-export const composeApi = {
-  compose: async (input: ComposeRequest): Promise<ComposeResponse> =>
-    (await http.post("/content/compose", input)).data,
-};
-
-// ---------------------------------------------------------------------------
 // Growth Report
 // ---------------------------------------------------------------------------
 
@@ -962,7 +888,7 @@ export type GrowthReport = {
 export type ReportShare = {
   id: string;
   token: string;
-  report_type: "growth" | "competitor";
+  report_type: "growth";
   locale: "en" | "ar";
   created_at: string;
   expires_at: string | null;
@@ -971,7 +897,7 @@ export type ReportShare = {
 
 export type SharedGrowthReport = {
   token: string;
-  report_type: "growth" | "competitor";
+  report_type: "growth";
   locale: "en" | "ar";
   created_at: string;
   expires_at: string | null;
@@ -1103,35 +1029,3 @@ export const reportsApi = {
   },
 };
 
-// ---------------------------------------------------------------------------
-// Trend Radar (Phase 7 Layer 1)
-// ---------------------------------------------------------------------------
-
-export type TrendsListParams = {
-  kind?: TrendKind | "all";
-  window_days?: 7 | 14 | 30 | number;
-  sort_by?: TrendSortBy;
-  limit?: number;
-  platform?: string;
-  source?: "own" | "competitor" | "all";
-  search?: string;
-};
-
-export const trendsApi = {
-  list: async (params?: TrendsListParams): Promise<TrendsListResponse> =>
-    (await http.get("/trends", { params })).data,
-  detail: async (
-    id: string,
-    windowDays = 30,
-  ): Promise<TrendDetail> =>
-    (
-      await http.get(`/trends/${id}`, {
-        params: { window_days: windowDays },
-      })
-    ).data,
-  rebuild: async (input?: {
-    window_days?: number;
-    allow_llm?: boolean;
-  }): Promise<TrendRebuildSummary> =>
-    (await http.post("/trends/rebuild", input || {})).data,
-};

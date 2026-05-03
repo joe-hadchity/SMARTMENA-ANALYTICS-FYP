@@ -24,7 +24,7 @@ export default function PageHeader({
   return (
     <div
       className={cn(
-        "mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between",
+        "mb-6 border-b border-border/70 pb-5 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between",
         className,
       )}
     >
@@ -55,13 +55,17 @@ export default function PageHeader({
         ) : null}
 
         {eyebrow ? (
-          <div className="text-[11px] uppercase tracking-widest text-primary font-semibold mb-1.5">
+          <div className="text-[11px] uppercase tracking-[0.12em] text-fg-subtle font-semibold mb-1.5">
             {eyebrow}
           </div>
         ) : null}
-        <h1 className="text-2xl font-semibold tracking-tight text-fg">{title}</h1>
+        <h1 className="text-[1.65rem] font-semibold leading-tight text-fg">
+          {title}
+        </h1>
         {subtitle ? (
-          <p className="text-sm text-fg-muted mt-1 max-w-2xl">{subtitle}</p>
+          <p className="text-sm text-fg-muted mt-2 max-w-2xl leading-relaxed">
+            {subtitle}
+          </p>
         ) : null}
       </div>
       {actions ? (

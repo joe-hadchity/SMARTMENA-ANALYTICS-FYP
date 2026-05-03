@@ -13,14 +13,12 @@ const predictRoutes = require("./predictRoutes");
 const recommendationsRoutes = require("./recommendationsRoutes");
 const analyticsRoutes = require("./analyticsRoutes");
 const insightsRoutes = require("./insightsRoutes");
-const contentRoutes = require("./contentRoutes");
 const integrationsRoutes = require("./integrationsRoutes");
 const assistantRoutes = require("./assistantRoutes");
 const reportRoutes = require("./reportRoutes");
 const scheduledPostRoutes = require("./scheduledPostRoutes");
 const oauthRoutes = require("./oauthRoutes");
 const competitorRoutes = require("./competitorRoutes");
-const trendsRoutes = require("./trendsRoutes");
 
 const router = express.Router();
 
@@ -37,13 +35,11 @@ router.use("/predict", predictRoutes);
 router.use("/recommendations", recommendationsRoutes);
 router.use("/analytics", analyticsRoutes);
 router.use("/insights", insightsRoutes);
-router.use("/content", contentRoutes);
 router.use("/integrations", integrationsRoutes);
 router.use("/assistant", assistantRoutes);
 router.use("/reports", reportRoutes);
 router.use("/scheduled-posts", scheduledPostRoutes);
 router.use("/oauth", oauthRoutes);
 router.use("/competitors", competitorRoutes);
-router.use("/trends", trendsRoutes);
 
 module.exports = router;

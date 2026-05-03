@@ -14,9 +14,7 @@ const env = require("../../config/env");
 
 const VALID_FEATURES = new Set([
   "assistant",
-  "caption_studio",
   "report_narrative",
-  "competitor_digest",
 ]);
 
 async function recordUsage({

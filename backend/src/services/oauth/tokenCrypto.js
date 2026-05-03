@@ -31,7 +31,9 @@ function getKey() {
 }
 
 /**
- * Encrypt a UTF-8 string. Returns a Buffer suitable for Postgres bytea.
+ * Encrypt a UTF-8 string. Returns a Postgres bytea hex literal. Supabase's
+ * JSON transport serialises raw Node Buffers as {"type":"Buffer",...}, which
+ * PostgREST can store as JSON bytes instead of the intended bytea payload.
  */
 function encryptToken(plaintext) {
   if (typeof plaintext !== "string" || plaintext.length === 0) {
@@ -42,7 +44,7 @@ function encryptToken(plaintext) {
   const cipher = crypto.createCipheriv(ALGO, key, iv);
   const ct = Buffer.concat([cipher.update(plaintext, "utf8"), cipher.final()]);
   const tag = cipher.getAuthTag();
-  return Buffer.concat([Buffer.from([VERSION]), iv, tag, ct]);
+  return `\\x${Buffer.concat([Buffer.from([VERSION]), iv, tag, ct]).toString("hex")}`;
 }
 
 /**
@@ -68,6 +70,16 @@ function decryptToken(input) {
     }
   } else {
     throw new Error("decryptToken: unsupported input type");
+  }
+  if (buf[0] === 0x7b) {
+    try {
+      const parsed = JSON.parse(buf.toString("utf8"));
+      if (parsed?.type === "Buffer" && Array.isArray(parsed.data)) {
+        buf = Buffer.from(parsed.data);
+      }
+    } catch {
+      // Keep the original buffer so the version-byte error remains explicit.
+    }
   }
   if (buf.length < 1 + 12 + 16 + 1) {
     throw new Error("decryptToken: ciphertext too short");

@@ -71,6 +71,8 @@ const spec = {
     { name: "Posts", description: "Draft posts attached to campaigns" },
     { name: "Analytics", description: "Aggregated dashboard data" },
     { name: "Insights", description: "AI-generated bilingual insights" },
+    { name: "Trend Intelligence", description: "Evidence-first local and global trend detection" },
+    { name: "Competitors", description: "Real profile discovery, approval, and tracking" },
     { name: "Recommendations", description: "MENA-tailored playbooks" },
     { name: "Analyze", description: "Arabic sentiment analysis (proxied to ML service)" },
     { name: "Predict", description: "ROI prediction (proxied to ML service)" },
@@ -196,6 +198,197 @@ const spec = {
             },
           },
           404: { $ref: "#/components/responses/NotFound" },
+        },
+      },
+    },
+    "/api/workspaces/{workspaceId}/trend-intelligence": {
+      get: {
+        tags: ["Trend Intelligence"],
+        summary: "Build evidence-first trend intelligence for a workspace",
+        description:
+          "Collects real signals from own posts, Brave Search, and YouTube " +
+          "when configured. The endpoint clusters " +
+          "and scores evidence, then returns dashboard-ready local/global " +
+          "trend insights and recommendations. LLMs are not used to invent " +
+          "trends.",
+        parameters: [
+          {
+            name: "workspaceId",
+            in: "path",
+            required: true,
+            schema: { type: "string", format: "uuid" },
+          },
+          {
+            name: "brand_id",
+            in: "query",
+            required: false,
+            schema: { type: "string", format: "uuid" },
+          },
+          {
+            name: "scope",
+            in: "query",
+            required: false,
+            schema: { type: "string", enum: ["micro", "macro", "all"], default: "all" },
+          },
+          {
+            name: "limit",
+            in: "query",
+            required: false,
+            schema: { type: "integer", minimum: 10, maximum: 150, default: 80 },
+          },
+        ],
+        responses: {
+          200: {
+            description: "Trend intelligence dashboard payload.",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/TrendIntelligenceResponse" },
+              },
+            },
+          },
+          404: { $ref: "#/components/responses/NotFound" },
+          503: { $ref: "#/components/responses/DbUnavailable" },
+        },
+      },
+    },
+
+    // ----------------------------------------------------------------------
+    // Competitors
+    // ----------------------------------------------------------------------
+    "/api/competitors": {
+      get: {
+        tags: ["Competitors"],
+        summary: "List approved competitors for the active workspace",
+        parameters: [workspaceHeaderParam],
+        responses: {
+          200: {
+            description: "Approved competitors.",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "array",
+                  items: { type: "object", additionalProperties: true },
+                },
+              },
+            },
+          },
+        },
+      },
+      post: {
+        tags: ["Competitors"],
+        summary: "Verify and approve a manually entered competitor profile",
+        parameters: [workspaceHeaderParam],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: ["handle"],
+                properties: {
+                  platform: { type: "string", default: "meta_instagram" },
+                  handle: { type: "string" },
+                  display_name: { type: "string" },
+                  region: { type: "string" },
+                  industry: { type: "string" },
+                  tags: { type: "array", items: { type: "string" } },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          201: {
+            description: "Verified competitor.",
+            content: {
+              "application/json": {
+                schema: { type: "object", additionalProperties: true },
+              },
+            },
+          },
+          422: { description: "Profile could not be verified." },
+        },
+      },
+    },
+    "/api/competitors/discover": {
+      post: {
+        tags: ["Competitors"],
+        summary: "Discover real competitor candidates from public search evidence",
+        parameters: [workspaceHeaderParam],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  platform: { type: "string", default: "meta_instagram" },
+                  category: { type: "string" },
+                  location: { type: "string" },
+                  keywords: { type: "array", items: { type: "string" } },
+                  hashtags: { type: "array", items: { type: "string" } },
+                  limit: { type: "integer", default: 12 },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          200: {
+            description: "Pending candidates with source evidence.",
+            content: {
+              "application/json": {
+                schema: { type: "object", additionalProperties: true },
+              },
+            },
+          },
+        },
+      },
+    },
+    "/api/competitors/candidates": {
+      get: {
+        tags: ["Competitors"],
+        summary: "List pending, approved, or rejected competitor candidates",
+        parameters: [
+          workspaceHeaderParam,
+          {
+            name: "status",
+            in: "query",
+            schema: { type: "string", enum: ["pending", "approved", "rejected", "all"] },
+          },
+        ],
+        responses: {
+          200: {
+            description: "Competitor candidates.",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "array",
+                  items: { type: "object", additionalProperties: true },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    "/api/competitors/candidates/{id}/approve": {
+      post: {
+        tags: ["Competitors"],
+        summary: "Approve a candidate and start tracking it",
+        parameters: [
+          workspaceHeaderParam,
+          { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+        ],
+        responses: {
+          200: {
+            description: "Approved competitor.",
+            content: {
+              "application/json": {
+                schema: { type: "object", additionalProperties: true },
+              },
+            },
+          },
         },
       },
     },
@@ -1267,6 +1460,101 @@ const spec = {
           },
           summaryEn: { type: "string" },
           summaryAr: { type: "string" },
+        },
+      },
+
+      // --- Trend Intelligence ----------------------------------------------
+      TrendEvidenceSample: {
+        type: "object",
+        properties: {
+          source: { type: "string" },
+          platform: { type: "string" },
+          title: { type: "string", nullable: true },
+          caption: { type: "string", nullable: true },
+          url: { type: "string", nullable: true },
+          author: { type: "string", nullable: true },
+          published_at: { type: "string", format: "date-time", nullable: true },
+          engagement_total: { type: "number" },
+          media_type: { type: "string", nullable: true },
+        },
+      },
+      TrendTopic: {
+        type: "object",
+        properties: {
+          topic_name: { type: "string" },
+          topic_keywords: { type: "array", items: { type: "string" } },
+          trend_score: { type: "number" },
+          scope: { type: "string", enum: ["micro", "macro"] },
+          evidence_count: { type: "integer" },
+          score_breakdown: { type: "object", additionalProperties: true },
+          format_counts: { type: "object", additionalProperties: { type: "integer" } },
+          source_counts: { type: "object", additionalProperties: { type: "integer" } },
+          caption_pattern_counts: { type: "object", additionalProperties: { type: "integer" } },
+          average_engagement: { type: "number" },
+          top_evidence: {
+            type: "array",
+            items: { $ref: "#/components/schemas/TrendEvidenceSample" },
+          },
+        },
+      },
+      TrendInsight: {
+        type: "object",
+        properties: {
+          insight_text: { type: "string" },
+          confidence_score: { type: "number", minimum: 0, maximum: 1 },
+          supporting_evidence_count: { type: "integer" },
+          topic_name: { type: "string" },
+          scope: { type: "string", enum: ["micro", "macro"] },
+          evidence_count: { type: "integer" },
+          format_pattern: { type: "string" },
+          caption_pattern: { type: "string" },
+          engagement_reason: { type: "string" },
+          supporting_sources: { type: "object", additionalProperties: { type: "integer" } },
+        },
+      },
+      TrendRecommendation: {
+        type: "object",
+        properties: {
+          recommendation_text: { type: "string" },
+          recommendation_type: { type: "string" },
+          priority_score: { type: "number" },
+          topic_name: { type: "string" },
+          scope: { type: "string", enum: ["micro", "macro"] },
+        },
+      },
+      TrendIntelligenceResponse: {
+        type: "object",
+        properties: {
+          workspace_id: { type: "string", format: "uuid" },
+          brand_id: { type: "string", format: "uuid", nullable: true },
+          generated_at: { type: "string", format: "date-time" },
+          elapsed_ms: { type: "integer" },
+          context: { type: "object", additionalProperties: true },
+          runs: { type: "array", items: { type: "object", additionalProperties: true } },
+          source_summary: { type: "object", additionalProperties: { type: "integer" } },
+          local_trends: {
+            type: "array",
+            items: { $ref: "#/components/schemas/TrendTopic" },
+          },
+          global_trends: {
+            type: "array",
+            items: { $ref: "#/components/schemas/TrendTopic" },
+          },
+          format_trends: { type: "array", items: { type: "object", additionalProperties: true } },
+          caption_trends: { type: "array", items: { type: "object", additionalProperties: true } },
+          campaign_theme_trends: {
+            type: "array",
+            items: { type: "object", additionalProperties: true },
+          },
+          insights: {
+            type: "array",
+            items: { $ref: "#/components/schemas/TrendInsight" },
+          },
+          recommendations: {
+            type: "array",
+            items: { $ref: "#/components/schemas/TrendRecommendation" },
+          },
+          warnings: { type: "array", items: { type: "string" } },
         },
       },
 

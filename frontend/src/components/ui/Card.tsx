@@ -23,8 +23,8 @@ const Card = forwardRef<HTMLDivElement, CardProps>(function Card(
     <div
       ref={ref}
       className={cn(
-        "bg-surface border border-border rounded-xl transition-colors",
-        elevated ? "shadow-md" : "shadow-sm",
+        "bg-surface border border-border rounded-md transition-colors",
+        elevated ? "shadow-sm" : "shadow-xs",
         padded && "p-5",
         className,
       )}
@@ -39,7 +39,7 @@ const CardHeader = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
       <div
         ref={ref}
         className={cn(
-          "px-5 pt-5 pb-3 flex items-start justify-between gap-4",
+          "px-5 pt-5 pb-3 flex items-start justify-between gap-4 border-b border-border/60",
           className,
         )}
         {...props}
@@ -54,7 +54,7 @@ const CardTitle = forwardRef<HTMLHeadingElement, HTMLAttributes<HTMLHeadingEleme
       <h3
         ref={ref}
         className={cn(
-          "text-sm font-semibold tracking-tight text-fg leading-tight",
+          "text-sm font-semibold text-fg leading-tight",
           className,
         )}
         {...props}
@@ -68,7 +68,7 @@ const CardDescription = forwardRef<HTMLParagraphElement, HTMLAttributes<HTMLPara
     return (
       <p
         ref={ref}
-        className={cn("text-xs text-fg-muted mt-0.5 leading-snug", className)}
+        className={cn("text-xs text-fg-muted mt-1 leading-snug", className)}
         {...props}
       />
     );
@@ -77,7 +77,7 @@ const CardDescription = forwardRef<HTMLParagraphElement, HTMLAttributes<HTMLPara
 
 const CardContent = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
   function CardContent({ className, ...props }, ref) {
-    return <div ref={ref} className={cn("px-5 pb-5", className)} {...props} />;
+    return <div ref={ref} className={cn("px-5 pb-5 pt-4", className)} {...props} />;
   },
 );
 
@@ -87,7 +87,7 @@ const CardFooter = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
       <div
         ref={ref}
         className={cn(
-          "px-5 py-3 border-t border-border flex items-center gap-2",
+          "px-5 py-3 border-t border-border/70 flex items-center gap-2",
           className,
         )}
         {...props}

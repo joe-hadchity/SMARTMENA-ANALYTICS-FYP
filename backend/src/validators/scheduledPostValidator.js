@@ -1,5 +1,14 @@
 const { z } = require("zod");
-const { PLATFORMS } = require("./contentScoreValidator");
+
+const PLATFORMS = [
+  "meta_instagram",
+  "meta_facebook",
+  "instagram",
+  "facebook",
+  "tiktok",
+  "x",
+  "twitter",
+];
 
 const STATUSES = [
   "draft",
