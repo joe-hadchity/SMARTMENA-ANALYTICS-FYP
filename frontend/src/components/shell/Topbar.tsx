@@ -68,9 +68,14 @@ export default function Topbar({
   return (
     <header
       className={cn(
-        "sticky top-0 z-30 h-12 border-b border-border bg-bg-elevated/80 backdrop-blur",
-        "px-3 md:px-5 flex items-center gap-3",
+        "sticky top-0 z-30 h-12 border-b px-3 md:px-5 flex items-center gap-3",
       )}
+      style={{
+        borderColor: "oklch(var(--border) / 0.6)",
+        backgroundColor: "oklch(var(--bg-elevated) / 0.80)",
+        backdropFilter: "blur(12px) saturate(1.5)",
+        WebkitBackdropFilter: "blur(12px) saturate(1.5)",
+      }}
     >
       {/* Mobile nav toggle */}
       <Button
@@ -83,25 +88,44 @@ export default function Topbar({
         <Menu className="h-4 w-4" />
       </Button>
 
-      {/* Breadcrumbs */}
+      {/* Breadcrumbs - Claude Design minimal style */}
       <nav
         aria-label="Breadcrumb"
-        className="hidden sm:flex items-center gap-1 text-sm min-w-0"
+        className="hidden sm:flex items-center gap-2 text-sm min-w-0"
       >
         {crumbs.map((c, i) => (
-          <span key={i} className="flex items-center gap-1 min-w-0">
+          <span key={i} className="flex items-center gap-2 min-w-0">
             {c.href ? (
               <Link
                 href={c.href}
-                className="text-fg-muted hover:text-fg transition-colors truncate"
+                className="truncate font-medium transition-colors"
+                style={{
+                  color: "oklch(var(--fg-muted))",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = "oklch(var(--fg))";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = "oklch(var(--fg-muted))";
+                }}
               >
                 {c.label}
               </Link>
             ) : (
-              <span className="text-fg truncate font-medium">{c.label}</span>
+              <span
+                className="truncate font-semibold"
+                style={{ color: "oklch(var(--fg))" }}
+              >
+                {c.label}
+              </span>
             )}
             {i < crumbs.length - 1 ? (
-              <ChevronRight className="h-3.5 w-3.5 text-fg-subtle shrink-0 rtl:rotate-180" />
+              <span
+                className="text-[10px] opacity-40"
+                style={{ color: "oklch(var(--fg-muted))" }}
+              >
+                /
+              </span>
             ) : null}
           </span>
         ))}

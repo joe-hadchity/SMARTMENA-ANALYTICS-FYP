@@ -7,7 +7,8 @@ import {
   Sparkles,
 } from "lucide-react";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useTheme } from "next-themes";
+import { useMemo, useState, useEffect } from "react";
 import { toast } from "sonner";
 
 import EngagementLineChart from "@/components/charts/EngagementLineChart";
@@ -35,7 +36,12 @@ import { cn } from "@/lib/utils";
 
 export default function OverviewPage() {
   const { t, locale } = useI18n();
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
+
+  useEffect(() => setMounted(true), []);
+  const dark = mounted && resolvedTheme === "dark";
 
   const qc = useQueryClient();
   const workspaceQ = useQuery({
@@ -142,8 +148,109 @@ export default function OverviewPage() {
   const ar = locale === "ar";
 
   return (
-    <div className="space-y-4">{/* Empty state */}
+    <div className="space-y-4">
+      {/* Hero Banner */}
+      <div
+        className="relative overflow-hidden rounded-[14px] p-6 shadow-md"
+        style={{
+          background: dark
+            ? "linear-gradient(135deg, oklch(22% 0.08 195) 0%, oklch(18% 0.06 220) 100%)"
+            : "linear-gradient(135deg, oklch(96% 0.025 195) 0%, oklch(97% 0.015 210) 60%, oklch(97% 0.02 60) 100%)",
+          border: dark
+            ? "1px solid rgba(255,255,255,0.07)"
+            : "1px solid rgba(120,180,200,0.18)",
+        }}
+      >
+        {/* Watermark */}
+        <div
+          className="pointer-events-none absolute right-6 top-1/2 -translate-y-1/2 select-none whitespace-nowrap font-mono text-7xl font-extrabold leading-none tracking-tight"
+          style={{
+            color: dark
+              ? "rgba(255,255,255,0.04)"
+              : "oklch(60% 0.09 195 / 0.08)",
+            letterSpacing: "-0.04em",
+          }}
+        >
+          APR 2026
+        </div>
 
+        {/* Left accent bar */}
+        <div
+          className="absolute bottom-0 left-0 top-0 w-[3px] rounded-tl-[14px] rounded-bl-[14px]"
+          style={{
+            background:
+              "linear-gradient(180deg, oklch(52% 0.13 195), oklch(46% 0.12 210))",
+          }}
+        />
+
+        {/* Content */}
+        <div
+          className={cn(
+            "relative z-10 flex items-center justify-between",
+            ar ? "flex-row-reverse" : "",
+          )}
+        >
+          <div>
+            <div
+              className="mb-1 font-mono text-[10px] font-semibold uppercase tracking-wider"
+              style={{
+                color: dark ? "rgba(255,255,255,0.45)" : "oklch(50% 0.10 195)",
+              }}
+            >
+              {t("overview.hero.label", "Performance Overview")}
+            </div>
+            <div
+              className="mb-1 text-xl font-bold leading-tight tracking-tight"
+              style={{
+                color: dark ? "rgba(255,255,255,0.88)" : "oklch(22% 0.08 195)",
+                fontFamily: ar ? "var(--font-arabic)" : "var(--font-sans)",
+              }}
+            >
+              {t("overview.hero.title", "Work smarter, not harder.")}
+            </div>
+            <div
+              className="text-xs"
+              style={{
+                color: dark ? "rgba(255,255,255,0.4)" : "oklch(48% 0.08 195)",
+                fontFamily: ar ? "var(--font-arabic)" : "var(--font-sans)",
+              }}
+            >
+              {t(
+                "overview.hero.subtitle",
+                `Your reach is up ${Math.abs(deltaEngagement).toFixed(0)}% — keep it going.`,
+              )}
+            </div>
+          </div>
+
+          {/* Right stat */}
+          <div
+            className={cn(
+              "flex shrink-0 flex-col gap-0.5",
+              ar ? "items-start" : "items-end",
+            )}
+          >
+            <div
+              className="font-mono text-3xl font-bold leading-none tracking-tight"
+              style={{
+                color: dark ? "rgba(255,255,255,0.88)" : "oklch(34% 0.11 195)",
+              }}
+            >
+              {deltaEngagement > 0 ? "+" : ""}
+              {deltaEngagement.toFixed(0)}%
+            </div>
+            <div
+              className="font-sans text-[10px] uppercase tracking-wider"
+              style={{
+                color: dark ? "rgba(255,255,255,0.35)" : "oklch(52% 0.09 195)",
+              }}
+            >
+              {t("overview.kpi.reach", "Reach")}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Empty state */}
       {noData ? (
         <EmptyState
           icon={Sparkles}
@@ -225,40 +332,56 @@ export default function OverviewPage() {
           )}
 
           {/* Full-Width Engagement Chart */}
-          <Card>
-            <CardHeader>
-              <CardTitle
-                className="text-xs uppercase tracking-wider"
-                style={{ color: "oklch(var(--fg-muted))" }}
-              >
-                {t("overview.chart.engagement", "Engagement Over Time")}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {timeseries.isLoading ? (
-                <Skeleton className="h-72 w-full" />
-              ) : timeseries.data?.points && timeseries.data.points.length > 0 ? (
-                <EngagementLineChart
-                  data={timeseries.data.points.slice(-30)}
-                  locale={locale}
-                />
-              ) : (
-                <CardEmpty
-                  title={t("common.empty")}
-                  description={t(
-                    "overview.chart.engagementEmpty",
-                    "Sync a connected account to populate engagement history.",
-                  )}
-                />
-              )}
-            </CardContent>
-          </Card>
+          <div
+            className="rounded-2xl p-6"
+            style={{
+              background: dark
+                ? "rgba(28,23,18,0.80)"
+                : "rgba(255,255,255,0.88)",
+              border: dark
+                ? "1px solid rgba(255,255,255,0.05)"
+                : "1px solid rgba(180,210,220,0.3)",
+              boxShadow: dark
+                ? "0 8px 40px rgba(0,0,0,0.28), 0 2px 8px rgba(0,0,0,0.12)"
+                : "0 8px 40px rgba(20,50,80,0.07), 0 2px 8px rgba(20,50,80,0.04)",
+              backdropFilter: "blur(20px) saturate(1.8) brightness(1.02)",
+              WebkitBackdropFilter:
+                "blur(20px) saturate(1.8) brightness(1.02)",
+            }}
+          >
+            <h3
+              className="mb-4 text-[10px] font-semibold uppercase tracking-wider"
+              style={{
+                color: dark ? "rgba(255,255,255,0.3)" : "oklch(var(--fg-muted))",
+              }}
+            >
+              {t("overview.chart.engagement", "Engagement Over Time")}
+            </h3>
+            {timeseries.isLoading ? (
+              <Skeleton className="h-72 w-full" />
+            ) : timeseries.data?.points && timeseries.data.points.length > 0 ? (
+              <EngagementLineChart
+                data={timeseries.data.points.slice(-30)}
+                locale={locale}
+              />
+            ) : (
+              <CardEmpty
+                title={t("common.empty")}
+                description={t(
+                  "overview.chart.engagementEmpty",
+                  "Sync a connected account to populate engagement history.",
+                )}
+              />
+            )}
+          </div>
 
           {/* Channel Summary Section */}
           <div>
             <h3
-              className="text-[10px] uppercase tracking-wider font-semibold mb-2"
-              style={{ color: "oklch(var(--fg-muted))" }}
+              className="mb-3 text-[10px] font-semibold uppercase tracking-wider"
+              style={{
+                color: dark ? "rgba(255,255,255,0.3)" : "oklch(var(--fg-muted))",
+              }}
             >
               {t("dashboard.sections.channelSummary", "Channel Summary")}
             </h3>

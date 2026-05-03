@@ -399,12 +399,15 @@ export default function InsightsDock() {
           type="button"
           aria-label={t("dock.open", "Open SmartMENA assistant")}
           className={cn(
-            "fixed bottom-6 end-6 z-40 h-14 w-14 rounded-full shadow-xl",
-            "bg-gradient-to-br from-primary to-[hsl(var(--viz-4))] text-primary-fg",
-            "grid place-items-center",
+            "fixed bottom-6 end-6 z-40 h-14 w-14 rounded-full",
+            "grid place-items-center text-white",
             "transition-transform hover:scale-[1.05] active:scale-[0.98]",
             "focus:outline-none focus-visible:ring-4 focus-visible:ring-primary/30",
           )}
+          style={{
+            background: "linear-gradient(135deg, oklch(52% 0.13 195) 0%, oklch(46% 0.12 210) 100%)",
+            boxShadow: "0 8px 24px rgba(52,130,150,0.35), 0 2px 8px rgba(52,130,150,0.25)",
+          }}
         >
           <Sparkles className="h-6 w-6" />
           {unread > 0 ? (

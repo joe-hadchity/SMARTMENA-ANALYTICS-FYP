@@ -1,8 +1,9 @@
 "use client";
 
 import { Facebook, Instagram } from "lucide-react";
+import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
 
-import { Card, CardContent } from "@/components/ui/Card";
 import { useI18n } from "@/i18n/I18nProvider";
 
 interface ChannelSummaryCardProps {
@@ -65,13 +66,33 @@ export function ChannelSummaryCard({
   metrics,
 }: ChannelSummaryCardProps) {
   const { t, locale } = useI18n();
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
+
   const ar = locale === "ar";
   const config = PLATFORM_CONFIG[platform];
   const Icon = config.icon;
+  const isDark = mounted && resolvedTheme === "dark";
 
   return (
-    <Card className="bg-bg">
-      <CardContent className="p-4">
+    <div
+      className="rounded-2xl p-4"
+      style={{
+        background: isDark
+          ? "rgba(28,23,18,0.80)"
+          : "rgba(255,255,255,0.88)",
+        border: isDark
+          ? "1px solid rgba(255,255,255,0.05)"
+          : "1px solid rgba(180,210,220,0.3)",
+        boxShadow: isDark
+          ? "0 4px 20px rgba(0,0,0,0.18), 0 1px 4px rgba(0,0,0,0.08)"
+          : "0 4px 20px rgba(20,50,80,0.05), 0 1px 4px rgba(20,50,80,0.03)",
+        backdropFilter: "blur(20px) saturate(1.8) brightness(1.02)",
+        WebkitBackdropFilter: "blur(20px) saturate(1.8) brightness(1.02)",
+      }}
+    >
         {/* Platform header */}
         <div
           className={`flex items-center gap-2 mb-3 ${
@@ -91,30 +112,29 @@ export function ChannelSummaryCard({
           />
         </div>
 
-        {/* Metrics grid */}
-        <div className="grid grid-cols-4 gap-2">
-          <MetricItem
-            label={t("dashboard.metrics.reach", "Reach")}
-            value={formatCompact(metrics.reach)}
-            ar={ar}
-          />
-          <MetricItem
-            label={t("dashboard.metrics.engagements", "Engagements")}
-            value={formatCompact(metrics.engagements)}
-            ar={ar}
-          />
-          <MetricItem
-            label={t("dashboard.metrics.posts", "Posts")}
-            value={metrics.posts}
-            ar={ar}
-          />
-          <MetricItem
-            label={t("dashboard.metrics.engRate", "Eng. Rate")}
-            value={`${metrics.engagementRate.toFixed(1)}%`}
-            ar={ar}
-          />
-        </div>
-      </CardContent>
-    </Card>
+      {/* Metrics grid */}
+      <div className="grid grid-cols-4 gap-2">
+        <MetricItem
+          label={t("dashboard.metrics.reach", "Reach")}
+          value={formatCompact(metrics.reach)}
+          ar={ar}
+        />
+        <MetricItem
+          label={t("dashboard.metrics.engagements", "Engagements")}
+          value={formatCompact(metrics.engagements)}
+          ar={ar}
+        />
+        <MetricItem
+          label={t("dashboard.metrics.posts", "Posts")}
+          value={metrics.posts}
+          ar={ar}
+        />
+        <MetricItem
+          label={t("dashboard.metrics.engRate", "Eng. Rate")}
+          value={`${metrics.engagementRate.toFixed(1)}%`}
+          ar={ar}
+        />
+      </div>
+    </div>
   );
 }

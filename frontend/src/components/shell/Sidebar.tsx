@@ -93,27 +93,56 @@ export default function Sidebar({
   return (
     <aside
       className={cn(
-        "h-screen sticky top-0 w-full flex flex-col overflow-hidden",
-        // Dark-always sidebar using custom tokens
-        "bg-[oklch(var(--sidebar-bg))] border-e border-[oklch(var(--sidebar-border))]",
+        "h-screen sticky top-0 w-full flex flex-col overflow-hidden relative",
       )}
       style={{
-        // Force dark text colors regardless of theme
-        color: "oklch(var(--sidebar-fg))",
+        background: "oklch(99.5% 0.004 72)",
+        borderRight: locale === "ar" ? "none" : "1px solid oklch(var(--border-subtle))",
+        borderLeft: locale === "ar" ? "1px solid oklch(var(--border-subtle))" : "none",
+        color: "oklch(var(--fg))",
+        backgroundImage: `url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cline x1='0' y1='20' x2='20' y2='0' stroke='oklch(70%25 0.06 195 / 0.12)' stroke-width='1'/%3E%3C/svg%3E")`,
       }}
     >
+      {/* Decorative teal glow orb at top */}
+      <div
+        className="absolute pointer-events-none"
+        style={{
+          top: -40,
+          [locale === "ar" ? "right" : "left"]: -30,
+          width: 140,
+          height: 140,
+          borderRadius: "50%",
+          background: "radial-gradient(circle, oklch(80% 0.08 195 / 0.35) 0%, transparent 70%)",
+        }}
+      />
       {/* Header / brand */}
-      <div className="px-4 py-4 flex items-center gap-3">
-        <Link
-          href="/"
-          className="flex items-center gap-3 min-w-0"
-        >
-          {/* Teal logo icon */}
-          <div className="h-7 w-7 shrink-0 rounded-lg bg-[oklch(52%_0.13_195)] grid place-items-center shadow-sm">
+      <div
+        className={cn(
+          "flex items-center gap-2 mb-0.5 relative z-10",
+          collapsed ? "justify-center py-4 px-0" : "px-3 py-4",
+          locale === "ar" && !collapsed ? "flex-row-reverse" : "",
+        )}
+      >
+        <Link href="/" className="flex items-center gap-2">
+          {/* Teal logo icon with gradient */}
+          <div
+            className="h-8 w-8 shrink-0 rounded-lg flex items-center justify-center"
+            style={{
+              background: "linear-gradient(135deg, oklch(58% 0.14 195) 0%, oklch(46% 0.12 210) 100%)",
+              boxShadow: "0 3px 10px oklch(52% 0.13 195 / 0.4)",
+            }}
+          >
             <LineChart className="h-3.5 w-3.5 text-white" />
           </div>
           {!collapsed ? (
-            <span className="text-sm font-bold tracking-tight text-[oklch(var(--sidebar-fg))]">
+            <span
+              className="text-sm font-bold tracking-tight"
+              style={{
+                color: "oklch(var(--fg))",
+                letterSpacing: "-0.02em",
+                fontFamily: locale === "ar" ? "var(--font-arabic)" : "var(--font-sans)",
+              }}
+            >
               {locale === "ar" ? "سمارت مينا" : "SmartMENA"}
             </span>
           ) : null}
@@ -156,22 +185,17 @@ export default function Sidebar({
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 overflow-y-auto px-2 pt-1 pb-4 space-y-5">
+      <nav className="flex-1 overflow-y-auto px-2 pt-1 pb-4 space-y-1 relative z-10">
         {SECTIONS.map((section) => (
-          <div key={section.titleKey}>
+          <div key={section.titleKey} className="mb-1">
             {!collapsed ? (
               <div
-                className="px-2.5 pb-1.5 text-[9px] uppercase tracking-widest font-bold"
-                style={{ color: "oklch(var(--sidebar-fg) / 0.22)" }}
+                className="px-3 pt-2.5 pb-1 text-[9px] font-bold uppercase tracking-widest"
+                style={{ color: "oklch(var(--fg-muted))" }}
               >
                 {t(section.titleKey)}
               </div>
-            ) : (
-              <div
-                className="mx-2 my-1.5 h-px"
-                style={{ backgroundColor: "oklch(var(--sidebar-fg) / 0.07)" }}
-              />
-            )}
+            ) : null}
             <div className="space-y-0.5">
               {section.items.map((item) => {
                 const Icon = item.icon;
@@ -181,46 +205,63 @@ export default function Sidebar({
                     key={item.href}
                     href={item.href}
                     className={cn(
-                      "relative group flex items-center gap-2.5 rounded-lg text-sm transition-all duration-150",
-                      collapsed ? "justify-center h-9 w-9 mx-auto" : "px-2.5 py-1.5",
-                      active ? "font-medium" : "",
-                      // Active indicator border
-                      active && !collapsed
-                        ? locale === "ar"
-                          ? "border-r-[2.5px] border-r-[oklch(70%_0.09_195)]"
-                          : "border-l-[2.5px] border-l-[oklch(70%_0.09_195)]"
-                        : "",
+                      "relative group flex items-center rounded-lg text-xs transition-all duration-150",
+                      collapsed ? "justify-center h-9 w-9 mx-auto" : "px-3 py-2",
+                      active ? "font-semibold" : "font-normal",
                     )}
                     style={{
                       backgroundColor: active
-                        ? "oklch(var(--sidebar-active) / 0.4)"
+                        ? "oklch(93% 0.04 195)"
                         : "transparent",
                       color: active
-                        ? "oklch(var(--sidebar-fg) / 0.92)"
-                        : "oklch(var(--sidebar-fg) / 0.42)",
+                        ? "oklch(46% 0.12 195)"
+                        : "oklch(var(--fg-muted))",
+                      boxShadow: active ? "0 1px 4px oklch(52% 0.13 195 / 0.12)" : "none",
+                      gap: collapsed ? 0 : "8px",
+                      justifyContent: collapsed ? "center" : (locale === "ar" ? "flex-end" : "flex-start"),
+                      flexDirection: locale === "ar" && !collapsed ? "row-reverse" : "row",
                     }}
                     onMouseEnter={(e) => {
                       if (!active) {
-                        e.currentTarget.style.backgroundColor =
-                          "oklch(var(--sidebar-hover) / 0.5)";
-                        e.currentTarget.style.color = "oklch(var(--sidebar-fg) / 0.72)";
+                        e.currentTarget.style.backgroundColor = "oklch(95% 0.006 72)";
+                        e.currentTarget.style.color = "oklch(var(--fg))";
                       }
                     }}
                     onMouseLeave={(e) => {
                       if (!active) {
                         e.currentTarget.style.backgroundColor = "transparent";
-                        e.currentTarget.style.color = "oklch(var(--sidebar-fg) / 0.42)";
+                        e.currentTarget.style.color = "oklch(var(--fg-muted))";
                       }
                     }}
                   >
-                    <Icon className="h-4 w-4 shrink-0" />
+                    {/* Active indicator bar */}
+                    {active && !collapsed && (
+                      <div
+                        className="absolute top-[20%] bottom-[20%] w-[2.5px] rounded-full"
+                        style={{
+                          [locale === "ar" ? "right" : "left"]: 0,
+                          background: "oklch(46% 0.12 195)",
+                        }}
+                      />
+                    )}
+                    <div className="relative shrink-0">
+                      <Icon
+                        className="h-[17px] w-[17px]"
+                        style={{ opacity: active ? 1 : 0.65 }}
+                      />
+                    </div>
                     {!collapsed ? (
                       <>
-                        <span className="truncate">{t(item.labelKey)}</span>
+                        <span
+                          className="flex-1 truncate leading-none"
+                          style={{ textAlign: locale === "ar" ? "right" : "left" }}
+                        >
+                          {t(item.labelKey)}
+                        </span>
                         {item.shortcut ? (
                           <span
-                            className="ms-auto text-[10px] tracking-widest opacity-0 group-hover:opacity-100 transition-opacity"
-                            style={{ color: "oklch(var(--sidebar-fg) / 0.42)" }}
+                            className="text-[10px] tracking-widest opacity-0 group-hover:opacity-60 transition-opacity"
+                            style={{ color: "oklch(var(--fg-muted))" }}
                           >
                             {item.shortcut}
                           </span>
@@ -239,6 +280,13 @@ export default function Sidebar({
                 );
               })}
             </div>
+            {/* Divider between sections (except last) */}
+            {section !== SECTIONS[SECTIONS.length - 1] && (
+              <div
+                className="h-px mx-2.5 my-1.5"
+                style={{ background: "oklch(var(--border-subtle))" }}
+              />
+            )}
           </div>
         ))}
       </nav>

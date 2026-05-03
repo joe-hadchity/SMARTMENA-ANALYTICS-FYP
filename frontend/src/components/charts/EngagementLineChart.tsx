@@ -44,43 +44,43 @@ export default function EngagementLineChart({
         >
           <defs>
             <linearGradient id="engagement-grad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.35} />
-              <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+              <stop offset="0%" stopColor="oklch(var(--primary))" stopOpacity={0.35} />
+              <stop offset="100%" stopColor="oklch(var(--primary))" stopOpacity={0} />
             </linearGradient>
           </defs>
           <CartesianGrid
-            stroke="hsl(var(--border) / 0.6)"
+            stroke="oklch(var(--border) / 0.6)"
             vertical={false}
             strokeDasharray="3 3"
           />
           <XAxis
             dataKey="label"
-            tick={{ fill: "hsl(var(--fg-muted))", fontSize: 11 }}
+            tick={{ fill: "oklch(var(--fg-muted))", fontSize: 11 }}
             tickLine={false}
             axisLine={false}
             dy={6}
           />
           <YAxis
-            tick={{ fill: "hsl(var(--fg-muted))", fontSize: 11 }}
+            tick={{ fill: "oklch(var(--fg-muted))", fontSize: 11 }}
             tickLine={false}
             axisLine={false}
             width={40}
           />
           <Tooltip
-            cursor={{ stroke: "hsl(var(--border-strong))", strokeDasharray: "3 3" }}
+            cursor={{ stroke: "oklch(var(--border-strong))", strokeDasharray: "3 3" }}
             content={<ChartTooltip valueLabel="Engagement" locale={locale} />}
           />
           <Area
             type="monotone"
             dataKey="value"
-            stroke="hsl(var(--primary))"
+            stroke="oklch(var(--primary))"
             strokeWidth={2}
             fill="url(#engagement-grad)"
             activeDot={{
               r: 4,
               strokeWidth: 2,
-              stroke: "hsl(var(--bg-elevated))",
-              fill: "hsl(var(--primary))",
+              stroke: "oklch(var(--bg-elevated))",
+              fill: "oklch(var(--primary))",
             }}
           />
         </AreaChart>

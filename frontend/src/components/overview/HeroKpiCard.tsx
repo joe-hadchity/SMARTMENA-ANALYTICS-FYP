@@ -1,8 +1,9 @@
 "use client";
 
 import { TrendingDown, TrendingUp } from "lucide-react";
+import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
 
-import { Card, CardContent } from "@/components/ui/Card";
 import { Sparkline } from "@/components/ui/Sparkline";
 import { useI18n } from "@/i18n/I18nProvider";
 
@@ -53,11 +54,32 @@ function Delta({ value }: { value: number }) {
 
 export function HeroKpiCard({ hero, secondary }: HeroKpiCardProps) {
   const { t, locale } = useI18n();
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
+
   const ar = locale === "ar";
+  const isDark = mounted && resolvedTheme === "dark";
 
   return (
-    <Card>
-      <CardContent className="p-0 flex flex-col md:flex-row">
+    <div
+      className="rounded-2xl"
+      style={{
+        background: isDark
+          ? "rgba(28,23,18,0.80)"
+          : "rgba(255,255,255,0.88)",
+        border: isDark
+          ? "1px solid rgba(255,255,255,0.05)"
+          : "1px solid rgba(180,210,220,0.3)",
+        boxShadow: isDark
+          ? "0 8px 40px rgba(0,0,0,0.28), 0 2px 8px rgba(0,0,0,0.12)"
+          : "0 8px 40px rgba(20,50,80,0.07), 0 2px 8px rgba(20,50,80,0.04)",
+        backdropFilter: "blur(20px) saturate(1.8) brightness(1.02)",
+        WebkitBackdropFilter: "blur(20px) saturate(1.8) brightness(1.02)",
+      }}
+    >
+      <div className="p-0 flex flex-col md:flex-row">
         {/* Hero stat - left side, large */}
         <div
           className={`p-7 flex flex-col gap-2 min-w-[180px] ${
@@ -120,7 +142,7 @@ export function HeroKpiCard({ hero, secondary }: HeroKpiCardProps) {
             </div>
           ))}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
