@@ -185,6 +185,11 @@ export type CompetitorDiscoveryResponse = {
   generated_at: string;
   source: string;
   real_data_only: boolean;
+  provider_status?: {
+    ok: boolean;
+    reason: string | null;
+    message: string;
+  };
   context: {
     brand_name: string;
     category: string;
@@ -220,6 +225,10 @@ export type CompetitorComparisonMetric = {
     published_at: string | null;
     engagement_total: number;
     engagement_rate: number | null;
+    media_url: string | null;
+    likes: number | null;
+    comments: number | null;
+    shares: number | null;
   } | null;
 };
 
@@ -234,6 +243,129 @@ export type CompetitorComparisonRow = CompetitorComparisonMetric & {
   evidence_count?: number;
   evidence_sources?: Record<string, number>;
   last_scraped_at?: string | null;
+};
+
+export type HashtagTopMedia = {
+  id: string;
+  caption: string | null;
+  url: string | null;
+  author: string | null;
+  media_type: string | null;
+  media_url: string | null;
+  published_at: string | null;
+  hashtags: string[];
+  metrics: {
+    likes?: number | null;
+    comments?: number | null;
+    shares?: number | null;
+    saves?: number | null;
+    video_views?: number | null;
+    engagement?: number | null;
+  };
+  engagement: number;
+};
+
+export type HashtagSnapshot = {
+  id: string;
+  tracked_hashtag_id: string;
+  captured_at: string;
+  provider: string;
+  source_url: string | null;
+  sample_size: number;
+  media_count: number;
+  total_likes: number;
+  total_comments: number;
+  total_video_views: number;
+  total_engagement: number;
+  avg_engagement: number;
+  momentum_score: number;
+  top_media: HashtagTopMedia[];
+  raw_payload_json: Record<string, unknown>;
+  warnings: string[];
+};
+
+export type TrackedHashtag = {
+  id: string;
+  workspace_id: string;
+  platform: string;
+  tag: string;
+  display_name: string;
+  source: string;
+  status: "active" | "paused";
+  last_synced_at: string | null;
+  created_at: string;
+  metadata_json: Record<string, unknown>;
+  latest_snapshot: HashtagSnapshot | null;
+  snapshots: HashtagSnapshot[];
+};
+
+export type HashtagTrendResponse = {
+  generated_at: string;
+  provider: string;
+  real_data_only: boolean;
+  refresh_days: number;
+  provider_status?: {
+    mode: string;
+    selected: string;
+    meta_ready: boolean;
+    apify_ready: boolean;
+    message: string;
+  };
+  hashtags: TrackedHashtag[];
+  suggested_hashtags: string[];
+  warnings: string[];
+};
+
+export type HashtagSearchResponse = {
+  generated_at: string;
+  query: string;
+  provider: string;
+  real_data_only: boolean;
+  results: Array<{
+    id: string;
+    tag: string;
+    name: string;
+    source_url: string | null;
+  }>;
+  warnings: string[];
+  provider_status?: HashtagTrendResponse["provider_status"];
+};
+
+export type InboxItem = {
+  id: string;
+  workspace_id: string;
+  social_account_id: string | null;
+  social_post_id: string | null;
+  platform: string;
+  provider: string;
+  item_type: "comment" | "message";
+  direction: "inbound" | "outbound";
+  external_id: string;
+  thread_external_id: string | null;
+  parent_external_id: string | null;
+  author_id: string | null;
+  author_username: string | null;
+  body: string;
+  status: "unread" | "read" | "replied" | "archived" | "failed";
+  permalink: string | null;
+  published_at: string | null;
+  raw_payload_json: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+  social_posts?: {
+    caption: string | null;
+    permalink: string | null;
+    media_type: string | null;
+    published_at: string | null;
+  } | null;
+};
+
+export type InboxSummary = {
+  total: number;
+  unread: number;
+  comments: number;
+  messages: number;
+  replied: number;
 };
 
 export type CompetitorBenchmark = {

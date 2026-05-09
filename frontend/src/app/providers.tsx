@@ -6,6 +6,7 @@ import { Toaster } from "sonner";
 import { useState, type ReactNode } from "react";
 
 import { I18nProvider } from "@/i18n/I18nProvider";
+import { AuthProvider } from "@/components/auth/AuthProvider";
 import { TooltipProvider } from "@/components/ui/Tooltip";
 import { CommandPaletteProvider } from "@/components/command/CommandPaletteProvider";
 
@@ -34,7 +35,9 @@ export default function Providers({ children }: { children: ReactNode }) {
       <QueryClientProvider client={client}>
         <I18nProvider>
           <TooltipProvider delayDuration={200}>
-            <CommandPaletteProvider>{children}</CommandPaletteProvider>
+            <AuthProvider>
+              <CommandPaletteProvider>{children}</CommandPaletteProvider>
+            </AuthProvider>
           </TooltipProvider>
         </I18nProvider>
       </QueryClientProvider>

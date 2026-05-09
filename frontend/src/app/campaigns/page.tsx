@@ -212,8 +212,8 @@ export default function CampaignsListPage() {
   return (
     <div className="space-y-6 max-w-6xl">
       <PageHeader
+        variant="compact"
         title={t("campaigns.title")}
-        subtitle={t("campaigns.subtitle")}
         actions={
           activeTab === "organic" ? (
             <Link href="/campaigns/new" className="btn btn-primary">

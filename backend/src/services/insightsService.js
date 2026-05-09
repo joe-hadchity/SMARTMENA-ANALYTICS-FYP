@@ -3,9 +3,10 @@
  * joining signals from synced_posts + post_metrics + sentiment_results +
  * campaigns + the static MENA calendar.
  *
- * Insights are rule-based for the beta (no LLM). Each generator returns a
- * list of NormalizedInsight objects; `generateForWorkspace` persists them
- * all and returns the saved rows.
+ * Most baseline insights are deterministic rules. When Azure OpenAI is
+ * configured, `generateForWorkspace` also appends evidence-grounded AI
+ * suggestions built from the same real analytics snapshot. The LLM is only
+ * allowed to explain and connect existing signals, not invent new metrics.
  *
  * NormalizedInsight = {
  *   insight_type, scope_type, scope_id?,
@@ -19,9 +20,19 @@ const analyticsService = require("./analyticsService");
 const recommendationsService = require("./recommendationsService");
 const menaEngine = require("./menaRecommendationEngine");
 const { getSupabase } = require("../config/supabase");
+const env = require("../config/env");
+const logger = require("../utils/logger");
+const {
+  chat,
+  isEnabled: isLLMEnabled,
+  LLMDisabledError,
+} = require("./llm/azureOpenAIClient");
+const systemPrompts = require("./llm/systemPrompts");
+const { assertBudget, recordUsage } = require("./llm/usageMeter");
 
 const TABLE = "ai_insights";
 const MODEL_VERSION = "insights-rules-v1";
+const LLM_MODEL_VERSION = "azure-openai-insights-v1";
 
 function requireClient() {
   const supabase = getSupabase();
@@ -514,6 +525,195 @@ async function generateMenaTrend(workspaceId) {
   ];
 }
 
+function extractJsonObject(text) {
+  if (!text) return null;
+  try {
+    return JSON.parse(text);
+  } catch {
+    const match = String(text).match(/\{[\s\S]*\}/);
+    if (!match) return null;
+    try {
+      return JSON.parse(match[0]);
+    } catch {
+      return null;
+    }
+  }
+}
+
+function compactPost(p) {
+  if (!p) return null;
+  return {
+    id: p.id,
+    type: p.post_type || p.media_type || null,
+    caption: p.caption ? String(p.caption).slice(0, 220) : null,
+    posted_at: p.posted_at || p.published_at || null,
+    engagement: p.engagement || 0,
+    score: p.score || 0,
+    latest_metrics: p.latest_metrics
+      ? {
+          likes: p.latest_metrics.likes || 0,
+          comments: p.latest_metrics.comments || 0,
+          shares: p.latest_metrics.shares || 0,
+          saves: p.latest_metrics.saves || 0,
+          reach: p.latest_metrics.reach || 0,
+          impressions: p.latest_metrics.impressions || 0,
+          engagement_rate: p.latest_metrics.engagement_rate ?? null,
+        }
+      : null,
+  };
+}
+
+async function buildLLMInsightContext(workspaceId) {
+  const supabase = requireClient();
+
+  const [workspaceRes, overview, sentiment, platform, topPosts] = await Promise.all([
+    supabase
+      .from("workspaces")
+      .select("id, name, region_default, locale_default, industry_hint, primary_region")
+      .eq("id", workspaceId)
+      .maybeSingle(),
+    analyticsService.getOverview(workspaceId).catch(() => null),
+    analyticsService.getSentimentBreakdown(workspaceId).catch(() => null),
+    analyticsService.getPlatformBreakdown(workspaceId).catch(() => []),
+    analyticsService.getTopPosts(workspaceId, { limit: 8, sortBy: "engagement" }).catch(() => []),
+  ]);
+
+  let competitor = null;
+  try {
+    const competitorService = require("./competitors/competitorService");
+    const comparison = await competitorService.comparison(workspaceId, { window_days: 30 });
+    competitor = {
+      approved_count: comparison?.competitors_summary?.competitor_count || 0,
+      accounts_with_posts: comparison?.competitors_summary?.accounts_with_posts || 0,
+      best_competitor_handle: comparison?.competitors_summary?.best_competitor_handle || null,
+      avg_engagement_rate: comparison?.competitors_summary?.avg_engagement_rate ?? null,
+      warnings: comparison?.warnings || [],
+      recommendations: (comparison?.recommendations || []).slice(0, 3),
+    };
+  } catch (err) {
+    competitor = { unavailable: true, reason: err?.message || "competitor comparison unavailable" };
+  }
+
+  return {
+    workspace: workspaceRes.data || null,
+    overview,
+    sentiment,
+    platform: (platform || []).slice(0, 6),
+    top_posts: (topPosts || []).slice(0, 6).map(compactPost).filter(Boolean),
+    competitor,
+    data_rules: {
+      no_hallucinated_metrics: true,
+      use_only_values_in_snapshot: true,
+      if_data_is_missing_recommend_next_connection_step: true,
+    },
+  };
+}
+
+function normalizeLLMInsightSuggestion(item, index) {
+  const severity = ["info", "warning", "opportunity"].includes(item?.severity)
+    ? item.severity
+    : "info";
+  const confidence = Number(item?.confidence);
+  const boundedConfidence =
+    Number.isFinite(confidence) ? Math.max(0, Math.min(1, confidence)) : 0.65;
+  const evidence = Array.isArray(item?.evidence)
+    ? item.evidence.map((v) => String(v).trim()).filter(Boolean).slice(0, 6)
+    : [];
+
+  const titleEn = String(item?.title_en || item?.title || "").trim();
+  const bodyEn = String(item?.body_en || item?.body || "").trim();
+  if (!titleEn || !bodyEn || evidence.length === 0) return null;
+
+  return {
+    insight_type: "content_recommendation",
+    scope_type: "workspace",
+    scope_id: null,
+    title_en: titleEn.slice(0, 180),
+    title_ar: String(item?.title_ar || titleEn).trim().slice(0, 180),
+    body_en: bodyEn.slice(0, 900),
+    body_ar: String(item?.body_ar || bodyEn).trim().slice(0, 900),
+    severity,
+    confidence: Number(boundedConfidence.toFixed(4)),
+    data: {
+      source: "azure_openai",
+      prompt_version: systemPrompts.PROMPT_VERSION,
+      evidence,
+      rank: index + 1,
+    },
+    model_version: `${LLM_MODEL_VERSION}:${env.AZURE_OPENAI_DEPLOYMENT || "unknown"}`,
+  };
+}
+
+async function generateAzureInsightSuggestions(workspaceId) {
+  if (!isLLMEnabled()) return [];
+
+  try {
+    await assertBudget(workspaceId);
+  } catch (err) {
+    if (err.code === "LLM_BUDGET_EXCEEDED") throw err;
+    logger.warn(`insights: budget check failed (${err.message})`);
+  }
+
+  const context = await buildLLMInsightContext(workspaceId);
+  const compactContext = {
+    workspace: context.workspace,
+    overview: context.overview,
+    sentiment: context.sentiment,
+    platform: context.platform,
+    top_posts: context.top_posts,
+    competitor: context.competitor,
+  };
+  const messages = [
+    {
+      role: "system",
+      content:
+        "You are SmartMENA's AI campaign analyst. Return strict JSON only with key suggestions. Use only the provided data; never invent metrics. Each suggestion must include concrete evidence strings.",
+    },
+    {
+      role: "user",
+      content: `Return JSON in this exact shape: {"suggestions":[{"title_en":"...","body_en":"...","title_ar":"...","body_ar":"...","severity":"info|warning|opportunity","confidence":0.7,"evidence":["..."]}]}. Create 1-3 practical suggestions for this workspace from this data: ${JSON.stringify(compactContext)}`,
+    },
+  ];
+
+  let result;
+  try {
+    result = await chat({
+      messages,
+      maxTokens: 4000,
+      temperature: 0.2,
+      responseFormat: { type: "json_object" },
+    });
+  } catch (err) {
+    if (err instanceof LLMDisabledError) return [];
+    logger.warn(`insights: JSON response mode failed, retrying plain chat (${err.message})`);
+    result = await chat({ messages, maxTokens: 4000, temperature: 0.2 });
+  }
+
+  try {
+    await recordUsage({
+      workspaceId,
+      feature: "insights",
+      model: result.model || env.AZURE_OPENAI_DEPLOYMENT || "unknown",
+      promptTokens: result.usage?.prompt_tokens || 0,
+      completionTokens: result.usage?.completion_tokens || 0,
+      costUSD: result.costUSD || 0,
+      metadata: {
+        prompt_version: systemPrompts.PROMPT_VERSION,
+        model_version: LLM_MODEL_VERSION,
+      },
+    });
+  } catch (err) {
+    logger.warn(`insights: usage meter failed (${err.message})`);
+  }
+
+  const parsed = extractJsonObject(result.text);
+  const suggestions = Array.isArray(parsed?.suggestions) ? parsed.suggestions : [];
+  return suggestions
+    .map((item, index) => normalizeLLMInsightSuggestion(item, index))
+    .filter(Boolean)
+    .slice(0, 3);
+}
+
 // ---------------------------------------------------------------------------
 // Orchestrator
 // ---------------------------------------------------------------------------
@@ -527,7 +727,15 @@ async function generateForWorkspace(workspaceId) {
     generateMenaTrend(workspaceId).catch(() => []),
   ]);
 
-  const all = [...sentiment, ...perf, ...content, ...timing, ...trend].map((i) => ({
+  let llm = [];
+  try {
+    llm = await generateAzureInsightSuggestions(workspaceId);
+  } catch (err) {
+    if (err.code === "LLM_BUDGET_EXCEEDED") throw err;
+    logger.warn(`insights: Azure suggestions skipped (${err.message})`);
+  }
+
+  const all = [...sentiment, ...perf, ...content, ...timing, ...trend, ...llm].map((i) => ({
     workspace_id: workspaceId,
     ...i,
   }));
@@ -551,4 +759,6 @@ module.exports = {
   generateContentRecommendations,
   generateBestPostingTime,
   generateMenaTrend,
+  buildLLMInsightContext,
+  generateAzureInsightSuggestions,
 };

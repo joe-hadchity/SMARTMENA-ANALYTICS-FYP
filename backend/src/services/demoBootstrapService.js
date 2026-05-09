@@ -16,28 +16,13 @@
  */
 
 const workspaceService = require("./workspaceService");
-const socialAccountService = require("./socialAccountService");
-const syncService = require("./syncService");
 const insightsService = require("./insightsService");
 const recommendationService = require("./recommendationService");
 const logger = require("../utils/logger");
 
-const DEMO_ACCOUNTS = [
-  {
-    kind: "instagram",
-    handle: "born2hike",
-    displayName: "Born2Hike",
-    limit: 24,
-    daysBack: 45,
-  },
-  {
-    kind: "facebook",
-    handle: "born2hike.lebanon",
-    displayName: "Born2Hike Lebanon",
-    limit: 18,
-    daysBack: 45,
-  },
-];
+// Born2Hike no longer seeds mock/scraped first-party posts. Own posts must be
+// pulled from Instagram Graph API so calendar/posts data is clearly sourced.
+const DEMO_ACCOUNTS = [];
 
 const DEMO_RECOMMENDATIONS = [
   {

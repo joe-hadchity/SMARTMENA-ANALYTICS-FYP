@@ -380,7 +380,7 @@ async function* streamAssistantReply({
   let costUSD = 0;
 
   try {
-    for await (const frame of streamChat({ messages, maxTokens: 700, temperature: 0.3 })) {
+    for await (const frame of streamChat({ messages, maxTokens: 1200, temperature: 0.3 })) {
       if (frame.delta) {
         fullText += frame.delta;
         yield { type: "token", delta: frame.delta };
@@ -395,12 +395,27 @@ async function* streamAssistantReply({
       yield { type: "error", code: "LLM_DISABLED", message: err.message };
       return;
     }
-    yield {
-      type: "error",
-      code: "LLM_STREAM_FAILED",
-      message: err?.message || "LLM stream failed",
-    };
-    return;
+
+    logger.warn(`assistant: streaming failed, retrying non-streaming (${err?.message || err})`);
+    try {
+      const fallback = await chat({ messages, maxTokens: 1200, temperature: 0.3 });
+      fullText = fallback.text || "";
+      finalUsage = fallback.usage || finalUsage;
+      model = fallback.model;
+      costUSD = fallback.costUSD || 0;
+      if (fullText) yield { type: "token", delta: fullText };
+    } catch (fallbackErr) {
+      if (fallbackErr instanceof LLMDisabledError) {
+        yield { type: "error", code: "LLM_DISABLED", message: fallbackErr.message };
+        return;
+      }
+      yield {
+        type: "error",
+        code: "LLM_FAILED",
+        message: fallbackErr?.message || err?.message || "LLM request failed",
+      };
+      return;
+    }
   }
 
   // Persist assistant message.

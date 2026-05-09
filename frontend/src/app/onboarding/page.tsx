@@ -56,7 +56,7 @@ const defaultDraft: Draft = {
   onboarding_completed: false,
   business_name: "Born2Hike",
   page_name: "Born2Hike",
-  instagram_handle: "born2hike",
+  instagram_handle: "borntohike",
   category: "hiking_group",
   business_type: "community_group",
   location: "Lebanon",

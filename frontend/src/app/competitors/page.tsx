@@ -9,6 +9,7 @@ import {
   ExternalLink,
   Globe2,
   Layers3,
+  Play,
   RefreshCcw,
   Search,
   ShieldCheck,
@@ -21,6 +22,18 @@ import {
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+
+import {
+  Bar,
+  BarChart,
+  Cell,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -104,7 +117,17 @@ export default function CompetitorsPage() {
     mutationFn: () => competitorsApi.discover(discoveryPayload(discover)),
     onSuccess: (res) => {
       qc.invalidateQueries({ queryKey: ["competitors", "candidates"] });
-      toast.success(`${res.candidates.length} real candidate(s) found`);
+      if (!res.candidates.length && res.provider_status?.ok === false) {
+        toast.warning("No competitors found because search provider failed", {
+          description: res.provider_status.message,
+        });
+      } else if (!res.candidates.length) {
+        toast.warning("No real competitors matched this search", {
+          description: "Try a wider niche, clearer location, or fewer hashtags.",
+        });
+      } else {
+        toast.success(`${res.candidates.length} real candidate(s) found`);
+      }
       setTab("suggestions");
     },
     onError: showError,
@@ -112,10 +135,20 @@ export default function CompetitorsPage() {
 
   const manualM = useMutation({
     mutationFn: () => competitorsApi.manualAdd(manual),
-    onSuccess: () => {
+    onSuccess: (res) => {
       qc.invalidateQueries({ queryKey: ["competitors"] });
+      qc.invalidateQueries({ queryKey: ["competitors", "comparison"] });
       setManual((prev) => ({ ...prev, handle: "", display_name: "" }));
-      toast.success("Competitor verified and approved");
+      const imported = res.posts_imported ?? 0;
+      const apifyWarnings = res.warnings?.filter((w) => w.includes("apify")) || [];
+      const description = imported
+        ? "Apify pulled real public posts for this competitor."
+        : apifyWarnings.length
+          ? `Apify issue: ${apifyWarnings[0]}`
+          : "Saved the exact profile. No trusted post metrics were returned yet.";
+      toast.success(imported ? `Competitor saved, ${imported} posts imported` : "Competitor approved for tracking", {
+        description,
+      });
       setTab("approved");
     },
     onError: showError,
@@ -123,9 +156,19 @@ export default function CompetitorsPage() {
 
   const approveM = useMutation({
     mutationFn: (id: string) => competitorsApi.approve(id),
-    onSuccess: () => {
+    onSuccess: (res) => {
       qc.invalidateQueries({ queryKey: ["competitors"] });
-      toast.success("Competitor approved");
+      qc.invalidateQueries({ queryKey: ["competitors", "comparison"] });
+      const imported = res.posts_imported ?? 0;
+      const apifyWarnings = res.warnings?.filter((w) => w.includes("apify")) || [];
+      const description = imported
+        ? "Real Apify post evidence is now available for comparison."
+        : apifyWarnings.length
+          ? `Apify issue: ${apifyWarnings[0]}`
+          : "No trusted post metrics were returned yet.";
+      toast.success(imported ? `Competitor approved, ${imported} posts imported` : "Competitor approved", {
+        description,
+      });
     },
     onError: showError,
   });
@@ -141,9 +184,42 @@ export default function CompetitorsPage() {
 
   const refreshM = useMutation({
     mutationFn: (id: string) => competitorsApi.refresh(id),
-    onSuccess: () => {
+    onSuccess: (res) => {
       qc.invalidateQueries({ queryKey: ["competitors"] });
-      toast.success("Snapshot refreshed");
+      qc.invalidateQueries({ queryKey: ["competitors", "comparison"] });
+      const imported = res.posts_imported ?? 0;
+      const apifyWarnings = res.warnings?.filter((w) => w.includes("apify")) || [];
+      const description = imported
+        ? "Apify evidence is now available for comparison."
+        : apifyWarnings.length
+          ? `Apify issue: ${apifyWarnings[0]}`
+          : "No new trusted post metrics were returned by the source.";
+      toast.success(imported ? `${imported} competitor posts imported` : "Competitor refreshed", {
+        description,
+      });
+    },
+    onError: showError,
+  });
+
+  const refreshAllM = useMutation({
+    mutationFn: () => competitorsApi.refreshAll(),
+    onSuccess: (res) => {
+      qc.invalidateQueries({ queryKey: ["competitors"] });
+      qc.invalidateQueries({ queryKey: ["competitors", "comparison"] });
+      const apifyWarnings = res.warnings?.filter((w) => w.includes("apify")) || [];
+      const description = res.posts_imported
+        ? "The comparison is now using fresh Apify evidence."
+        : apifyWarnings.length
+          ? `Apify issue: ${apifyWarnings[0]}`
+          : "No new trusted post metrics were returned by Apify.";
+      toast.success(
+        res.posts_imported
+          ? `${res.posts_imported} posts imported from ${res.refreshed_count} competitors`
+          : "Approved competitors refreshed",
+        {
+          description,
+        },
+      );
     },
     onError: showError,
   });
@@ -160,7 +236,7 @@ export default function CompetitorsPage() {
   const approved = approvedQ.data || [];
   const candidates = candidatesQ.data || [];
   const avgScore = useMemo(() => {
-    if (!candidates.length) return 0;
+    if (!candidates.length) return null;
     return candidates.reduce((sum, row) => sum + Number(row.relevance_score || 0), 0) / candidates.length;
   }, [candidates]);
 
@@ -196,17 +272,18 @@ export default function CompetitorsPage() {
       <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
         <Metric label="Approved" value={approved.length} icon={<ShieldCheck className="h-4 w-4" />} />
         <Metric label="Pending" value={candidates.length} icon={<Search className="h-4 w-4" />} />
-        <Metric label="Avg match" value={`${Math.round(avgScore)}%`} icon={<Globe2 className="h-4 w-4" />} />
+        <Metric label="Avg match" value={avgScore == null ? "-" : `${Math.round(avgScore)}%`} icon={<Globe2 className="h-4 w-4" />} />
       </div>
 
       <ImprovedComparisonCard
         data={comparisonQ.data}
         loading={comparisonQ.isLoading}
         fetching={comparisonQ.isFetching}
+        refreshingAll={refreshAllM.isPending}
         windowDays={windowDays}
         locale={locale}
         onWindowChange={setWindowDays}
-        onRefresh={() => comparisonQ.refetch()}
+        onRefresh={() => refreshAllM.mutate()}
       />
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
@@ -219,6 +296,7 @@ export default function CompetitorsPage() {
         <DiscoveryCard
           value={discover}
           loading={discoverM.isPending}
+          result={discoverM.data}
           onChange={setDiscover}
           onSubmit={() => discoverM.mutate()}
         />
@@ -339,6 +417,7 @@ function ImprovedComparisonCard({
   data,
   loading,
   fetching,
+  refreshingAll,
   windowDays,
   locale,
   onWindowChange,
@@ -347,6 +426,7 @@ function ImprovedComparisonCard({
   data?: CompetitorComparisonResponse;
   loading: boolean;
   fetching: boolean;
+  refreshingAll: boolean;
   windowDays: number;
   locale: "en" | "ar";
   onWindowChange: (value: number) => void;
@@ -359,6 +439,7 @@ function ImprovedComparisonCard({
   const delta = data?.deltas.engagement_rate_delta ?? null;
   const topCompetitors = data?.competitors.slice(0, 5) || [];
   const verdict = comparisonVerdict(data);
+  const hasCompetitorPostMetrics = Boolean(competitors?.post_count);
 
   return (
     <Card padded={false}>
@@ -386,10 +467,10 @@ function ImprovedComparisonCard({
             variant="ghost"
             size="sm"
             onClick={onRefresh}
-            loading={fetching}
+            loading={fetching || refreshingAll}
             leftIcon={<RefreshCcw className="h-3.5 w-3.5" />}
           >
-            Refresh
+            Refresh competitors
           </Button>
         </div>
       </CardHeader>
@@ -417,6 +498,21 @@ function ImprovedComparisonCard({
                   <p className="mt-1 max-w-3xl text-sm leading-relaxed text-fg-muted">
                     {verdict.detail}
                   </p>
+                  {!hasCompetitorPostMetrics ? (
+                    <p className="mt-2 max-w-3xl text-xs leading-relaxed text-warning">
+                      Competitor followers, ER, engagement, and post counts are hidden until a real post source is connected. Approved usernames are real, but SmartMENA will not invent their metrics.
+                    </p>
+                  ) : null}
+                  {data?.warnings?.length ? (
+                    <div className="mt-3 space-y-1 rounded-md border border-warning/30 bg-warning/5 p-2">
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-warning">Diagnostics</p>
+                      {data.warnings.map((warning) => (
+                        <p key={warning} className="text-xs text-warning/80">
+                          {warning}
+                        </p>
+                      ))}
+                    </div>
+                  ) : null}
                 </div>
                 <div className="rounded-md border border-border bg-surface px-3 py-2">
                   <div className="mb-2 flex items-center justify-between gap-3">
@@ -435,8 +531,8 @@ function ImprovedComparisonCard({
                   </div>
                   <div className="mt-2 grid grid-cols-2 gap-2 text-[11px] text-fg-muted">
                     <span>{benchmark?.evidence_coverage.approved_competitors || 0} approved</span>
-                    <span>{benchmark?.evidence_coverage.competitors_with_posts || 0} with posts</span>
-                    <span>{benchmark?.evidence_coverage.competitors_with_snapshots || 0} snapshots</span>
+                    <span>{benchmark?.evidence_coverage.competitors_with_posts || 0} with real posts</span>
+                    <span>{benchmark?.evidence_coverage.competitors_with_snapshots || 0} follower snapshots</span>
                     <span>{benchmark?.evidence_coverage.public_evidence_items || 0} web items</span>
                   </div>
                 </div>
@@ -451,8 +547,8 @@ function ImprovedComparisonCard({
               />
               <CompareStat
                 label="Competitor avg ER"
-                value={formatPercent(competitors?.avg_engagement_rate, 2, locale)}
-                helper={`${formatNumber(competitors?.competitor_count || 0, locale)} profiles / ${formatNumber(competitors?.avg_posts_per_week || 0, locale)} posts per week`}
+                value={hasCompetitorPostMetrics ? formatPercent(competitors?.avg_engagement_rate, 2, locale) : "Unavailable"}
+                helper={hasCompetitorPostMetrics ? `${formatNumber(competitors?.competitor_count || 0, locale)} profiles / ${formatNumber(competitors?.avg_posts_per_week || 0, locale)} posts per week` : "connect Meta Business Discovery or Apify"}
               />
               <CompareStat
                 label="Engagement gap"
@@ -463,13 +559,21 @@ function ImprovedComparisonCard({
               <CompareStat
                 label="Competitor reach proxy"
                 value={
-                  competitors?.avg_followers == null
+                  !hasCompetitorPostMetrics || competitors?.avg_followers == null
                     ? "-"
                     : formatNumber(competitors.avg_followers, locale)
                 }
-                helper={`${formatNumber(competitors?.evidence_count || 0, locale)} public evidence items`}
+                helper={hasCompetitorPostMetrics ? `${formatNumber(competitors?.evidence_count || 0, locale)} public evidence items` : "not estimated from manual profiles"}
               />
             </div>
+
+            {topCompetitors.length > 0 && (
+              <ComparisonCharts
+                own={own}
+                topCompetitors={topCompetitors}
+                locale={locale}
+              />
+            )}
 
             <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
               <div className="rounded-md border border-border bg-surface-muted/50 p-4">
@@ -545,6 +649,7 @@ function ImprovedComparisonCard({
                       posts={competitor.post_count}
                       avgRate={competitor.avg_engagement_rate}
                       engagementPerPost={competitor.avg_engagement_per_post}
+                      hasMetrics={competitor.post_count > 0}
                       locale={locale}
                       followers={competitor.followers_count}
                       evidence={competitor.evidence_count}
@@ -560,9 +665,15 @@ function ImprovedComparisonCard({
             </div>
 
             <div className="grid gap-3 lg:grid-cols-2">
-              <TopPostPanel title="Your strongest post" post={own?.top_post} locale={locale} />
-              <TopPostPanel title="Competitor strongest post" post={competitors?.top_post} locale={locale} />
+              <TopPostPanel title="Your strongest post" handle="you" post={own?.top_post} locale={locale} />
+              <TopPostPanel
+                title="Competitor strongest post"
+                handle={benchmark?.best_benchmark?.handle || competitors?.best_competitor_handle || "competitor"}
+                post={competitors?.top_post}
+                locale={locale}
+              />
             </div>
+
           </div>
         )}
       </CardContent>
@@ -757,6 +868,7 @@ function CompareRow({
   strong,
   followers,
   evidence,
+  hasMetrics = true,
 }: {
   label: string;
   sublabel: string;
@@ -767,6 +879,7 @@ function CompareRow({
   strong?: boolean;
   followers?: number | null;
   evidence?: number;
+  hasMetrics?: boolean;
 }) {
   return (
     <div className="grid grid-cols-[minmax(0,1fr)_90px_90px_96px] gap-2 px-3 py-3 text-sm">
@@ -780,9 +893,9 @@ function CompareRow({
           {evidence ? ` / ${evidence} evidence` : ""}
         </div>
       </div>
-      <div className="text-end tabular-nums">{formatNumber(posts, locale)}</div>
-      <div className="text-end tabular-nums">{formatPercent(avgRate, 2, locale)}</div>
-      <div className="text-end tabular-nums">{formatNumber(engagementPerPost, locale)}</div>
+      <div className="text-end tabular-nums">{hasMetrics ? formatNumber(posts, locale) : "-"}</div>
+      <div className="text-end tabular-nums">{hasMetrics ? formatPercent(avgRate, 2, locale) : "-"}</div>
+      <div className="text-end tabular-nums">{hasMetrics ? formatNumber(engagementPerPost, locale) : "-"}</div>
     </div>
   );
 }
@@ -812,47 +925,329 @@ function SignalMini({
 
 function TopPostPanel({
   title,
+  handle,
   post,
   locale,
 }: {
   title: string;
+  handle: string;
   post?: CompetitorComparisonResponse["own"]["top_post"];
   locale: "en" | "ar";
 }) {
+  const initial = (handle || "?")[0].toUpperCase();
+  const displayHandle = handle === "you" ? "you" : `@${handle}`;
+
   return (
-    <div className="rounded-md border border-border bg-surface p-4 shadow-xs">
-      <div className="mb-2 flex items-center justify-between gap-3">
-        <div className="text-sm font-semibold">{title}</div>
-        {post?.media_type ? (
-          <Badge tone="neutral" size="sm">
-            {formatLabel(post.media_type)}
-          </Badge>
-        ) : null}
-      </div>
+    <div className="space-y-1.5">
+      <div className="px-0.5 text-xs font-semibold text-fg-muted">{title}</div>
+
       {post ? (
-        <>
-          <p className="line-clamp-2 text-sm leading-relaxed text-fg-muted">
-            {post.caption || "No caption captured."}
-          </p>
-          <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-fg-subtle">
-            <span>{formatNumber(post.engagement_total || 0, locale)} engagement</span>
-            <span>{formatPercent(post.engagement_rate, 2, locale)} ER</span>
-            <span>{post.published_at ? formatDate(post.published_at, locale) : "No date"}</span>
+        <div className="overflow-hidden rounded-xl border border-border bg-surface shadow-xs">
+          {/* Header */}
+          <div className="flex items-center gap-2.5 px-3 py-2.5">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface-muted text-xs font-bold text-fg ring-1 ring-border">
+              {initial}
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-fg">
+                <svg className="h-3 w-3 shrink-0 text-[#E1306C]" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                </svg>
+                {displayHandle}
+              </div>
+              {post.published_at ? (
+                <div className="text-[10px] text-fg-subtle">
+                  {formatDate(post.published_at, locale)}
+                </div>
+              ) : null}
+            </div>
             {post.url ? (
               <a
                 href={post.url}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-1 text-primary hover:underline"
+                className="ml-auto shrink-0 text-fg-subtle hover:text-fg"
               >
-                Open <ExternalLink className="h-3 w-3" />
+                <ExternalLink className="h-3.5 w-3.5" />
               </a>
             ) : null}
           </div>
-        </>
+
+          {/* Caption */}
+          {post.caption ? (
+            <div className="px-3 pb-2 text-xs leading-relaxed text-fg">
+              <p className="line-clamp-2">{post.caption}</p>
+            </div>
+          ) : null}
+
+          {/* Media — Apify gives us the post thumbnail (displayUrl).
+              For videos/reels, overlay a play badge so it's clear it's a video. */}
+          {post.media_url ? (
+            <a
+              href={post.url || "#"}
+              target="_blank"
+              rel="noreferrer"
+              className="relative block w-full bg-black"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={post.media_url}
+                alt={post.caption || "Post media"}
+                className="max-h-64 w-full object-cover"
+                referrerPolicy="no-referrer"
+                loading="lazy"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).style.display = "none";
+                }}
+              />
+              {(post.media_type === "video" || post.media_type === "reel") && (
+                <span className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                  <span className="flex h-12 w-12 items-center justify-center rounded-full bg-black/60 ring-2 ring-white/80 backdrop-blur-sm">
+                    <Play className="h-5 w-5 fill-white text-white" />
+                  </span>
+                </span>
+              )}
+              {post.media_type ? (
+                <span className="absolute right-2 top-2 rounded-md bg-black/60 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white backdrop-blur-sm">
+                  {post.media_type}
+                </span>
+              ) : null}
+            </a>
+          ) : (
+            <div className="mx-3 mb-2 flex h-28 items-center justify-center rounded-lg bg-surface-muted text-xs text-fg-subtle">
+              No image captured
+            </div>
+          )}
+
+          {/* Metrics */}
+          <div className="divide-y divide-border/60 px-3">
+            <MetricRow label="Public Engagements" value={post.engagement_total} locale={locale} bold />
+            <MetricRow label="Likes" value={post.likes} locale={locale} />
+            <MetricRow label="Comments" value={post.comments} locale={locale} />
+            <MetricRow label="Shares" value={post.shares} locale={locale} />
+          </div>
+        </div>
       ) : (
-        <div className="text-sm text-fg-muted">No top post available in this window.</div>
+        <div className="rounded-xl border border-border bg-surface px-4 py-8 text-center text-sm text-fg-muted">
+          No top post in this window.
+        </div>
       )}
+    </div>
+  );
+}
+
+function MetricRow({
+  label,
+  value,
+  locale,
+  bold,
+}: {
+  label: string;
+  value: number | null | undefined;
+  locale: "en" | "ar";
+  bold?: boolean;
+}) {
+  return (
+    <div className={`flex items-center justify-between py-2 text-xs ${bold ? "font-semibold text-fg" : "text-fg-muted"}`}>
+      <span>{label}</span>
+      <span className={bold ? "text-sm font-bold text-fg" : "font-medium text-fg"}>
+        {value != null ? formatNumber(value, locale) : "—"}
+      </span>
+    </div>
+  );
+}
+
+const FORMAT_COLORS: Record<string, string> = {
+  reel:     "#7c3aed",
+  video:    "#2563eb",
+  carousel: "#0891b2",
+  image:    "#059669",
+  story:    "#d97706",
+  text:     "#64748b",
+  unknown:  "#94a3b8",
+};
+
+function ComparisonCharts({
+  own,
+  topCompetitors,
+  locale,
+}: {
+  own?: CompetitorComparisonResponse["own"];
+  topCompetitors: CompetitorComparisonResponse["competitors"];
+  locale: "en" | "ar";
+}) {
+  // ── Engagement Rate leaderboard ──────────────────────────────────────────
+  const erData = [
+    { name: "You", er: Number(((own?.avg_engagement_rate ?? 0) * 100).toFixed(2)), isYou: true },
+    ...topCompetitors
+      .filter((c) => c.avg_engagement_rate != null)
+      .map((c) => ({
+        name: `@${c.handle}`,
+        er: Number(((c.avg_engagement_rate ?? 0) * 100).toFixed(2)),
+        isYou: false,
+      })),
+  ].sort((a, b) => b.er - a.er);
+
+  // ── Posts / week cadence ─────────────────────────────────────────────────
+  const cadenceData = [
+    { name: "You", ppw: Number((own?.avg_posts_per_week ?? 0).toFixed(1)), isYou: true },
+    ...topCompetitors.map((c) => ({
+      name: `@${c.handle}`,
+      ppw: Number((c.avg_posts_per_week ?? 0).toFixed(1)),
+      isYou: false,
+    })),
+  ].sort((a, b) => b.ppw - a.ppw);
+
+  // ── Format mix (your own content) ────────────────────────────────────────
+  const formatEntries = Object.entries(own?.format_mix ?? {}).filter(([, v]) => v > 0);
+  const formatTotal = formatEntries.reduce((s, [, v]) => s + v, 0);
+  const formatData = formatEntries
+    .sort((a, b) => b[1] - a[1])
+    .map(([fmt, count]) => ({
+      name: formatLabel(fmt),
+      value: count,
+      pct: formatTotal > 0 ? Math.round((count / formatTotal) * 100) : 0,
+      color: FORMAT_COLORS[fmt] ?? FORMAT_COLORS.unknown,
+    }));
+
+  const CHART_YOU    = "#1a7a6e";   // primary teal
+  const CHART_OTHER  = "#94a3b8";   // slate-400
+
+  const tooltipStyle: React.CSSProperties = {
+    background: "#ffffff",
+    border: "1px solid #e2e8f0",
+    borderRadius: 8,
+    fontSize: 11,
+    color: "#1e293b",
+    boxShadow: "0 2px 8px rgba(0,0,0,.12)",
+  };
+
+  return (
+    <div className="grid gap-4 lg:grid-cols-3">
+      {/* 1. ER Leaderboard */}
+      <div className="col-span-1 lg:col-span-1 rounded-md border border-border bg-surface p-4">
+        <div className="mb-3 flex items-center gap-2 text-sm font-semibold">
+          <TrendingUp className="h-4 w-4 text-primary" />
+          Engagement rate ranking
+        </div>
+        {erData.every((d) => d.er === 0) ? (
+          <p className="text-xs text-fg-muted">No engagement rate data yet.</p>
+        ) : (
+          <ResponsiveContainer width="100%" height={Math.max(120, erData.length * 36)}>
+            <BarChart data={erData} layout="vertical" margin={{ left: 4, right: 32, top: 0, bottom: 0 }}>
+              <XAxis type="number" hide domain={[0, "dataMax + 0.5"]} />
+              <YAxis
+                type="category"
+                dataKey="name"
+                width={90}
+                tick={{ fontSize: 11, fill: "var(--color-fg-muted)" }}
+                tickLine={false}
+                axisLine={false}
+              />
+              <Tooltip
+                formatter={(v: number) => [`${v}%`, "Avg ER"]}
+                contentStyle={tooltipStyle}
+                cursor={{ fill: "var(--color-surface-muted)" }}
+              />
+              <Bar dataKey="er" radius={[0, 4, 4, 0]} maxBarSize={18} label={{ position: "right", fontSize: 10, formatter: (v: number) => `${v}%`, fill: "var(--color-fg-muted)" }}>
+                {erData.map((entry, i) => (
+                  <Cell
+                    key={i}
+                    fill={entry.isYou ? CHART_YOU : CHART_OTHER}
+                    opacity={entry.isYou ? 1 : 0.7}
+                  />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        )}
+      </div>
+
+      {/* 2. Posting cadence */}
+      <div className="rounded-md border border-border bg-surface p-4">
+        <div className="mb-3 flex items-center gap-2 text-sm font-semibold">
+          <BarChart3 className="h-4 w-4 text-primary" />
+          Posts per week
+        </div>
+        {cadenceData.every((d) => d.ppw === 0) ? (
+          <p className="text-xs text-fg-muted">No cadence data yet.</p>
+        ) : (
+          <ResponsiveContainer width="100%" height={Math.max(120, cadenceData.length * 36)}>
+            <BarChart data={cadenceData} layout="vertical" margin={{ left: 4, right: 32, top: 0, bottom: 0 }}>
+              <XAxis type="number" hide domain={[0, "dataMax + 0.5"]} />
+              <YAxis
+                type="category"
+                dataKey="name"
+                width={90}
+                tick={{ fontSize: 11, fill: "var(--color-fg-muted)" }}
+                tickLine={false}
+                axisLine={false}
+              />
+              <Tooltip
+                formatter={(v: number) => [`${v} posts/wk`, "Cadence"]}
+                contentStyle={tooltipStyle}
+                cursor={{ fill: "var(--color-surface-muted)" }}
+              />
+              <Bar dataKey="ppw" radius={[0, 4, 4, 0]} maxBarSize={18} label={{ position: "right", fontSize: 10, formatter: (v: number) => `${v}`, fill: "var(--color-fg-muted)" }}>
+                {cadenceData.map((entry, i) => (
+                  <Cell
+                    key={i}
+                    fill={entry.isYou ? CHART_YOU : CHART_OTHER}
+                    opacity={entry.isYou ? 1 : 0.7}
+                  />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        )}
+      </div>
+
+      {/* 3. Your format mix donut */}
+      <div className="rounded-md border border-border bg-surface p-4">
+        <div className="mb-3 flex items-center gap-2 text-sm font-semibold">
+          <Layers3 className="h-4 w-4 text-primary" />
+          Your content mix
+        </div>
+        {formatData.length === 0 ? (
+          <p className="text-xs text-fg-muted">No format data yet.</p>
+        ) : (
+          <div className="flex items-center gap-4">
+            <ResponsiveContainer width={110} height={110}>
+              <PieChart>
+                <Pie
+                  data={formatData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={30}
+                  outerRadius={50}
+                  dataKey="value"
+                  strokeWidth={1}
+                  stroke="var(--color-surface)"
+                >
+                  {formatData.map((entry, i) => (
+                    <Cell key={i} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  formatter={(v: number, _: string, props: { payload?: { pct?: number } }) => [`${v} posts (${props?.payload?.pct ?? 0}%)`, ""]}
+                  contentStyle={tooltipStyle}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+            <div className="flex-1 space-y-1.5">
+              {formatData.map((entry) => (
+                <div key={entry.name} className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-1.5">
+                    <div className="h-2 w-2 rounded-full shrink-0" style={{ background: entry.color }} />
+                    <span className="text-xs text-fg-muted">{entry.name}</span>
+                  </div>
+                  <span className="text-xs font-semibold tabular-nums text-fg">{entry.pct}%</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -873,7 +1268,7 @@ function ManualCard({
       <CardHeader>
         <div>
           <CardTitle>Add manually</CardTitle>
-          <CardDescription>Verify an exact username or profile URL before saving.</CardDescription>
+          <CardDescription>Add the exact public username or profile URL you want to track.</CardDescription>
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -926,7 +1321,7 @@ function ManualCard({
             disabled={!value.handle?.trim()}
             leftIcon={<Check className="h-3.5 w-3.5" />}
           >
-            Verify and approve
+            Track competitor
           </Button>
         </div>
       </CardContent>
@@ -937,6 +1332,7 @@ function ManualCard({
 function DiscoveryCard({
   value,
   loading,
+  result,
   onChange,
   onSubmit,
 }: {
@@ -949,6 +1345,15 @@ function DiscoveryCard({
     limit: number;
   };
   loading: boolean;
+  result?: {
+    candidates: CompetitorCandidate[];
+    warnings: string[];
+    provider_status?: {
+      ok: boolean;
+      reason: string | null;
+      message: string;
+    };
+  };
   onChange: (value: {
     platform: Provider;
     category: string;
@@ -1023,6 +1428,30 @@ function DiscoveryCard({
             Discover
           </Button>
         </div>
+        {result && !result.candidates.length ? (
+          <div
+            className={`rounded-lg border p-3 text-sm ${
+              result.provider_status?.ok === false
+                ? "border-warning/30 bg-warning/10 text-warning"
+                : "border-border bg-surface-muted text-fg-muted"
+            }`}
+          >
+            <div className="font-medium">
+              {result.provider_status?.ok === false
+                ? "Search provider issue"
+                : "No matching public profiles found"}
+            </div>
+            <div className="mt-1 text-xs leading-relaxed text-fg-muted">
+              {result.provider_status?.message ||
+                "Try searching for a wider niche like hiking Lebanon, outdoor Lebanon, or group hikes Lebanon."}
+            </div>
+            {result.warnings.length ? (
+              <div className="mt-2 text-[11px] text-fg-subtle">
+                Technical signal: {result.warnings.slice(0, 3).join(", ")}
+              </div>
+            ) : null}
+          </div>
+        ) : null}
       </CardContent>
     </Card>
   );

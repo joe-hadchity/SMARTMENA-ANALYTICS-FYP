@@ -6,6 +6,14 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import {
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+import {
   Activity,
   AlertCircle,
   ArrowUpRight,
@@ -13,11 +21,14 @@ import {
   Database,
   ExternalLink,
   Globe2,
+  Hash,
   MapPin,
   Mountain,
+  Plus,
   RefreshCcw,
   SearchCheck,
   Sparkles,
+  Trash2,
   Users,
 } from "lucide-react";
 import { useMemo, useState, type ReactNode } from "react";
@@ -33,6 +44,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/Card";
+import { Input } from "@/components/ui/Input";
 import PageHeader from "@/components/ui/PageHeader";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { Select } from "@/components/ui/Select";
@@ -42,6 +54,7 @@ import {
   isBorn2HikeWorkspace,
 } from "@/lib/born2hikeDemo";
 import {
+  hashtagTrendsApi,
   trendIntelligenceApi,
   workspacesApi,
 } from "@/lib/api";
@@ -52,6 +65,8 @@ import type {
   TrendRecommendation,
   TrendScope,
   TrendTopic,
+  HashtagTrendResponse,
+  TrackedHashtag,
 } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -68,6 +83,7 @@ export default function TrendIntelligencePage() {
   const qc = useQueryClient();
   const [scope, setScope] = useState<ScopeFilter>("all");
   const [limit, setLimit] = useState(30);
+  const [newHashtag, setNewHashtag] = useState("");
 
   const workspaceQ = useQuery({
     queryKey: ["workspace", "current"],
@@ -84,6 +100,70 @@ export default function TrendIntelligencePage() {
       }),
     enabled: Boolean(workspaceId),
     staleTime: 30_000,
+  });
+
+  const hashtagQ = useQuery({
+    queryKey: ["hashtag-trends", workspaceId],
+    queryFn: hashtagTrendsApi.list,
+    enabled: Boolean(workspaceId),
+    staleTime: 30_000,
+  });
+
+  const addHashtag = useMutation({
+    mutationFn: (tag: string) =>
+      hashtagTrendsApi.create({ tag, refresh: true, limit: 24 }),
+    onSuccess: (tag) => {
+      setNewHashtag("");
+      qc.invalidateQueries({ queryKey: ["hashtag-trends"] });
+      toast.success(`${tag.display_name} is now tracked`, {
+        description: tag.latest_snapshot
+          ? `${tag.latest_snapshot.sample_size} public posts sampled from Apify.`
+          : "Tracking created. Refresh to collect the first snapshot.",
+      });
+    },
+    onError: (err: unknown) =>
+      toast.error(err instanceof Error ? err.message : "Could not track hashtag."),
+  });
+
+  const searchHashtag = useMutation({
+    mutationFn: hashtagTrendsApi.search,
+    onSuccess: (result) => {
+      if (result.results.length) {
+        toast.success(`Meta found #${result.results[0].tag}`, {
+          description: "You can track it to collect top/recent public media.",
+        });
+      } else {
+        toast.warning("Meta did not return a hashtag match", {
+          description: result.warnings[0] || "Try a more exact hashtag spelling.",
+        });
+      }
+    },
+    onError: (err: unknown) =>
+      toast.error(err instanceof Error ? err.message : "Could not search Meta hashtags."),
+  });
+
+  const refreshHashtag = useMutation({
+    mutationFn: (id: string) => hashtagTrendsApi.refresh(id, { limit: 24 }),
+    onSuccess: (result) => {
+      qc.invalidateQueries({ queryKey: ["hashtag-trends"] });
+      toast.success(`${result.hashtag.display_name} refreshed`, {
+        description: result.hashtag.latest_snapshot
+          ? `${result.hashtag.latest_snapshot.sample_size} public posts sampled.`
+          : "Refresh completed.",
+      });
+    },
+    onError: (err: unknown) =>
+      toast.error(err instanceof Error ? err.message : "Could not refresh hashtag."),
+  });
+
+  const removeHashtag = useMutation({
+    mutationFn: hashtagTrendsApi.remove,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["hashtag-trends"] });
+      toast.success("Hashtag removed");
+    },
+    onError: (err: unknown) =>
+      toast.error(err instanceof Error ? err.message : "Could not remove hashtag."),
   });
 
   const born2Hike = useMutation({
@@ -208,6 +288,22 @@ export default function TrendIntelligencePage() {
           muted={trendQ.isLoading}
         />
       </div>
+
+      <HashtagTrendPanel
+        data={hashtagQ.data}
+        loading={hashtagQ.isLoading}
+        error={hashtagQ.error as Error | null}
+        newHashtag={newHashtag}
+        onNewHashtagChange={setNewHashtag}
+        onAdd={(tag) => addHashtag.mutate(tag)}
+        onSearch={(tag) => searchHashtag.mutate(tag)}
+        onRefresh={(id) => refreshHashtag.mutate(id)}
+        onRemove={(id) => removeHashtag.mutate(id)}
+        adding={addHashtag.isPending}
+        searching={searchHashtag.isPending}
+        refreshingId={refreshHashtag.variables}
+        removingId={removeHashtag.variables}
+      />
 
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1.65fr)_minmax(340px,0.85fr)]">
         <div className="space-y-5">
@@ -372,6 +468,323 @@ function MetricCard({
         {formatNumber(value)}
       </div>
     </Card>
+  );
+}
+
+function HashtagTrendPanel({
+  data,
+  loading,
+  error,
+  newHashtag,
+  onNewHashtagChange,
+  onAdd,
+  onSearch,
+  onRefresh,
+  onRemove,
+  adding,
+  searching,
+  refreshingId,
+  removingId,
+}: {
+  data?: HashtagTrendResponse;
+  loading: boolean;
+  error: Error | null;
+  newHashtag: string;
+  onNewHashtagChange: (value: string) => void;
+  onAdd: (tag: string) => void;
+  onSearch: (tag: string) => void;
+  onRefresh: (id: string) => void;
+  onRemove: (id: string) => void;
+  adding: boolean;
+  searching: boolean;
+  refreshingId?: string;
+  removingId?: string;
+}) {
+  const sortedTags = useMemo(
+    () =>
+      (data?.hashtags || [])
+        .slice()
+        .sort(
+          (a, b) =>
+            Number(b.latest_snapshot?.momentum_score || 0) -
+              Number(a.latest_snapshot?.momentum_score || 0) ||
+            Number(b.latest_snapshot?.avg_engagement || 0) -
+              Number(a.latest_snapshot?.avg_engagement || 0),
+        ),
+    [data?.hashtags],
+  );
+  const topMedia = sortedTags.flatMap((tag) =>
+    (tag.latest_snapshot?.top_media || []).map((media) => ({ ...media, tag: tag.tag })),
+  );
+
+  const submit = () => {
+    const clean = newHashtag.replace(/^#/, "").trim();
+    if (!clean) return;
+    onAdd(clean);
+  };
+  const search = () => {
+    const clean = newHashtag.replace(/^#/, "").trim();
+    if (!clean) return;
+    onSearch(clean);
+  };
+
+  return (
+    <Card padded={false}>
+      <CardHeader>
+        <div>
+          <div className="flex flex-wrap items-center gap-2">
+            <CardTitle>Tracked hashtag momentum</CardTitle>
+            <Badge tone="success" size="sm" dot>
+              {data?.provider_status?.selected === "meta_graph" ? "Meta Graph first" : "Apify fallback"}
+            </Badge>
+          </div>
+          <CardDescription>
+            Search hashtags through Meta Graph when configured, then collect public top/recent media snapshots.
+          </CardDescription>
+        </div>
+        <div className="flex w-full flex-col gap-2 sm:w-auto sm:min-w-[360px] sm:flex-row">
+          <Input
+            value={newHashtag}
+            onChange={(event) => onNewHashtagChange(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") submit();
+            }}
+            leftAddon={<Hash className="h-3.5 w-3.5" />}
+            placeholder="hikinglebanon"
+            className="h-9"
+          />
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={search}
+            loading={searching}
+            leftIcon={<SearchCheck className="h-3.5 w-3.5" />}
+          >
+            Search Meta
+          </Button>
+          <Button
+            size="sm"
+            variant="primary"
+            onClick={submit}
+            loading={adding}
+            leftIcon={<Plus className="h-3.5 w-3.5" />}
+          >
+            Track
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-5">
+        {data?.provider_status ? (
+          <div className="flex flex-wrap items-center gap-2 rounded-lg border border-border bg-surface-muted px-3 py-2 text-xs text-fg-muted">
+            <Badge tone={data.provider_status.meta_ready ? "success" : "warning"} size="sm" dot>
+              Meta {data.provider_status.meta_ready ? "ready" : "not configured"}
+            </Badge>
+            <Badge tone={data.provider_status.apify_ready ? "success" : "warning"} size="sm" dot>
+              Apify {data.provider_status.apify_ready ? "ready" : "not configured"}
+            </Badge>
+            <span>{data.provider_status.message}</span>
+          </div>
+        ) : null}
+
+        {error ? (
+          <div className="rounded-lg border border-warning/30 bg-warning-soft p-3 text-sm text-warning">
+            {error.message}
+          </div>
+        ) : null}
+
+        {loading ? (
+          <PanelSkeleton rows={3} />
+        ) : sortedTags.length ? (
+          <div className="grid gap-3 xl:grid-cols-3">
+            {sortedTags.map((tag) => (
+              <HashtagCard
+                key={tag.id}
+                tag={tag}
+                refreshing={refreshingId === tag.id}
+                removing={removingId === tag.id}
+                onRefresh={() => onRefresh(tag.id)}
+                onRemove={() => onRemove(tag.id)}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-lg border border-dashed border-border bg-surface-muted p-4">
+            <div className="text-sm font-semibold">No tracked hashtags yet</div>
+            <p className="mt-1 text-sm text-fg-muted">
+              Track one of the Born2Hike tags below to collect a real Apify snapshot.
+            </p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {(data?.suggested_hashtags || ["hikinglebanon", "lebanontrails", "hiking"]).map((tag) => (
+                <Button
+                  key={tag}
+                  size="sm"
+                  variant="outline"
+                  onClick={() => onAdd(tag)}
+                  disabled={adding}
+                  leftIcon={<Hash className="h-3.5 w-3.5" />}
+                >
+                  {tag}
+                </Button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {topMedia.length ? (
+          <div>
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <div>
+                <div className="text-sm font-semibold">Top hashtag media examples</div>
+                <div className="text-xs text-fg-muted">
+                  Real public posts from the latest snapshots, sorted by visible engagement.
+                </div>
+              </div>
+              <Badge tone="neutral" size="sm">
+                top {Math.min(3, topMedia.length)}
+              </Badge>
+            </div>
+            <div className="grid gap-3 md:grid-cols-3">
+              {topMedia.slice(0, 3).map((item) => (
+                <a
+                  key={`${item.tag}:${item.id}`}
+                  href={item.url || undefined}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="group overflow-hidden rounded-lg border border-border bg-surface transition-colors hover:bg-surface-muted"
+                >
+                  <div className="aspect-[4/3] bg-surface-muted">
+                    {item.media_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={item.media_url} alt="" className="h-full w-full object-cover" />
+                    ) : (
+                      <div className="grid h-full place-items-center text-fg-muted">
+                        <Hash className="h-6 w-6" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="space-y-2 p-3">
+                    <div className="flex items-center justify-between gap-2 text-xs text-fg-muted">
+                      <span>#{item.tag}</span>
+                      <span>{formatNumber(item.engagement)} eng.</span>
+                    </div>
+                    <p className="line-clamp-2 text-sm leading-relaxed">
+                      {item.caption || item.author || "Public Instagram media"}
+                    </p>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
+        ) : null}
+      </CardContent>
+    </Card>
+  );
+}
+
+function HashtagCard({
+  tag,
+  refreshing,
+  removing,
+  onRefresh,
+  onRemove,
+}: {
+  tag: TrackedHashtag;
+  refreshing: boolean;
+  removing: boolean;
+  onRefresh: () => void;
+  onRemove: () => void;
+}) {
+  const latest = tag.latest_snapshot;
+  const momentum = Number(latest?.momentum_score || 0);
+  const momentumTone = momentum > 5 ? "success" : momentum < -5 ? "danger" : "neutral";
+
+  return (
+    <div className="rounded-lg border border-border bg-surface p-4">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2">
+            <Hash className="h-4 w-4 text-primary" />
+            <div className="truncate font-semibold">{tag.display_name}</div>
+          </div>
+          <div className="mt-1 text-xs text-fg-muted">
+            {tag.last_synced_at ? `Last snapshot ${formatDate(tag.last_synced_at)}` : "No snapshot yet"}
+          </div>
+        </div>
+        <div className="flex items-center gap-1">
+          <Button
+            size="icon-sm"
+            variant="ghost"
+            aria-label={`Refresh ${tag.display_name}`}
+            onClick={onRefresh}
+            loading={refreshing}
+          >
+            <RefreshCcw className="h-3.5 w-3.5" />
+          </Button>
+          <Button
+            size="icon-sm"
+            variant="ghost"
+            aria-label={`Remove ${tag.display_name}`}
+            onClick={onRemove}
+            loading={removing}
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+          </Button>
+        </div>
+      </div>
+
+      <div className="mt-4 grid grid-cols-3 gap-2 text-center">
+        <MiniMetric label="Sample" value={latest?.sample_size ?? 0} />
+        <MiniMetric label="Avg eng." value={Math.round(latest?.avg_engagement || 0)} />
+        <div className="rounded-lg bg-surface-muted p-2">
+          <Badge tone={momentumTone} size="sm">
+            {momentum > 0 ? "+" : ""}
+            {Math.round(momentum)}%
+          </Badge>
+          <div className="mt-1 text-[11px] text-fg-muted">momentum</div>
+        </div>
+      </div>
+
+      <HashtagMomentumChart snapshots={tag.snapshots} />
+
+      {latest?.warnings?.length ? (
+        <div className="mt-3 rounded-md bg-warning-soft px-2 py-1.5 text-[11px] text-warning">
+          {latest.warnings[0]}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function MiniMetric({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="rounded-lg bg-surface-muted p-2">
+      <div className="font-numeric text-sm font-semibold">{formatNumber(value)}</div>
+      <div className="mt-1 text-[11px] text-fg-muted">{label}</div>
+    </div>
+  );
+}
+
+function HashtagMomentumChart({ snapshots }: { snapshots: TrackedHashtag["snapshots"] }) {
+  const rows = snapshots.map((snapshot) => ({
+    date: shortDate(snapshot.captured_at),
+    avg: snapshot.avg_engagement,
+    momentum: snapshot.momentum_score,
+  }));
+  if (!rows.length) {
+    return <div className="mt-4 h-20 rounded-lg bg-surface-muted" />;
+  }
+
+  return (
+    <div className="mt-4 h-24">
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart data={rows}>
+          <XAxis dataKey="date" hide />
+          <YAxis hide />
+          <Tooltip formatter={(value) => formatNumber(Number(value))} />
+          <Line type="monotone" dataKey="avg" stroke="#2563eb" strokeWidth={2} dot={false} />
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
   );
 }
 
@@ -773,6 +1186,16 @@ function sourceLabel(value: string) {
     reference_observations: "References",
   };
   return labels[value] || labelize(value);
+}
+
+function shortDate(input: string | null | undefined) {
+  if (!input) return "";
+  const date = new Date(input);
+  if (!Number.isFinite(date.getTime())) return String(input);
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+  }).format(date);
 }
 
 function humanWarning(value: string) {

@@ -10,6 +10,7 @@ const persistence = require("./trendPersistenceService");
 const ownPostsAdapter = require("./trendSourceAdapters/ownPostsAdapter");
 const braveSearchAdapter = require("./trendSourceAdapters/braveSearchAdapter");
 const youtubeAdapter = require("./trendSourceAdapters/youtubeAdapter");
+const googleTrendsAdapter = require("./trendSourceAdapters/googleTrendsAdapter");
 
 async function buildDashboard({ workspaceId, brandId = null, scope = "all", limit = 80 } = {}) {
   const started = Date.now();
@@ -106,6 +107,7 @@ async function collectSources({ workspaceId, context, scope, limit }) {
   return Promise.all([
     braveSearchAdapter.collect({ workspaceId, context, scope, limit }),
     youtubeAdapter.collect({ workspaceId, context, scope, limit }),
+    googleTrendsAdapter.collect({ workspaceId, context, scope, limit }),
   ]);
 }
 

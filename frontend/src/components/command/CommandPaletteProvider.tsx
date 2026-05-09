@@ -16,6 +16,7 @@ import {
   SunMoon,
   Swords,
   Globe,
+  Users,
   type LucideIcon,
 } from "lucide-react";
 import { useTheme } from "next-themes";
@@ -56,6 +57,7 @@ const NAV_COMMANDS: NavCmd[] = [
   { href: "/calendar", labelKey: "nav.calendar", icon: CalendarDays, shortcut: "G K" },
   { href: "/campaigns", labelKey: "nav.campaigns", icon: Megaphone },
   { href: "/reports/growth", labelKey: "nav.reports", icon: LineChart, shortcut: "G R" },
+  { href: "/audience", labelKey: "nav.audience", icon: Users, shortcut: "G A" },
   { href: "/trend-intelligence", labelKey: "nav.trendIntelligence", icon: Activity, shortcut: "G T" },
   { href: "/competitors", labelKey: "nav.competitors", icon: Swords, shortcut: "G X" },
   { href: "/settings", labelKey: "nav.settings", icon: Settings },

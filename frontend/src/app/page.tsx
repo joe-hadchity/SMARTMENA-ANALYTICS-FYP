@@ -37,8 +37,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/Card";
+import ChannelSummary from "@/components/overview/ChannelSummary";
+import KpiStrip, { type KpiStripItem } from "@/components/overview/KpiStrip";
+import OverviewHero from "@/components/overview/OverviewHero";
 import { EmptyState } from "@/components/ui/EmptyState";
-import KpiCard from "@/components/ui/KpiCard";
+import InsightCaption from "@/components/ui/InsightCaption";
 import PageHeader from "@/components/ui/PageHeader";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useI18n } from "@/i18n/I18nProvider";
@@ -170,6 +173,21 @@ export default function OverviewPage() {
 
   const totals = overview.data?.totals;
   const averages = overview.data?.averages;
+
+  // Channel rows for the new ChannelSummary block. Engagement-rate is
+  // posts > 0 ? engagements / max(reach, 1) — same convention as elsewhere.
+  const channelRows = useMemo(
+    () =>
+      filteredPlatformBreakdown.map((p) => ({
+        provider: p.provider,
+        reach: p.reach,
+        engagements: p.engagements,
+        posts: p.posts,
+        engagementRate:
+          p.reach > 0 ? p.engagements / p.reach : null,
+      })),
+    [filteredPlatformBreakdown],
+  );
   const noData =
     overview.data &&
     totals?.connectedAccounts === 0 &&
@@ -183,7 +201,7 @@ export default function OverviewPage() {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <PageHeader
         eyebrow={t("overview.eyebrow", "Workspace dashboard")}
         title={t("overview.title")}
@@ -315,98 +333,84 @@ export default function OverviewPage() {
         />
       ) : null}
 
-      {/* KPI grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3">
-        <KpiCard
-          label={t("overview.kpi.reach")}
-          value={
-            overview.isLoading
-              ? ""
-              : formatNumber(totals?.reach ?? 0, locale)
-          }
-          loading={overview.isLoading}
-          icon={BarChart3}
-          delta={deltaEngagement}
-          series={engagementValues}
-          hint={t("overview.kpi.reachHint", "People reached across selected sources")}
-          locale={locale}
-        />
-        <KpiCard
-          label={t("overview.kpi.engagements")}
-          value={
-            overview.isLoading
-              ? ""
-              : formatNumber(totals?.engagements ?? 0, locale)
-          }
-          loading={overview.isLoading}
-          icon={LineChart}
-          delta={deltaEngagement}
-          series={engagementValues}
-          hint={t("overview.kpi.engagementsHint", "Reactions, comments, shares and saves")}
-          locale={locale}
-        />
-        <KpiCard
-          label={t("overview.kpi.engagementRate")}
-          value={formatPercent(averages?.engagementRate, 2, locale)}
-          loading={overview.isLoading}
-          icon={TrendingUp}
-          hint={t("overview.kpi.engagementRateHint", "How strongly the audience responds")}
-          locale={locale}
-        />
-        <KpiCard
-          label={t("overview.kpi.roi")}
-          value={
-            averages?.predictedRoi == null
-              ? "-"
-              : `${averages.predictedRoi.toFixed(2)}x`
-          }
-          loading={overview.isLoading}
-          icon={Zap}
-          hint={t("overview.kpi.roiHint", "predicted, ensemble model")}
-          locale={locale}
-        />
+      {/* Editorial hero banner — gradient surface, headline copy, faded period label */}
+      <OverviewHero
+        eyebrow={t("overview.hero.eyebrow", "Performance overview")}
+        headline={
+          deltaEngagement == null || Math.abs(deltaEngagement) < 0.005
+            ? t("overview.hero.headline.flat", "Steady as she goes.")
+            : deltaEngagement > 0
+              ? t("overview.hero.headline.up", "Work smarter, not harder.")
+              : t("overview.hero.headline.down", "Time to recalibrate.")
+        }
+        story={
+          deltaEngagement == null
+            ? t(
+                "overview.hero.story.flat",
+                "Reach is holding steady this period.",
+              )
+            : deltaEngagement >= 0
+              ? t(
+                  "overview.hero.story.up",
+                  "Reach is up — keep the cadence going.",
+                ).replace(
+                  "{pct}",
+                  new Intl.NumberFormat(
+                    locale === "ar" ? "ar-EG" : "en-US",
+                    { style: "percent", maximumFractionDigits: 0 },
+                  ).format(deltaEngagement),
+                )
+              : t(
+                  "overview.hero.story.down",
+                  "Reach is softer than last period — review the trend below.",
+                )
+        }
+        delta={deltaEngagement}
+        deltaLabel={t("overview.hero.deltaLabel", "Reach")}
+        periodLabel={periodLabel(range)}
+      />
 
-        <KpiCard
-          label={t("overview.kpi.accounts")}
-          value={formatNumber(totals?.connectedAccounts ?? 0, locale)}
-          loading={overview.isLoading}
-          icon={Cable}
-          hint={t("overview.kpi.accountsHint", "Active data feeds in this workspace")}
-          locale={locale}
-        />
-        <KpiCard
-          label={t("overview.kpi.posts")}
-          value={formatNumber(totals?.syncedPosts ?? 0, locale)}
-          loading={overview.isLoading}
-          icon={FileText}
-          hint={t("overview.kpi.postsHint", "Campaign evidence available for analysis")}
-          locale={locale}
-        />
-        <KpiCard
-          label={t("overview.kpi.impressions")}
-          value={formatNumber(totals?.impressions ?? 0, locale)}
-          loading={overview.isLoading}
-          icon={BarChart3}
-          hint={t("overview.kpi.impressionsHint", "Total content exposure")}
-          locale={locale}
-        />
-        <KpiCard
-          label={t("overview.kpi.sentiment")}
-          value={
-            averages?.sentimentScore == null
-              ? "-"
-              : averages.sentimentScore.toFixed(2)
-          }
-          loading={overview.isLoading}
-          icon={Smile}
-          hint={t("overview.kpi.sentimentHint", "Arabic + English")}
-          locale={locale}
-        />
-      </div>
+      {/* Combined KPI strip — single card, vertical dividers, inline sparklines */}
+      <KpiStrip
+        loading={overview.isLoading}
+        locale={locale}
+        items={
+          [
+            {
+              label: t("overview.kpi.reach"),
+              value: formatNumber(totals?.reach ?? 0, locale),
+              delta: deltaEngagement,
+              hint: t("overview.kpi.vsLastPeriod", "vs. last period"),
+              series: engagementValues,
+              tone: "primary",
+            },
+            {
+              label: t("overview.kpi.impressions", "Impressions"),
+              value: formatNumber(totals?.impressions ?? 0, locale),
+              delta: deltaEngagement,
+              series: engagementValues,
+              tone: "success",
+            },
+            {
+              label: t("overview.kpi.engagements"),
+              value: formatNumber(totals?.engagements ?? 0, locale),
+              delta: deltaEngagement,
+              series: engagementValues,
+              tone: "warning",
+            },
+            {
+              label: t("overview.kpi.engagementRate", "Eng. rate"),
+              value: formatPercent(averages?.engagementRate, 1, locale),
+              delta: null,
+              tone: "muted",
+            },
+          ] satisfies KpiStripItem[]
+        }
+      />
 
-      {/* Engagement + sentiment */}
+      {/* Engagement chart — full width, dominant */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <Card padded={false} className="lg:col-span-2">
+        <Card padded={false} className="lg:col-span-3">
           <CardHeader>
             <div>
               <CardTitle>{t("overview.chart.engagement")}</CardTitle>
@@ -425,7 +429,15 @@ export default function OverviewPage() {
             {timeseries.isLoading ? (
               <Skeleton className="h-72 w-full" />
             ) : rangedSeries.length > 0 ? (
-              <EngagementLineChart data={rangedSeries} locale={locale} />
+              <>
+                <EngagementLineChart data={rangedSeries} locale={locale} />
+                <InsightCaption className="px-1">
+                  {t(
+                    "overview.chart.insight",
+                    "Most MENA audiences engage between 7-10pm GST — schedule accordingly.",
+                  )}
+                </InsightCaption>
+              </>
             ) : (
               <CardEmpty
                 title={t("common.empty")}
@@ -437,7 +449,15 @@ export default function OverviewPage() {
             )}
           </CardContent>
         </Card>
+      </div>
 
+      {/* Channel summary — one row per platform, brand-coloured top accent */}
+      {!noData ? (
+        <ChannelSummary rows={channelRows} />
+      ) : null}
+
+      {/* Sentiment + platform breakdown + top posts — secondary insights row */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <Card padded={false}>
           <CardHeader>
             <div>
@@ -489,10 +509,7 @@ export default function OverviewPage() {
             )}
           </CardContent>
         </Card>
-      </div>
 
-      {/* Platform breakdown + top posts */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <Card padded={false}>
           <CardHeader>
             <div>
@@ -560,7 +577,7 @@ export default function OverviewPage() {
           </CardContent>
         </Card>
 
-        <Card padded={false} className="lg:col-span-2">
+        <Card padded={false}>
           <CardHeader>
             <div>
               <CardTitle>{t("overview.topPosts")}</CardTitle>
@@ -663,6 +680,19 @@ type WorkspaceSignal = {
   detail: string;
   tone: "good" | "watch" | "risk" | "neutral";
 };
+
+/**
+ * Big faded label that sits behind the hero — current month for 30/90 day
+ * windows, or a "7 DAYS" / "90 DAYS" label otherwise.
+ */
+function periodLabel(range: Range): string {
+  if (range === "7d") return "7 DAYS";
+  if (range === "90d") return "90 DAYS";
+  const now = new Date();
+  return now
+    .toLocaleString("en-US", { month: "short", year: "numeric" })
+    .toUpperCase();
+}
 
 function buildWorkspaceRead({
   connectedAccounts,

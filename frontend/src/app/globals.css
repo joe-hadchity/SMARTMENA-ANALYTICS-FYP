@@ -8,48 +8,56 @@
  * `hsl(var(--token) / <alpha>)` pattern can apply alpha channels.
  */
 :root {
+  /* ── SmartMENA palette: "Cedar & Brass" — Levantine / Gulf-rooted ────────
+   * primary  cedar teal (mosque domes, Lebanon cedars)
+   * accent   brass amber (lanterns, market signage) — uses --warning
+   * danger   terracotta  (earthen, not lab-red)
+   * success  olive-green (date palm, not bootstrap-green)
+   * surfaces warm parchment + pure-white cards
+   */
+
   /* surfaces */
-  --bg:              220 33% 98%;   /* page background */
-  --bg-elevated:     0 0% 100%;     /* nav, modals */
-  --surface:         0 0% 100%;     /* cards */
-  --surface-muted:   220 20% 97%;
-  --surface-hover:   220 25% 96%;
+  --bg:              38 35% 96%;   /* warm parchment page bg */
+  --bg-elevated:     0 0% 100%;    /* nav, modals — pure white */
+  --surface:         0 0% 100%;    /* cards — pure white */
+  --surface-muted:   38 25% 95%;
+  --surface-hover:   38 30% 93%;
 
-  /* borders */
-  --border:          220 20% 92%;
-  --border-strong:   220 16% 85%;
+  /* borders — warm and subtle, shadows do the depth */
+  --border:          38 20% 88%;
+  --border-strong:   38 18% 78%;
 
-  /* text */
-  --fg:              225 25% 11%;
-  --fg-muted:        225 10% 38%;
-  --fg-subtle:       225 10% 55%;
+  /* text — slightly cool ink against warm surfaces */
+  --fg:              210 18% 13%;
+  --fg-muted:        210 10% 38%;
+  --fg-subtle:       210 8% 55%;
   --fg-inverse:      0 0% 100%;
 
-  /* brand primary (SmartMENA blue, tuned down for product surfaces) */
-  --primary:         217 82% 45%;
+  /* primary — deep cedar teal */
+  --primary:         175 50% 28%;
   --primary-fg:      0 0% 100%;
-  --primary-soft:    220 100% 96%;
-  --primary-hover:   217 82% 39%;
+  --primary-soft:    175 30% 92%;
+  --primary-hover:   175 55% 22%;
 
-  /* semantic */
-  --success:         152 70% 40%;
-  --success-soft:    152 76% 95%;
-  --warning:         35 92% 50%;
-  --warning-soft:    42 96% 95%;
-  --danger:          0 78% 55%;
-  --danger-soft:     0 86% 96%;
-  --info:            205 90% 50%;
-  --info-soft:       205 100% 96%;
+  /* semantic — MENA-native palette, no off-the-shelf greens/reds */
+  --success:         150 45% 35%;   /* olive-green */
+  --success-soft:    150 30% 92%;
+  --warning:         38 90% 50%;    /* brass amber — also our warm accent */
+  --warning-soft:    38 80% 92%;
+  --danger:          15 70% 48%;    /* terracotta */
+  --danger-soft:     15 60% 94%;
+  --info:            205 50% 40%;
+  --info-soft:       205 40% 92%;
 
-  --ring:            220 94% 55%;
+  --ring:            175 50% 35%;
 
-  /* data-viz (primary teal-blue story; warm accents for secondary categories) */
-  --viz-1:           220 94% 49%;   /* primary blue */
-  --viz-2:           186 72% 44%;   /* teal */
-  --viz-3:           250 54% 58%;   /* indigo */
-  --viz-4:           25 93% 58%;    /* amber */
-  --viz-5:           340 82% 58%;   /* rose */
-  --viz-6:           160 60% 42%;   /* emerald */
+  /* data-viz — cedar → brass → terracotta → olive → ink-violet → sand-gold */
+  --viz-1:           175 50% 32%;   /* cedar teal */
+  --viz-2:           38 80% 55%;    /* brass */
+  --viz-3:           15 65% 50%;    /* terracotta */
+  --viz-4:           150 40% 38%;   /* olive */
+  --viz-5:           260 35% 50%;   /* ink violet */
+  --viz-6:           45 50% 45%;    /* sand gold */
 
   /* fonts */
   --font-sans:       "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -57,42 +65,43 @@
 }
 
 html.dark {
-  --bg:              228 25% 6%;
-  --bg-elevated:     228 22% 9%;
-  --surface:         228 22% 10%;
-  --surface-muted:   228 22% 12%;
-  --surface-hover:   228 22% 14%;
+  /* ── Dark mode: deep ink-teal, like night sky over the Gulf ───────── */
+  --bg:              200 30% 6%;
+  --bg-elevated:     200 25% 9%;
+  --surface:         200 22% 11%;
+  --surface-muted:   200 20% 14%;
+  --surface-hover:   200 18% 17%;
 
-  --border:          228 16% 18%;
-  --border-strong:   228 14% 26%;
+  --border:          200 15% 22%;
+  --border-strong:   200 12% 30%;
 
-  --fg:              220 20% 96%;
-  --fg-muted:        220 14% 68%;
-  --fg-subtle:       220 12% 52%;
-  --fg-inverse:      225 25% 11%;
+  --fg:              38 25% 96%;     /* warm cream ink for warmth on dark */
+  --fg-muted:        38 12% 70%;
+  --fg-subtle:       38 10% 55%;
+  --fg-inverse:      210 18% 13%;
 
-  --primary:         217 82% 62%;
-  --primary-fg:      0 0% 100%;
-  --primary-soft:    220 60% 16%;
-  --primary-hover:   217 82% 68%;
+  --primary:         175 50% 50%;    /* lifted cedar for contrast */
+  --primary-fg:      210 18% 8%;
+  --primary-soft:    175 40% 18%;
+  --primary-hover:   175 55% 58%;
 
-  --success:         152 65% 48%;
-  --success-soft:    152 50% 14%;
-  --warning:         35 92% 60%;
-  --warning-soft:    42 60% 14%;
-  --danger:          0 78% 62%;
-  --danger-soft:     0 60% 16%;
-  --info:            205 90% 62%;
-  --info-soft:       205 60% 14%;
+  --success:         150 45% 50%;
+  --success-soft:    150 30% 18%;
+  --warning:         38 85% 60%;
+  --warning-soft:    38 50% 18%;
+  --danger:          15 70% 60%;
+  --danger-soft:     15 50% 18%;
+  --info:            205 60% 60%;
+  --info-soft:       205 50% 18%;
 
-  --ring:            220 94% 62%;
+  --ring:            175 50% 55%;
 
-  --viz-1:           220 94% 62%;
-  --viz-2:           186 72% 54%;
-  --viz-3:           250 58% 68%;
-  --viz-4:           25 93% 62%;
-  --viz-5:           340 82% 65%;
-  --viz-6:           160 60% 52%;
+  --viz-1:           175 55% 50%;
+  --viz-2:           38 80% 60%;
+  --viz-3:           15 65% 58%;
+  --viz-4:           150 45% 52%;
+  --viz-5:           260 40% 65%;
+  --viz-6:           45 60% 58%;
 }
 
 html,
@@ -181,10 +190,11 @@ html.color-theme-in-transition * {
            shadow-[inset_0_-1px_0_rgba(0,0,0,0.05)];
   }
 
-  /* Marketing-grade gradient tile used in logo, empty states, illustrations. */
+  /* Marketing-grade gradient tile used in logo, empty states, illustrations.
+     Cedar deep → cedar teal → brass amber. The signature SmartMENA gradient. */
   .gradient-tile {
     background-image:
-      linear-gradient(135deg, hsl(222 34% 18%) 0%, hsl(var(--primary)) 56%, hsl(var(--viz-2)) 100%);
+      linear-gradient(135deg, hsl(175 55% 16%) 0%, hsl(var(--primary)) 55%, hsl(var(--viz-2)) 100%);
   }
   .gradient-text {
     background: linear-gradient(90deg, hsl(var(--primary)) 0%, hsl(var(--viz-2)) 100%);
@@ -260,6 +270,80 @@ html.color-theme-in-transition * {
     );
     background-size: 800px 100%;
     @apply animate-shimmer rounded-md;
+  }
+
+  .audience-leaflet-map.leaflet-container {
+    @apply h-full min-h-[390px] w-full bg-surface-muted font-sans;
+    z-index: 0;
+  }
+
+  .audience-leaflet-map .leaflet-control-zoom {
+    @apply overflow-hidden rounded-md border border-border shadow-sm;
+  }
+
+  .audience-leaflet-map .leaflet-control-zoom a {
+    @apply border-0 bg-surface text-fg transition-colors;
+  }
+
+  .audience-leaflet-map .leaflet-control-zoom a:hover {
+    @apply bg-surface-muted text-fg;
+  }
+
+  .audience-leaflet-map .leaflet-control-attribution {
+    @apply bg-surface/80 text-[10px] text-fg-muted backdrop-blur;
+  }
+
+  .audience-leaflet-map .leaflet-popup-content-wrapper {
+    @apply rounded-md border border-border bg-surface text-fg shadow-lg;
+  }
+
+  .audience-leaflet-map .leaflet-popup-content {
+    @apply m-2 text-xs;
+  }
+
+  .audience-leaflet-map .leaflet-popup-tip {
+    @apply bg-surface;
+  }
+
+  .live-signals-track {
+    animation: live-signals-marquee 42s linear infinite;
+  }
+
+  .live-signals-track:hover {
+    animation-play-state: paused;
+  }
+}
+
+@keyframes live-signals-marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .live-signals-track {
+    animation: none;
+  }
+}
+
+/*
+ * Numeric typography — apply to any metric, stat, or data value.
+ * JetBrains Mono with tabular figures so numbers don't shift width as they update.
+ */
+@layer utilities {
+  .font-numeric {
+    font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+  }
+  /* Every existing tabular-nums usage also gets the mono font automatically. */
+  .tabular-nums {
+    font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
   }
 }
 

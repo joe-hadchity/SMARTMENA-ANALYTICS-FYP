@@ -42,7 +42,7 @@ const emptyProfile: EditableProfile = {
   onboarding_completed: false,
   business_name: "Born2Hike",
   page_name: "Born2Hike",
-  instagram_handle: "born2hike",
+  instagram_handle: "borntohike",
   category: "hiking_group",
   business_type: "community_group",
   location: "Lebanon",
@@ -137,7 +137,7 @@ export default function BusinessProfileSettings({ workspaceId }: Props) {
                 leftAddon="@"
                 value={profile.instagram_handle || ""}
                 onChange={(e) => setField("instagram_handle", e.target.value)}
-                placeholder="born2hike"
+                placeholder="borntohike"
                 disabled={loading}
               />
             </Field>

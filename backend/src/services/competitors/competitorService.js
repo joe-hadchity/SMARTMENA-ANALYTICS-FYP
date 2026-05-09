@@ -2,6 +2,10 @@ const { getSupabase } = require("../../config/supabase");
 const contextService = require("./competitorContextService");
 const normalizer = require("./competitorNormalizerService");
 const braveAdapter = require("./discoveryAdapters/braveCompetitorAdapter");
+const apifyInstagramAdapter = require("./discoveryAdapters/apifyInstagramAdapter");
+const apifyProfileAdapter = require("./discoveryAdapters/apifyProfileAdapter");
+const { syncOwnInstagram } = require("../metaInstagramSyncService");
+const env = require("../../config/env");
 const {
   isValidHandle,
   normalizeHandle,
@@ -89,6 +93,7 @@ async function discover(workspaceId, input = {}) {
     context,
     limit: input.limit || 12,
   });
+  const providerStatus = providerStatusFromWarnings(adapterResult.warnings || []);
   const normalized = normalizer
     .normalizeCandidates(adapterResult.candidates, context)
     .filter((candidate) => candidate.relevance_score >= 18)
@@ -99,9 +104,47 @@ async function discover(workspaceId, input = {}) {
     generated_at: new Date().toISOString(),
     source: "brave_search",
     real_data_only: true,
+    provider_status: providerStatus,
     context,
     candidates: saved,
     warnings: adapterResult.warnings || [],
+  };
+}
+
+function providerStatusFromWarnings(warnings = []) {
+  if (!warnings.length) {
+    return { ok: true, reason: null, message: "Search provider returned usable results." };
+  }
+
+  if (warnings.some((warning) => warning.includes("missing_api_key"))) {
+    return {
+      ok: false,
+      reason: "missing_api_key",
+      message: "Brave Search API key is missing, so competitor discovery cannot fetch real web results.",
+    };
+  }
+
+  if (warnings.some((warning) => warning.includes("brave_web_failed:402"))) {
+    return {
+      ok: false,
+      reason: "quota_or_billing_required",
+      message:
+        "Brave Search rejected the request with 402. Check the Brave API plan, billing, quota, or key status.",
+    };
+  }
+
+  if (warnings.every((warning) => warning.startsWith("brave_web_failed:"))) {
+    return {
+      ok: false,
+      reason: "provider_unavailable",
+      message: `Brave Search did not return usable results (${warnings.join(", ")}).`,
+    };
+  }
+
+  return {
+    ok: true,
+    reason: "partial_warnings",
+    message: `Search completed with warnings: ${warnings.join(", ")}`,
   };
 }
 
@@ -120,16 +163,8 @@ async function manualAdd(workspaceId, input = {}) {
     location: input.region,
     keywords: input.tags,
   });
-  const verification = await braveAdapter.verifyHandle({ platform, handle, context });
-  if (!verification.verified) {
-    const err = new Error("Could not verify this public profile from search evidence.");
-    err.status = 422;
-    err.details = {
-      warnings: verification.warnings,
-      hint: "Check the username/page name or try pasting the full profile URL.",
-    };
-    throw err;
-  }
+  const verification = await verifyManualHandle({ platform, handle, context });
+  const evidence = manualEvidenceFor({ platform, handle, input, verification });
 
   const candidate = normalizer.normalizeCandidate(
     {
@@ -141,8 +176,12 @@ async function manualAdd(workspaceId, input = {}) {
       industry: input.industry || context.category || null,
       tags: input.tags || context.hashtags || [],
       source: "manual",
-      evidence: verification.evidence.flatMap((item) => item.evidence || []),
-      raw_payload: { verification },
+      evidence,
+      raw_payload: {
+        verification,
+        provider_status: providerStatusFromWarnings(verification.warnings || []),
+        manual_profile_url: input.profile_url || profileUrlFor(platform, handle),
+      },
       metrics: verification.evidence[0]?.metrics || {},
     },
     context,
@@ -152,8 +191,39 @@ async function manualAdd(workspaceId, input = {}) {
   return {
     competitor: approved.competitor,
     candidate: approved.candidate,
-    warnings: verification.warnings || [],
+    posts_imported: approved.posts_imported || 0,
+    metrics_snapshots_inserted: approved.metrics_snapshots_inserted || 0,
+    warnings: [...(verification.warnings || []), ...(approved.warnings || [])],
   };
+}
+
+async function verifyManualHandle({ platform, handle, context }) {
+  try {
+    return await braveAdapter.verifyHandle({ platform, handle, context });
+  } catch (err) {
+    return {
+      verified: false,
+      evidence: [],
+      warnings: [`manual_verification_skipped:${err.message || "search_failed"}`],
+    };
+  }
+}
+
+function manualEvidenceFor({ platform, handle, input, verification }) {
+  const searchEvidence = (verification.evidence || []).flatMap((item) => item.evidence || []);
+  if (searchEvidence.length) return searchEvidence;
+
+  return [
+    {
+      source: "manual_profile_input",
+      query: null,
+      title: input.display_name || `@${handle}`,
+      snippet:
+        "User-provided public profile. Search evidence was unavailable, so SmartMENA saved the profile for tracking without inventing metrics.",
+      url: input.profile_url || profileUrlFor(platform, handle),
+      published_at: null,
+    },
+  ];
 }
 
 async function approveCandidate(workspaceId, candidateId) {
@@ -183,13 +253,16 @@ async function approveCandidate(workspaceId, candidateId) {
       .single();
     if (error) throw wrapSchemaError(error);
     await captureAccountSnapshot(competitor, candidate);
+    const refresh = await safeRefreshApprovedCompetitor(workspaceId, competitor);
     return {
       competitor,
       candidate: {
         ...candidate,
         status: "approved",
         approved_competitor_id: competitor.id,
+        metadata: competitor.metadata || candidate.metadata || {},
       },
+      ...refresh,
     };
   }
 
@@ -227,6 +300,7 @@ async function approveCandidate(workspaceId, candidateId) {
     approved_competitor_id: competitor.id,
   });
   await captureAccountSnapshot(competitor, candidate);
+  const refresh = await safeRefreshApprovedCompetitor(workspaceId, competitor);
 
   return {
     competitor,
@@ -235,7 +309,25 @@ async function approveCandidate(workspaceId, candidateId) {
       status: "approved",
       approved_competitor_id: competitor.id,
     },
+    ...refresh,
   };
+}
+
+async function safeRefreshApprovedCompetitor(workspaceId, competitor) {
+  try {
+    const result = await refreshCompetitor(workspaceId, competitor.id);
+    return {
+      posts_imported: result.posts_imported || 0,
+      metrics_snapshots_inserted: result.metrics_snapshots_inserted || 0,
+      warnings: result.warnings || [],
+    };
+  } catch (err) {
+    return {
+      posts_imported: 0,
+      metrics_snapshots_inserted: 0,
+      warnings: [`auto_refresh_failed:${err.message || "unknown_error"}`],
+    };
+  }
 }
 
 async function rejectCandidate(workspaceId, candidateId) {
@@ -276,29 +368,56 @@ async function refreshCompetitor(workspaceId, competitorId) {
     throw err;
   }
 
+  const apifyResult = await apifyInstagramAdapter.fetchProfilePosts({
+    platform: competitor.platform,
+    handle: competitor.handle,
+    limit: undefined,
+  });
+  const profileResult = await apifyProfileAdapter.fetchProfileInfo({
+    platform: competitor.platform,
+    handle: competitor.handle,
+  });
+  const stored = await storeApifyCompetitorPosts(supabase, competitor, apifyResult.posts || []);
+  const accountSnapshot = await captureApifyAccountSnapshot(supabase, competitor, stored, profileResult.profile);
+
   const context = await contextService.buildContext(workspaceId, {
     platform: competitor.platform,
     category: competitor.industry,
     location: competitor.region,
     keywords: competitor.tags,
   });
-  const verification = await braveAdapter.verifyHandle({
+  const verification = await verifyManualHandle({
     platform: competitor.platform,
     handle: competitor.handle,
     context,
   });
   const evidence = verification.evidence.flatMap((item) => item.evidence || []);
-  const candidateLike = {
-    evidence_json: evidence,
-    raw_payload_json: { verification },
-  };
-  const snapshot = await captureAccountSnapshot(competitor, candidateLike);
+  const warnings = [
+    ...(apifyResult.warnings || []),
+    ...(profileResult.warnings || []),
+    ...(verification.warnings || []),
+  ];
   const { data: updated, error: updateError } = await supabase
     .from("competitor_accounts")
     .update({
       last_scraped_at: new Date().toISOString(),
       metadata: {
         ...(competitor.metadata || {}),
+        last_apify_refresh: {
+          provider: "apify",
+          actor_id: apifyResult.actor_id || null,
+          run_id: apifyResult.run_id || null,
+          dataset_id: apifyResult.dataset_id || null,
+          posts_imported: stored.posts.length,
+          metrics_snapshots_inserted: stored.snapshots.length,
+          warnings: apifyResult.warnings || [],
+        },
+        last_profile_refresh: {
+          provider: "apify",
+          actor_id: profileResult.actor_id || null,
+          followers_count: profileResult.profile?.followers_count || null,
+          warnings: profileResult.warnings || [],
+        },
         last_verification: {
           verified: verification.verified,
           evidence_count: evidence.length,
@@ -312,9 +431,153 @@ async function refreshCompetitor(workspaceId, competitorId) {
   if (updateError) throw wrapSchemaError(updateError);
   return {
     competitor: updated,
-    snapshot,
-    warnings: verification.warnings || [],
+    snapshot: accountSnapshot,
+    posts_imported: stored.posts.length,
+    metrics_snapshots_inserted: stored.snapshots.length,
+    warnings,
   };
+}
+
+async function refreshAllCompetitors(workspaceId) {
+  const competitors = await listApproved(workspaceId);
+
+  // Run competitor refreshes and own-profile sync in parallel.
+  // Own posts must come from Instagram Graph API; Apify is competitors-only.
+  const ownSyncTask = env.META_INSTAGRAM_ENABLED
+    ? syncOwnInstagram(workspaceId, { limit: 50 }).catch((err) => ({
+        posts_imported: 0,
+        warnings: [`meta_sync_failed:${err.message}`],
+      }))
+    : Promise.resolve({
+        posts_imported: 0,
+        warnings: ["meta_sync_skipped:missing_META_INSTAGRAM_ACCESS_TOKEN"],
+      });
+
+  const [competitorResults, selfResult] = await Promise.all([
+    Promise.all(
+      competitors.map((competitor) =>
+        safeRefreshApprovedCompetitor(workspaceId, competitor).then((result) => ({
+          competitor_id: competitor.id,
+          handle: competitor.handle,
+          platform: competitor.platform,
+          ...result,
+        })),
+      ),
+    ),
+    ownSyncTask,
+  ]);
+
+  return {
+    refreshed_count: competitorResults.length,
+    posts_imported: sumNumbers(competitorResults.map((row) => row.posts_imported)),
+    metrics_snapshots_inserted: sumNumbers(
+      competitorResults.map((row) => row.metrics_snapshots_inserted),
+    ),
+    results: competitorResults,
+    warnings: competitorResults.flatMap((row) => row.warnings || []),
+    self_scrape: selfResult
+      ? { posts_imported: selfResult.posts_imported, warnings: selfResult.warnings || [] }
+      : null,
+  };
+}
+
+async function storeApifyCompetitorPosts(supabase, competitor, posts) {
+  if (!posts.length) return { posts: [], snapshots: [] };
+  const postRows = posts.map((post) => ({
+    competitor_account_id: competitor.id,
+    platform_post_id: post.platform_post_id,
+    caption: post.caption,
+    caption_lang: detectCaptionLang(post.caption),
+    media_type: post.media_type,
+    media_url: post.media_url || null,
+    permalink: post.permalink,
+    posted_at: post.posted_at,
+    hashtags: post.hashtags || [],
+    raw_payload: post.raw_payload || {},
+  }));
+
+  const { data: savedPosts, error } = await supabase
+    .from("competitor_posts")
+    .upsert(postRows, { onConflict: "competitor_account_id,platform_post_id" })
+    .select();
+  if (error) throw wrapSchemaError(error);
+
+  const byPlatformPostId = new Map((savedPosts || []).map((row) => [row.platform_post_id, row]));
+  const snapshotRows = posts
+    .map((post) => {
+      const saved = byPlatformPostId.get(post.platform_post_id);
+      if (!saved) return null;
+      const metrics = post.metrics || {};
+      const engagement = engagementTotal(metrics);
+      const followers = nullableNumber(metrics.followers_count);
+      return {
+        competitor_post_id: saved.id,
+        competitor_account_id: competitor.id,
+        scope: "post",
+        followers_count: followers,
+        likes: nullableNumber(metrics.likes),
+        comments: nullableNumber(metrics.comments),
+        shares: nullableNumber(metrics.shares),
+        saves: nullableNumber(metrics.saves),
+        impressions: nullableNumber(metrics.impressions),
+        reach: nullableNumber(metrics.reach),
+        video_views: nullableNumber(metrics.video_views),
+        engagement_rate:
+          followers && followers > 0
+            ? Number((engagement / followers).toFixed(5))
+            : null,
+        metadata: {
+          source: "apify",
+          provider: "apify",
+          actor_id: post.raw_payload?.actor_id || null,
+        },
+      };
+    })
+    .filter(Boolean);
+
+  if (!snapshotRows.length) return { posts: savedPosts || [], snapshots: [] };
+  const { data: snapshots, error: snapshotError } = await supabase
+    .from("competitor_metrics_snapshots")
+    .insert(snapshotRows)
+    .select();
+  if (snapshotError) throw wrapSchemaError(snapshotError);
+  return { posts: savedPosts || [], snapshots: snapshots || [] };
+}
+
+async function captureApifyAccountSnapshot(supabase, competitor, stored, profileData = null) {
+  const followerValues = [];
+
+  // Prefer profile scraper data for followers
+  if (profileData?.followers_count != null && Number.isFinite(Number(profileData.followers_count))) {
+    followerValues.push(Number(profileData.followers_count));
+  }
+
+  // Fall back to post-level metrics
+  (stored.snapshots || [])
+    .map((row) => row.followers_count)
+    .filter((value) => value != null && Number.isFinite(Number(value)))
+    .forEach((value) => followerValues.push(Number(value)));
+
+  if (!followerValues.length) return null;
+
+  const followers = Math.max(...followerValues);
+  const { data, error } = await supabase
+    .from("competitor_metrics_snapshots")
+    .insert({
+      competitor_account_id: competitor.id,
+      scope: "account",
+      followers_count: followers,
+      metadata: {
+        source: "apify",
+        provider: "apify",
+        posts_imported: stored.posts.length,
+        profile_source: profileData ? "apify_profile" : "post_metrics",
+      },
+    })
+    .select()
+    .single();
+  if (error) throw wrapSchemaError(error);
+  return data;
 }
 
 async function upsertCandidates(workspaceId, candidates) {
@@ -410,13 +673,35 @@ async function latestSnapshots(accountIds) {
     .from("competitor_metrics_snapshots")
     .select("*")
     .in("competitor_account_id", accountIds)
+    .eq("scope", "account")
     .order("captured_at", { ascending: false });
   if (error) return new Map();
   const map = new Map();
   for (const row of data || []) {
+    if (!isTrustedAccountSnapshot(row)) continue;
     if (!map.has(row.competitor_account_id)) map.set(row.competitor_account_id, row);
   }
   return map;
+}
+
+function isTrustedAccountSnapshot(snapshot = {}) {
+  if (snapshot.followers_count == null) return false;
+  if (isMockCompetitorPayload(snapshot.metadata)) return false;
+  const source = String(
+    snapshot.metadata?.source ||
+      snapshot.metadata?.provider ||
+      snapshot.metadata?.integration ||
+      "",
+  ).toLowerCase();
+  return [
+    "apify",
+    "apify_instagram",
+    "instagram_graph",
+    "meta_graph",
+    "business_discovery",
+    "ad_library",
+    "instagram_public_scraper",
+  ].includes(source);
 }
 
 async function listAccountBackedCandidates(workspaceId, { status = "pending", limit = 50 } = {}) {
@@ -643,7 +928,9 @@ async function comparison(workspaceId, { window_days: windowDays = 30 } = {}) {
     warnings: [
       ...(own.post_count ? [] : ["own_posts_empty:no_recent_synced_posts"]),
       ...(competitors.length ? [] : ["competitors_empty:no_approved_competitors"]),
-      ...(competitorSummary.post_count ? [] : ["competitor_posts_empty:no_recent_competitor_posts"]),
+      ...(competitorSummary.post_count
+        ? []
+        : ["competitor_posts_unavailable:no_trusted_real_competitor_post_source"]),
     ],
   };
 }
@@ -659,7 +946,7 @@ async function loadOwnComparisonPosts(supabase, workspaceId, since) {
 async function loadSyncedOwnPosts(supabase, workspaceId, since) {
   const { data: posts, error } = await supabase
     .from("synced_posts")
-    .select("id, post_type, caption, permalink, posted_at, fetched_at")
+    .select("*")
     .eq("workspace_id", workspaceId)
     .gte("posted_at", since)
     .order("posted_at", { ascending: false })
@@ -675,6 +962,7 @@ async function loadSyncedOwnPosts(supabase, workspaceId, since) {
       caption: post.caption,
       url: post.permalink,
       published_at: post.posted_at || post.fetched_at,
+      media_url: resolveMediaUrl(post),
       metrics: metrics.get(post.id) || {},
     }),
   );
@@ -690,7 +978,7 @@ async function loadSocialOwnPosts(supabase, workspaceId, since) {
   const accountIds = accounts.map((account) => account.id);
   const { data: posts, error } = await supabase
     .from("social_posts")
-    .select("id, social_account_id, caption, media_type, permalink, published_at, created_at")
+    .select("*")
     .in("social_account_id", accountIds)
     .gte("published_at", since)
     .order("published_at", { ascending: false })
@@ -712,8 +1000,24 @@ async function loadSocialOwnPosts(supabase, workspaceId, since) {
       caption: post.caption,
       url: post.permalink,
       published_at: post.published_at || post.created_at,
+      media_url: resolveMediaUrl(post),
       metrics: metrics.get(post.id) || {},
     }),
+  );
+}
+
+function resolveMediaUrl(post) {
+  if (!post) return null;
+  const meta = post.metadata_json || {};
+  const raw = meta.raw_payload || post.raw_payload || {};
+  return (
+    post.media_url ||
+    meta.media_url ||
+    raw.displayUrl ||
+    raw.imageUrl ||
+    raw.images?.[0]?.url ||
+    raw.thumbnailUrl ||
+    null
   );
 }
 
@@ -740,6 +1044,13 @@ async function loadCompetitorComparisonRows(supabase, workspaceId, since) {
   for (const post of posts || []) {
     const group = grouped.get(post.competitor_account_id);
     if (!group) continue;
+    if (!isTrustedCompetitorPost(group.account, post)) continue;
+    const mediaUrl = post.media_url
+      || post.raw_payload?.displayUrl
+      || post.raw_payload?.imageUrl
+      || post.raw_payload?.images?.[0]?.url
+      || post.raw_payload?.thumbnailUrl
+      || null;
     group.posts.push(
       comparisonRow({
         id: post.id,
@@ -748,11 +1059,53 @@ async function loadCompetitorComparisonRows(supabase, workspaceId, since) {
         caption: post.caption,
         url: post.permalink,
         published_at: post.posted_at || post.fetched_at,
+        media_url: mediaUrl,
         metrics: metrics.get(post.id) || {},
       }),
     );
   }
   return [...grouped.values()];
+}
+
+function isTrustedCompetitorPost(account = {}, post = {}) {
+  if (isMockCompetitorPayload(post.raw_payload) || /^mock_/i.test(post.platform_post_id || "")) {
+    return false;
+  }
+
+  if (["business_discovery", "ad_library"].includes(account.source)) {
+    return true;
+  }
+
+  const payload = post.raw_payload || {};
+  const source = String(
+    payload.source ||
+      payload.provider ||
+      payload.collector ||
+      payload.scraper ||
+      payload.integration ||
+      "",
+  ).toLowerCase();
+
+  return [
+    "apify",
+    "apify_instagram",
+    "instagram_graph",
+    "meta_graph",
+    "business_discovery",
+    "ad_library",
+    "instagram_public_scraper",
+  ].includes(source);
+}
+
+function isMockCompetitorPayload(payload = {}) {
+  const text = JSON.stringify(payload || {}).toLowerCase();
+  return (
+    Boolean(payload?.mock) ||
+    Boolean(payload?.is_mock) ||
+    text.includes('"mock":true') ||
+    text.includes("smartmena demo") ||
+    text.includes("mock_meta")
+  );
 }
 
 async function latestPostMetrics(
@@ -778,7 +1131,7 @@ async function latestPostMetrics(
   return byPost;
 }
 
-function comparisonRow({ id, source, media_type, caption, url, published_at, metrics }) {
+function comparisonRow({ id, source, media_type, caption, url, published_at, media_url, metrics }) {
   const normalized = normalizeMetrics(metrics || {});
   return {
     id,
@@ -787,6 +1140,7 @@ function comparisonRow({ id, source, media_type, caption, url, published_at, met
     caption: caption || null,
     url: url || null,
     published_at: published_at || null,
+    media_url: media_url || null,
     metrics: normalized,
     engagement_total: engagementTotal(normalized),
   };
@@ -864,6 +1218,10 @@ function summarizeRows(rows, { label }) {
           published_at: topPost.published_at,
           engagement_total: topPost.engagement_total,
           engagement_rate: topPost.metrics?.engagement_rate ?? null,
+          media_url: topPost.media_url ?? null,
+          likes: topPost.metrics?.likes ?? null,
+          comments: topPost.metrics?.comments ?? null,
+          shares: topPost.metrics?.shares ?? null,
         }
       : null,
   };
@@ -903,7 +1261,9 @@ function buildBenchmark({ own, competitorSummary, competitors, windowDays }) {
 
   const evidenceCount = sumNumbers(competitors.map((row) => row.evidence_count));
   const accountsWithPosts = competitors.filter((row) => row.post_count > 0).length;
-  const accountsWithSnapshots = competitors.filter((row) => row.latest_snapshot).length;
+  const accountsWithSnapshots = competitors.filter(
+    (row) => row.latest_snapshot?.followers_count != null,
+  ).length;
   const qualityScore = Math.min(
     100,
     Math.round(
@@ -955,7 +1315,7 @@ function comparisonOpportunities(own, competitorSummary, competitors, benchmark)
       priority: "high",
       title: "Improve comparison evidence",
       detail:
-        "Refresh approved competitors and sync your own account so the benchmark is based on recent posts, not only profile evidence.",
+        "Connect a real competitor post source such as Meta Business Discovery or Apify, then refresh competitors so ER, posts, and engagement are based on captured public posts.",
     });
   }
   if (benchmark.engagement_winner === "competitors") {
@@ -1009,7 +1369,7 @@ function comparisonRecommendations(own, competitorSummary, bestCompetitor) {
     notes.push("Sync your own social posts first so the comparison has your real performance baseline.");
   }
   if (!competitorSummary.post_count) {
-    notes.push("Refresh approved competitors to capture recent public evidence before comparing content output.");
+    notes.push("Competitor ER, engagement, and post counts are unavailable until a real competitor post source is connected.");
   }
   if (own.avg_engagement_rate != null && competitorSummary.avg_engagement_rate != null) {
     if (own.avg_engagement_rate >= competitorSummary.avg_engagement_rate) {
@@ -1138,6 +1498,15 @@ function truncate(text, max) {
   return value.length > max ? `${value.slice(0, max - 1)}...` : value;
 }
 
+function detectCaptionLang(text = "") {
+  const value = String(text || "");
+  const arabicChars = (value.match(/[\u0600-\u06ff]/g) || []).length;
+  const latinChars = (value.match(/[a-z]/gi) || []).length;
+  if (arabicChars && latinChars) return "mixed";
+  if (arabicChars) return "ar";
+  return "en";
+}
+
 function engagementTotal(metrics = {}) {
   return (
     numberOrZero(metrics.likes) +
@@ -1165,6 +1534,7 @@ module.exports = {
   listApproved,
   listCandidates,
   manualAdd,
+  refreshAllCompetitors,
   refreshCompetitor,
   rejectCandidate,
   removeCompetitor,

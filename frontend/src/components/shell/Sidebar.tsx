@@ -10,17 +10,21 @@ import {
   ChevronsRight,
   Activity,
   FileText,
+  Inbox,
   LineChart,
+  LogOut,
   Megaphone,
   Plus,
   Settings,
   Swords,
   User,
+  Users,
   type LucideIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { useAuth } from "@/components/auth/AuthProvider";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -48,26 +52,33 @@ type NavSection = {
 
 const SECTIONS: NavSection[] = [
   {
-    titleKey: "nav.section.monitor",
+    titleKey: "nav.section.today",
     items: [
       { href: "/", labelKey: "nav.overview", icon: BarChart3, shortcut: "G O" },
-      { href: "/connections", labelKey: "nav.connections", icon: Cable, shortcut: "G C" },
-      { href: "/posts", labelKey: "nav.posts", icon: FileText, shortcut: "G P" },
+      { href: "/calendar", labelKey: "nav.calendar", icon: CalendarDays, shortcut: "G K" },
+      { href: "/inbox", labelKey: "nav.inbox", icon: Inbox, shortcut: "G I" },
     ],
   },
   {
-    titleKey: "nav.section.grow",
+    titleKey: "nav.section.publish",
     items: [
-      { href: "/calendar", labelKey: "nav.calendar", icon: CalendarDays, shortcut: "G K" },
+      { href: "/posts", labelKey: "nav.posts", icon: FileText, shortcut: "G P" },
       { href: "/campaigns", labelKey: "nav.campaigns", icon: Megaphone },
+    ],
+  },
+  {
+    titleKey: "nav.section.analyze",
+    items: [
       { href: "/reports/growth", labelKey: "nav.reports", icon: LineChart, shortcut: "G R" },
+      { href: "/audience", labelKey: "nav.audience", icon: Users, shortcut: "G A" },
       { href: "/trend-intelligence", labelKey: "nav.trendIntelligence", icon: Activity, shortcut: "G T" },
       { href: "/competitors", labelKey: "nav.competitors", icon: Swords, shortcut: "G X" },
     ],
   },
   {
-    titleKey: "nav.section.workspace",
+    titleKey: "nav.section.connect",
     items: [
+      { href: "/connections", labelKey: "nav.connections", icon: Cable, shortcut: "G C" },
       { href: "/settings", labelKey: "nav.settings", icon: Settings },
     ],
   },
@@ -166,7 +177,7 @@ export default function Sidebar({
                       "relative group flex items-center gap-2.5 rounded-md text-sm transition-colors",
                       collapsed ? "justify-center h-9 w-9 mx-auto" : "px-2.5 py-1.5",
                       active
-                        ? "bg-surface-muted text-fg font-semibold shadow-[inset_0_0_0_1px_hsl(var(--border))]"
+                        ? "bg-primary/10 text-primary font-semibold"
                         : "text-fg-muted hover:text-fg hover:bg-surface-muted",
                     )}
                   >
@@ -322,6 +333,10 @@ function WorkspaceSwitcher({ collapsed }: { collapsed: boolean }) {
 
 function UserMenu({ collapsed }: { collapsed: boolean }) {
   const { t } = useI18n();
+  const auth = useAuth();
+  const name = auth.user?.name || "SmartMENA user";
+  const email = auth.user?.email || "";
+
   const trigger = (
     <button
       type="button"
@@ -337,10 +352,10 @@ function UserMenu({ collapsed }: { collapsed: boolean }) {
       {!collapsed ? (
         <div className="min-w-0 text-start flex-1">
           <div className="text-xs font-medium leading-tight truncate">
-            {t("user.demo", "Demo founder")}
+            {name}
           </div>
           <div className="text-[10px] text-fg-subtle leading-tight truncate">
-            beta access
+            {email || "Signed in"}
           </div>
         </div>
       ) : null}
@@ -354,7 +369,7 @@ function UserMenu({ collapsed }: { collapsed: boolean }) {
           <Tooltip>
             <TooltipTrigger asChild>{trigger}</TooltipTrigger>
             <TooltipContent side="right">
-              {t("user.demo", "Demo founder")}
+              {name}
             </TooltipContent>
           </Tooltip>
         ) : (
@@ -370,15 +385,12 @@ function UserMenu({ collapsed }: { collapsed: boolean }) {
             {t("nav.settings")}
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <a
-            href="https://supabase.com"
-            target="_blank"
-            rel="noreferrer"
-          >
-            <Building2 className="h-4 w-4" />
-            {t("user.docs", "Docs")}
-          </a>
+        <DropdownMenuItem
+          onSelect={() => auth.signOut()}
+          className="text-danger focus:text-danger"
+        >
+          <LogOut className="h-4 w-4" />
+          Sign out
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

@@ -50,6 +50,7 @@ router.get(
 
 router.post("/candidates/:id/approve", asyncHandler(controller.approveCandidate));
 router.post("/candidates/:id/reject", asyncHandler(controller.rejectCandidate));
+router.post("/refresh-all", asyncHandler(controller.refreshAllCompetitors));
 router.post("/:id/refresh", asyncHandler(controller.refreshCompetitor));
 router.delete("/:id", asyncHandler(controller.removeCompetitor));
 

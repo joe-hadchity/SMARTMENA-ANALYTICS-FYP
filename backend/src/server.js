@@ -5,6 +5,9 @@ const { isEnabled: isLLMEnabled } = require("./services/llm");
 const {
   startPublishWorker,
 } = require("./services/scheduledPostService");
+const {
+  startHashtagTrendWorker,
+} = require("./services/hashtags/hashtagTrendWorker");
 
 app.listen(env.PORT, () => {
   logger.info(`SmartMENA backend listening on http://localhost:${env.PORT}`);
@@ -24,5 +27,7 @@ app.listen(env.PORT, () => {
   if (process.env.SMARTMENA_DISABLE_WORKERS !== "1") {
     startPublishWorker({ intervalMs: 60_000 });
     logger.info("scheduledPostService: publish worker started (60s cadence)");
+    startHashtagTrendWorker();
+    logger.info("hashtagTrendWorker: weekly hashtag snapshot worker started");
   }
 });

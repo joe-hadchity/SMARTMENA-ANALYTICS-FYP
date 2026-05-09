@@ -11,6 +11,8 @@ const db = require("./dbService");
 
 const TABLE = "workspaces";
 const DEMO_SLUG = "demo";
+const MEMBERSHIP_TABLE =
+  process.env.WORKSPACE_MEMBERSHIP_TABLE || "workspace_memberships";
 
 function normalizeSlug(input) {
   return String(input || "")
@@ -23,6 +25,40 @@ function normalizeSlug(input) {
 
 async function listWorkspaces() {
   return db.list(TABLE, { orderBy: "created_at", ascending: false });
+}
+
+async function listWorkspacesForUser(userId) {
+  const supabase = db.getSupabase();
+  if (!supabase) {
+    const err = new Error(
+      "Supabase is not configured. Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.",
+    );
+    err.status = 503;
+    throw err;
+  }
+
+  const { data, error } = await supabase
+    .from(MEMBERSHIP_TABLE)
+    .select("role, workspace:workspaces(*)")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    const err = new Error(
+      /workspace_members/i.test(error.message || "")
+        ? "Authentication membership schema is not installed. Apply the auth/workspace membership migration first."
+        : error.message || "Failed to list user workspaces",
+    );
+    err.status = /workspace_memberships?|workspace_members/i.test(error.message || "")
+      ? 503
+      : 400;
+    err.details = error;
+    throw err;
+  }
+
+  return (data || [])
+    .filter((row) => row.workspace)
+    .map((row) => ({ ...row.workspace, role: row.role }));
 }
 
 async function getWorkspaceById(id) {
@@ -88,6 +124,60 @@ async function createWorkspace(payload) {
   return db.insert(TABLE, row);
 }
 
+async function createWorkspaceForUser(payload, userId, role = "owner") {
+  const workspace = await createWorkspace({
+    ...payload,
+    // Keep ownership in workspace_memberships. Older project schemas have
+    // workspaces.owner_user_id pointing to public.users rather than auth.users.
+    owner_user_id: null,
+  });
+  await addWorkspaceMember({
+    workspaceId: workspace.id,
+    userId,
+    role,
+  });
+  return { ...workspace, role };
+}
+
+async function addWorkspaceMember({ workspaceId, userId, role = "member" }) {
+  const supabase = db.getSupabase();
+  if (!supabase) {
+    const err = new Error(
+      "Supabase is not configured. Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.",
+    );
+    err.status = 503;
+    throw err;
+  }
+
+  const { data, error } = await supabase
+    .from(MEMBERSHIP_TABLE)
+    .upsert(
+      {
+        workspace_id: workspaceId,
+        user_id: userId,
+        role,
+        status: "active",
+      },
+      { onConflict: "workspace_id,user_id" },
+    )
+    .select()
+    .single();
+
+  if (error) {
+    const err = new Error(
+      /workspace_members/i.test(error.message || "")
+        ? "Authentication membership schema is not installed. Apply the auth/workspace membership migration first."
+        : error.message || "Failed to add workspace member",
+    );
+    err.status = /workspace_memberships?|workspace_members/i.test(error.message || "")
+      ? 503
+      : 400;
+    err.details = error;
+    throw err;
+  }
+  return data;
+}
+
 /**
  * Resolve (or lazily create) the default demo workspace. Used by the
  * workspaceContext middleware when no x-workspace-id header is provided.
@@ -103,6 +193,27 @@ async function getOrCreateDemoWorkspace() {
     locale_default: "en",
     industry: "outdoor_travel",
   });
+}
+
+async function getOrCreateBorn2HikeWorkspace({ ownerUserId } = {}) {
+  let workspace = await findWorkspaceBySlug("born2hike");
+
+  if (!workspace) {
+    workspace = await createWorkspace({
+      name: "Born2Hike",
+      slug: "born2hike",
+      region_default: "LB",
+      locale_default: "en",
+      industry: "outdoor_travel",
+      // The canonical auth link is workspace_memberships. Some deployed schemas
+      // still keep owner_user_id linked to public.users, so avoid writing the
+      // Supabase auth user id here.
+      owner_user_id: null,
+    });
+  }
+
+  await applyBorn2HikeProfile(workspace.id);
+  return getWorkspaceById(workspace.id);
 }
 
 // ---------------------------------------------------------------------------
@@ -129,7 +240,7 @@ const BORN2HIKE_PROFILE = {
   onboarding_completed: false,
   business_name: "Born2Hike",
   page_name: "Born2Hike",
-  instagram_handle: "born2hike",
+  instagram_handle: "borntohike",
   category: "hiking_group",
   business_type: "community_group",
   location: "Lebanon",
@@ -482,10 +593,14 @@ module.exports = {
   BORN2HIKE_PROFILE,
   VALID_DIALECTS,
   listWorkspaces,
+  listWorkspacesForUser,
   getWorkspaceById,
   findWorkspaceBySlug,
   createWorkspace,
+  createWorkspaceForUser,
   getOrCreateDemoWorkspace,
+  getOrCreateBorn2HikeWorkspace,
+  addWorkspaceMember,
   listSocialAccountsForWorkspace,
   listSyncJobsForWorkspace,
   normalizeSlug,

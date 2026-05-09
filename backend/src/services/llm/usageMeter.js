@@ -14,6 +14,7 @@ const env = require("../../config/env");
 
 const VALID_FEATURES = new Set([
   "assistant",
+  "insights",
   "report_narrative",
 ]);
 

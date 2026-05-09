@@ -212,14 +212,14 @@ export default function RecommendationsPage() {
                 <CardTitle>{t("recommendations.result.roi")}</CardTitle>
                 <div className="flex items-center gap-3">
                   <TrendingUp className="h-5 w-5 text-brand-600" />
-                  <div className="text-2xl font-semibold">
+                  <div className="font-numeric text-2xl font-semibold">
                     {rec.roiForecast.predictedRoi != null
                       ? `${rec.roiForecast.predictedRoi.toFixed(2)}x`
                       : "—"}
                   </div>
                   {rec.roiForecast.roiLow != null &&
                   rec.roiForecast.roiHigh != null ? (
-                    <div className="text-sm text-fg-muted">
+                    <div className="font-numeric text-sm text-fg-muted">
                       ({rec.roiForecast.roiLow.toFixed(2)} ·{" "}
                       {rec.roiForecast.roiHigh.toFixed(2)})
                     </div>
@@ -228,7 +228,7 @@ export default function RecommendationsPage() {
                 {rec.roiForecast.confidenceScore != null ? (
                   <div className="mt-2 text-xs text-fg-muted">
                     confidence:{" "}
-                    {(rec.roiForecast.confidenceScore * 100).toFixed(0)}%
+                    <span className="font-numeric">{(rec.roiForecast.confidenceScore * 100).toFixed(0)}%</span>
                   </div>
                 ) : null}
                 {rec.roiForecast.unavailableReason ? (

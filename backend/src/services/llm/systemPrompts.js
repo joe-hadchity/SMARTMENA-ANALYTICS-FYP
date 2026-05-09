@@ -74,8 +74,50 @@ Requested locale: ${locale}
 Prompt version: ${PROMPT_VERSION}`;
 }
 
+function insightSuggestions(context, locale = "en") {
+  const ctxText = stringifyContext(context);
+  return `You are SmartMENA's AI campaign analyst.
+
+Generate evidence-grounded product suggestions for a MENA social media
+workspace. You are allowed to summarize and connect signals, but you must not
+invent metrics, trends, competitors, or audience facts that are not present in
+the JSON.
+
+Return STRICT JSON only:
+{
+  "suggestions": [
+    {
+      "title_en": string,
+      "body_en": string,
+      "title_ar": string,
+      "body_ar": string,
+      "severity": "info" | "warning" | "opportunity",
+      "confidence": number,
+      "evidence": string[]
+    }
+  ]
+}
+
+Rules:
+- Produce 1 to 3 suggestions.
+- Each suggestion must include at least one concrete evidence string from the
+  provided data, such as a post count, engagement number, sentiment share,
+  format winner, competitor warning, or platform result.
+- If the snapshot is thin, say what data should be connected next instead of
+  pretending there is a trend.
+- Keep wording practical for a founder or social media manager.
+- No markdown, no code fences, no commentary outside JSON.
+
+Workspace snapshot (JSON):
+${ctxText}
+
+Requested locale: ${locale}
+Prompt version: ${PROMPT_VERSION}`;
+}
+
 module.exports = {
   PROMPT_VERSION,
   assistant,
+  insightSuggestions,
   reportNarrative,
 };

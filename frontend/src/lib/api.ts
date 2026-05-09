@@ -11,7 +11,12 @@ import type {
   CompetitorComparisonResponse,
   CompetitorDiscoveryResponse,
   HealthCheck,
+  HashtagSearchResponse,
+  HashtagTrendResponse,
+  TrackedHashtag,
   Insight,
+  InboxItem,
+  InboxSummary,
   TrendIntelligenceResponse,
   MenaRecommendation,
   OAuthStatus,
@@ -32,6 +37,31 @@ const BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4000/api";
 
 const WORKSPACE_STORAGE_KEY = "smartmena.workspaceId";
+const AUTH_TOKEN_STORAGE_KEY = "smartmena.authToken";
+const AUTH_REFRESH_STORAGE_KEY = "smartmena.refreshToken";
+
+export type AuthUser = {
+  id: string;
+  email: string;
+  name: string;
+};
+
+export type AuthWorkspace = Workspace & {
+  role?: "owner" | "admin" | "member" | "viewer" | "demo";
+};
+
+export type AuthPayload = {
+  user: AuthUser;
+  session?: {
+    accessToken: string;
+    refreshToken?: string;
+    expiresAt?: number;
+    tokenType?: string;
+  };
+  workspaces: AuthWorkspace[];
+  activeWorkspace: Workspace | null;
+  activeRole: string | null;
+};
 
 function readWorkspaceId(): string | null {
   if (typeof window === "undefined") return null;
@@ -54,6 +84,42 @@ export function setStoredWorkspaceId(id: string | null) {
   }
 }
 
+export function readAuthToken(): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    return window.localStorage.getItem(AUTH_TOKEN_STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+export function setStoredAuthSession(
+  session: AuthPayload["session"] | null,
+) {
+  if (typeof window === "undefined") return;
+  try {
+    if (session?.accessToken) {
+      window.localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, session.accessToken);
+      if (session.refreshToken) {
+        window.localStorage.setItem(
+          AUTH_REFRESH_STORAGE_KEY,
+          session.refreshToken,
+        );
+      }
+    } else {
+      window.localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
+      window.localStorage.removeItem(AUTH_REFRESH_STORAGE_KEY);
+    }
+  } catch {
+    // ignore
+  }
+}
+
+export function clearStoredAuth() {
+  setStoredAuthSession(null);
+  setStoredWorkspaceId(null);
+}
+
 function createClient(): AxiosInstance {
   const client = axios.create({
     baseURL: BASE_URL,
@@ -61,10 +127,14 @@ function createClient(): AxiosInstance {
     headers: { "Content-Type": "application/json" },
   });
 
-  client.interceptors.request.use((config) => {
+  client.interceptors.request.use(async (config) => {
     const wsid = readWorkspaceId();
     if (wsid) {
       config.headers["x-workspace-id"] = wsid;
+    }
+    const token = readAuthToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   });
@@ -72,6 +142,16 @@ function createClient(): AxiosInstance {
   client.interceptors.response.use(
     (response) => response,
     (error) => {
+      if (
+        error?.response?.status === 401 &&
+        typeof window !== "undefined" &&
+        !window.location.pathname.startsWith("/login") &&
+        !window.location.pathname.startsWith("/register")
+      ) {
+        clearStoredAuth();
+        window.location.assign("/login");
+      }
+
       const data = error?.response?.data;
       const message =
         (data && typeof data === "object" && (data.message as string)) ||
@@ -91,6 +171,56 @@ function createClient(): AxiosInstance {
 }
 
 const http = createClient();
+
+// ---------------------------------------------------------------------------
+// Authentication
+// ---------------------------------------------------------------------------
+
+export const authApi = {
+  login: async (input: {
+    email: string;
+    password: string;
+  }): Promise<AuthPayload> => {
+    const payload = (await http.post("/auth/login", input)).data;
+    setStoredAuthSession(payload.session);
+    if (payload.activeWorkspace?.id) {
+      setStoredWorkspaceId(payload.activeWorkspace.id);
+    }
+    return payload;
+  },
+  register: async (input: {
+    name: string;
+    email: string;
+    password: string;
+    workspaceName?: string;
+    region?: string;
+    locale?: "ar" | "en";
+    industry?: string;
+  }): Promise<AuthPayload> => {
+    const payload = (await http.post("/auth/register", input)).data;
+    setStoredAuthSession(payload.session);
+    if (payload.activeWorkspace?.id) {
+      setStoredWorkspaceId(payload.activeWorkspace.id);
+    }
+    return payload;
+  },
+  me: async (): Promise<AuthPayload> => (await http.get("/auth/me")).data,
+  bootstrapBorn2Hike: async (input: {
+    email?: string;
+    password?: string;
+    name?: string;
+  } = {}): Promise<{
+    email: string;
+    password: string;
+    user: AuthUser;
+    workspace: Workspace;
+    bootstrap: unknown;
+    warnings: string[];
+  }> => (await http.post("/auth/bootstrap-born2hike", input)).data,
+  logout: () => {
+    clearStoredAuth();
+  },
+};
 
 // ---------------------------------------------------------------------------
 // Workspaces
@@ -151,6 +281,32 @@ export const trendIntelligenceApi = {
     ).data,
 };
 
+export const hashtagTrendsApi = {
+  list: async (): Promise<HashtagTrendResponse> =>
+    (await http.get("/hashtags")).data,
+  search: async (q: string): Promise<HashtagSearchResponse> =>
+    (await http.get("/hashtags/search", { params: { q } })).data,
+  create: async (input: {
+    tag: string;
+    platform?: string;
+    display_name?: string;
+    refresh?: boolean;
+    limit?: number;
+  }): Promise<TrackedHashtag> => (await http.post("/hashtags", input)).data,
+  refresh: async (
+    id: string,
+    input: { limit?: number } = {},
+  ): Promise<{ hashtag: TrackedHashtag; warnings: string[] }> =>
+    (await http.post(`/hashtags/${id}/refresh`, input)).data,
+  remove: async (id: string): Promise<{ id: string; deleted: true }> =>
+    (await http.delete(`/hashtags/${id}`)).data,
+  snapshots: async (
+    id: string,
+    params: { limit?: number } = {},
+  ): Promise<TrackedHashtag> =>
+    (await http.get(`/hashtags/${id}/snapshots`, { params })).data,
+};
+
 // ---------------------------------------------------------------------------
 // Social accounts
 // ---------------------------------------------------------------------------
@@ -178,6 +334,50 @@ export const socialAccountsApi = {
   }> => (await http.post(`/social-accounts/${id}/sync`, input)).data,
   remove: async (id: string): Promise<{ id: string; deleted: true }> =>
     (await http.delete(`/social-accounts/${id}`)).data,
+};
+
+// ---------------------------------------------------------------------------
+// Social posts (social_posts table — Apify-scraped + future OAuth)
+// ---------------------------------------------------------------------------
+
+export type SocialPostMetrics = {
+  likes: number;
+  comments: number;
+  shares: number;
+  saves: number;
+  impressions: number;
+  reach: number;
+  engagement_rate: number | null;
+  snapshot_time: string;
+};
+
+export type SocialPost = {
+  id: string;
+  social_account_id: string;
+  platform_post_id: string;
+  caption: string | null;
+  media_type: string | null;
+  media_url: string | null;
+  permalink: string | null;
+  published_at: string | null;
+  metadata_json: Record<string, unknown>;
+  created_at: string;
+  social_accounts: { handle: string; display_name: string | null; provider: string } | null;
+  latest_metrics: SocialPostMetrics | null;
+};
+
+export const socialPostsApi = {
+  list: async (params: {
+    socialAccountId?: string;
+    mediaType?: string;
+    limit?: number;
+  } = {}): Promise<SocialPost[]> =>
+    (await http.get("/social-posts", { params })).data,
+  refresh: async (input: { limit?: number } = {}): Promise<{
+    posts_imported: number;
+    account_id: string;
+    warnings: string[];
+  }> => (await http.post("/social-posts/refresh", input)).data,
 };
 
 // ---------------------------------------------------------------------------
@@ -223,6 +423,158 @@ export const analyticsApi = {
     } = {},
   ): Promise<TopPost[]> =>
     (await http.get("/analytics/top-posts", { params })).data,
+};
+
+// ---------------------------------------------------------------------------
+// Audience insights
+// ---------------------------------------------------------------------------
+
+export type AudienceInsightRow = {
+  value: number;
+  share?: number | null;
+};
+
+export type AudienceInsightsPayload = {
+  source: "meta_graph";
+  generated_at: string;
+  window_days: number;
+  account: {
+    id: string;
+    handle: string | null;
+    display_name: string | null;
+    provider: string;
+    last_synced_at: string | null;
+  } | null;
+  kpis: {
+    followers: number | null;
+    follower_delta: number | null;
+    reach: number;
+    impressions: number;
+    engaged_accounts: number;
+    profile_views: number;
+    posts_analyzed: number;
+  };
+  follower_growth: Array<{
+    date: string;
+    followers: number;
+    following: number;
+  }>;
+  active_times: {
+    source: "meta_graph" | "derived_from_posts" | "unavailable";
+    by_hour: Array<{ hour: number; score: number; posts?: number }>;
+    by_day: Array<{ day: string; score: number; posts?: number }>;
+  };
+  gender_distribution: Array<AudienceInsightRow & { gender: string }>;
+  age_ranges: Array<AudienceInsightRow & { range: string }>;
+  top_cities: Array<AudienceInsightRow & { name: string }>;
+  top_countries: Array<AudienceInsightRow & { name: string }>;
+  content_response: Array<{ format: string; avg_engagement: number; posts: number }>;
+  sentiment_distribution?: {
+    positive: number;
+    neutral: number;
+    negative: number;
+    total: number;
+    avg_confidence: number | null;
+    coverage: number;
+  };
+  sentiment_source?: "comments" | "captions" | "unavailable";
+  comments_analyzed?: number;
+  caption_sentiment_distribution?: {
+    positive: number;
+    neutral: number;
+    negative: number;
+    total: number;
+    avg_confidence: number | null;
+    coverage: number;
+  };
+  comment_sentiment_distribution?: {
+    positive: number;
+    neutral: number;
+    negative: number;
+    total: number;
+    avg_confidence: number | null;
+    coverage: number;
+  };
+  sentiment_samples?: Array<{
+    id: string;
+    caption: string;
+    permalink: string | null;
+    published_at: string | null;
+    source?: "comments" | "captions";
+    post_caption?: string | null;
+    author?: string | null;
+    sentiment: "positive" | "neutral" | "negative";
+    confidence: number;
+  }>;
+  caption_sentiment_samples?: Array<{
+    id: string;
+    caption: string;
+    permalink: string | null;
+    published_at: string | null;
+    source?: "comments" | "captions";
+    post_caption?: string | null;
+    author?: string | null;
+    sentiment: "positive" | "neutral" | "negative";
+    confidence: number;
+  }>;
+  comment_sentiment_samples?: Array<{
+    id: string;
+    caption: string;
+    permalink: string | null;
+    published_at: string | null;
+    source?: "comments" | "captions";
+    post_caption?: string | null;
+    author?: string | null;
+    sentiment: "positive" | "neutral" | "negative";
+    confidence: number;
+  }>;
+  ai_insights?: Array<{
+    kind: "growth" | "demographic" | "geo" | "timing" | "content" | "sentiment";
+    text: string;
+  }>;
+  warnings: string[];
+  refresh?: {
+    posts_imported: number;
+    metrics_snapshots_inserted: number;
+    comments_imported?: number;
+    warnings: string[];
+  };
+};
+
+export const audienceInsightsApi = {
+  get: async (params: { days?: number } = {}): Promise<AudienceInsightsPayload> =>
+    (await http.get("/audience-insights", { params })).data,
+  refresh: async (input: { limit?: number } = {}): Promise<AudienceInsightsPayload> =>
+    (await http.post("/audience-insights/refresh", input)).data,
+};
+
+// ---------------------------------------------------------------------------
+// Inbox
+// ---------------------------------------------------------------------------
+
+export const inboxApi = {
+  list: async (
+    params: {
+      type?: "all" | "comment" | "message";
+      status?: "all" | "unread" | "read" | "replied" | "archived" | "failed";
+      limit?: number;
+    } = {},
+  ): Promise<InboxItem[]> => (await http.get("/inbox", { params })).data,
+  summary: async (): Promise<InboxSummary> => (await http.get("/inbox/summary")).data,
+  sync: async (input: { limit?: number } = {}): Promise<{
+    comments_imported: number;
+    messages_imported: number;
+    warnings: string[];
+  }> => (await http.post("/inbox/sync", input)).data,
+  markStatus: async (
+    id: string,
+    status: "unread" | "read" | "replied" | "archived",
+  ): Promise<InboxItem> => (await http.patch(`/inbox/${id}/status`, { status })).data,
+  reply: async (
+    id: string,
+    message: string,
+  ): Promise<{ inbound: InboxItem; outbound: InboxItem }> =>
+    (await http.post(`/inbox/${id}/reply`, { message })).data,
 };
 
 // ---------------------------------------------------------------------------
@@ -602,18 +954,51 @@ export const competitorsApi = {
     (await http.post("/competitors/discover", input)).data,
   manualAdd: async (
     input: ManualCompetitorInput,
-  ): Promise<{ competitor: CompetitorAccount; candidate: CompetitorCandidate; warnings: string[] }> =>
+  ): Promise<{
+    competitor: CompetitorAccount;
+    candidate: CompetitorCandidate;
+    posts_imported?: number;
+    metrics_snapshots_inserted?: number;
+    warnings: string[];
+  }> =>
     (await http.post("/competitors", input)).data,
   approve: async (
     id: string,
-  ): Promise<{ competitor: CompetitorAccount; candidate: CompetitorCandidate }> =>
+  ): Promise<{
+    competitor: CompetitorAccount;
+    candidate: CompetitorCandidate;
+    posts_imported?: number;
+    metrics_snapshots_inserted?: number;
+    warnings?: string[];
+  }> =>
     (await http.post(`/competitors/candidates/${id}/approve`)).data,
   reject: async (id: string): Promise<CompetitorCandidate> =>
     (await http.post(`/competitors/candidates/${id}/reject`)).data,
   refresh: async (
     id: string,
-  ): Promise<{ competitor: CompetitorAccount; snapshot: unknown; warnings: string[] }> =>
+  ): Promise<{
+    competitor: CompetitorAccount;
+    snapshot: unknown;
+    posts_imported?: number;
+    metrics_snapshots_inserted?: number;
+    warnings: string[];
+  }> =>
     (await http.post(`/competitors/${id}/refresh`)).data,
+  refreshAll: async (): Promise<{
+    refreshed_count: number;
+    posts_imported: number;
+    metrics_snapshots_inserted: number;
+    results: Array<{
+      competitor_id: string;
+      handle: string;
+      platform: Provider;
+      posts_imported: number;
+      metrics_snapshots_inserted: number;
+      warnings: string[];
+    }>;
+    warnings: string[];
+  }> =>
+    (await http.post("/competitors/refresh-all")).data,
   remove: async (id: string): Promise<CompetitorAccount> =>
     (await http.delete(`/competitors/${id}`)).data,
   summary: async (): Promise<{

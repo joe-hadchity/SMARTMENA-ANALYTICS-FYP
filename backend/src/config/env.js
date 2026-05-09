@@ -50,6 +50,23 @@ const env = {
     process.env.COMPETITOR_SEARCH_LANG ||
     process.env.TREND_SEARCH_LANG ||
     "en",
+  APIFY_API_TOKEN: process.env.APIFY_API_TOKEN || "",
+  APIFY_INSTAGRAM_ACTOR_ID:
+    process.env.APIFY_INSTAGRAM_ACTOR_ID || "apify/instagram-scraper",
+  COMPETITOR_POST_LIMIT: Number(process.env.COMPETITOR_POST_LIMIT) || 12,
+  HASHTAG_PROVIDER: (process.env.HASHTAG_PROVIDER || "auto").toLowerCase(),
+  HASHTAG_SCRAPE_LIMIT: Number(process.env.HASHTAG_SCRAPE_LIMIT) || 24,
+  HASHTAG_REFRESH_DAYS: Number(process.env.HASHTAG_REFRESH_DAYS) || 7,
+  META_HASHTAG_ACCESS_TOKEN:
+    process.env.META_HASHTAG_ACCESS_TOKEN ||
+    process.env.META_GRAPH_ACCESS_TOKEN ||
+    "",
+  META_HASHTAG_IG_USER_ID:
+    process.env.META_HASHTAG_IG_USER_ID ||
+    process.env.META_INSTAGRAM_USER_ID ||
+    "",
+  META_FACEBOOK_GRAPH_BASE:
+    process.env.META_FACEBOOK_GRAPH_BASE || "https://graph.facebook.com",
 
   // ---------------------------------------------------------------------
   // Meta Graph API OAuth (Phase 5).
@@ -73,6 +90,36 @@ const env = {
     process.env.META_APP_ID &&
       process.env.META_APP_SECRET &&
       process.env.TOKEN_ENCRYPTION_KEY,
+  ),
+
+  // ---------------------------------------------------------------------
+  // Instagram API with Instagram Login (graph.instagram.com).
+  // Separate from Facebook Login for Business — uses IGAA tokens that
+  // give read access to the user's own posts + per-post insights.
+  // No FB Page required. Used for the workspace's own profile only.
+  // ---------------------------------------------------------------------
+  META_INSTAGRAM_APP_ID: process.env.META_INSTAGRAM_APP_ID || "",
+  META_INSTAGRAM_APP_SECRET: process.env.META_INSTAGRAM_APP_SECRET || "",
+  META_INSTAGRAM_ACCESS_TOKEN: process.env.META_INSTAGRAM_ACCESS_TOKEN || "",
+  META_INSTAGRAM_GRAPH_BASE:
+    process.env.META_INSTAGRAM_GRAPH_BASE || "https://graph.instagram.com",
+  META_INSTAGRAM_WEBHOOK_VERIFY_TOKEN:
+    process.env.META_INSTAGRAM_WEBHOOK_VERIFY_TOKEN || "",
+  META_INSTAGRAM_ENABLED: Boolean(process.env.META_INSTAGRAM_ACCESS_TOKEN),
+
+  // Instagram Messaging API uses Facebook Graph + a Page/Business token.
+  // It is separate from the IGAA token used by graph.instagram.com.
+  META_MESSAGING_PAGE_ACCESS_TOKEN:
+    process.env.META_MESSAGING_PAGE_ACCESS_TOKEN ||
+    process.env.META_PAGE_ACCESS_TOKEN ||
+    "",
+  META_MESSAGING_IG_USER_ID:
+    process.env.META_MESSAGING_IG_USER_ID ||
+    process.env.META_INSTAGRAM_USER_ID ||
+    "",
+  META_MESSAGING_ENABLED: Boolean(
+    process.env.META_MESSAGING_PAGE_ACCESS_TOKEN ||
+      process.env.META_PAGE_ACCESS_TOKEN,
   ),
 
   // pgp_sym_encrypt / pgp_sym_decrypt secret used for oauth_connections.

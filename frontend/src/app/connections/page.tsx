@@ -133,8 +133,8 @@ function ConnectionsPageContent() {
   return (
     <div className="space-y-6 max-w-6xl">
       <PageHeader
+        variant="compact"
         title={t("connections.title")}
-        subtitle={t("connections.subtitle")}
         actions={
           <>
             {liveEnabled ? (

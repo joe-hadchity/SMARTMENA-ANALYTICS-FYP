@@ -54,7 +54,7 @@ function DeltaPill({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[11px] font-semibold",
+        "font-numeric inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[11px] font-semibold",
         tone,
       )}
     >
@@ -124,9 +124,8 @@ export default function KpiCard({
         className,
       )}
     >
-      <span className="absolute start-0 top-4 h-10 w-[3px] rounded-e-full bg-primary/70" />
       <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0 ps-2">
+        <div className="min-w-0">
           <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-fg-muted">
             {label}
           </div>
@@ -134,7 +133,7 @@ export default function KpiCard({
             {loading ? (
               <Skeleton className="h-7 w-20" />
             ) : (
-              <span className="text-[1.6rem] font-semibold leading-none text-fg">
+              <span className="font-numeric text-[1.6rem] font-semibold leading-none text-fg">
                 {value}
               </span>
             )}

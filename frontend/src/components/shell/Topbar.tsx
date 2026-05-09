@@ -4,14 +4,17 @@ import { useQuery } from "@tanstack/react-query";
 import {
   Bell,
   ChevronRight,
+  LogOut,
   Languages,
   Menu,
   Search,
+  UserCircle,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { useCommandPalette } from "@/components/command/CommandPaletteProvider";
+import { useAuth } from "@/components/auth/AuthProvider";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import {
@@ -31,7 +34,6 @@ import { useI18n } from "@/i18n/I18nProvider";
 import { healthApi } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
-import Born2HikeDemoSwitch from "./Born2HikeDemoSwitch";
 import { ThemeToggle } from "./ThemeToggle";
 
 const PATH_LABEL_KEYS: Record<string, string> = {
@@ -51,6 +53,7 @@ export default function Topbar({
   onOpenMobileNav?: () => void;
 }) {
   const { t, locale, setLocale } = useI18n();
+  const auth = useAuth();
   const cmdk = useCommandPalette();
   const pathname = usePathname() || "/";
 
@@ -107,8 +110,6 @@ export default function Topbar({
       </nav>
 
       <div className="ms-auto" />
-
-      <Born2HikeDemoSwitch />
 
       {/* Search / command palette trigger */}
       <button
@@ -186,6 +187,32 @@ export default function Topbar({
       </DropdownMenu>
 
       <ThemeToggle />
+
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon-sm" aria-label="Account">
+            <UserCircle className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-56">
+          <DropdownMenuLabel>
+            <span className="block truncate">
+              {auth.user?.name || "SmartMENA user"}
+            </span>
+            <span className="block truncate text-[11px] font-normal text-fg-muted">
+              {auth.user?.email}
+            </span>
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            onSelect={() => auth.signOut()}
+            className="text-danger focus:text-danger"
+          >
+            <LogOut className="me-2 h-4 w-4" />
+            Sign out
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
 
       {/* Notifications (placeholder) */}
       <Tooltip>

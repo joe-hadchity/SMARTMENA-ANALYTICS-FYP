@@ -1,5 +1,6 @@
 const express = require("express");
 
+const authRoutes = require("./authRoutes");
 const healthRoutes = require("./healthRoutes");
 const workspaceRoutes = require("./workspaceRoutes");
 const socialAccountRoutes = require("./socialAccountRoutes");
@@ -12,6 +13,7 @@ const analyzeRoutes = require("./analyzeRoutes");
 const predictRoutes = require("./predictRoutes");
 const recommendationsRoutes = require("./recommendationsRoutes");
 const analyticsRoutes = require("./analyticsRoutes");
+const audienceInsightsRoutes = require("./audienceInsightsRoutes");
 const insightsRoutes = require("./insightsRoutes");
 const integrationsRoutes = require("./integrationsRoutes");
 const assistantRoutes = require("./assistantRoutes");
@@ -19,9 +21,14 @@ const reportRoutes = require("./reportRoutes");
 const scheduledPostRoutes = require("./scheduledPostRoutes");
 const oauthRoutes = require("./oauthRoutes");
 const competitorRoutes = require("./competitorRoutes");
+const trendRoutes = require("./trendRoutes");
+const hashtagTrendRoutes = require("./hashtagTrendRoutes");
+const inboxRoutes = require("./inboxRoutes");
+const webhookRoutes = require("./webhookRoutes");
 
 const router = express.Router();
 
+router.use("/auth", authRoutes);
 router.use("/health", healthRoutes);
 router.use("/workspaces", workspaceRoutes);
 router.use("/social-accounts", socialAccountRoutes);
@@ -34,6 +41,7 @@ router.use("/analyze", analyzeRoutes);
 router.use("/predict", predictRoutes);
 router.use("/recommendations", recommendationsRoutes);
 router.use("/analytics", analyticsRoutes);
+router.use("/audience-insights", audienceInsightsRoutes);
 router.use("/insights", insightsRoutes);
 router.use("/integrations", integrationsRoutes);
 router.use("/assistant", assistantRoutes);
@@ -41,5 +49,9 @@ router.use("/reports", reportRoutes);
 router.use("/scheduled-posts", scheduledPostRoutes);
 router.use("/oauth", oauthRoutes);
 router.use("/competitors", competitorRoutes);
+router.use("/trends", trendRoutes);
+router.use("/hashtags", hashtagTrendRoutes);
+router.use("/inbox", inboxRoutes);
+router.use("/webhooks", webhookRoutes);
 
 module.exports = router;

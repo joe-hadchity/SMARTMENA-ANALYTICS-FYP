@@ -59,6 +59,13 @@ function isReasoningDeployment() {
   return /^o\d/i.test(env.AZURE_OPENAI_DEPLOYMENT || "");
 }
 
+function completionBudget(maxTokens) {
+  const requested = Number(maxTokens) || 600;
+  // o-series deployments spend part of max_completion_tokens on hidden
+  // reasoning tokens. Small budgets can produce an empty visible answer.
+  return isReasoningDeployment() ? Math.max(requested, 900) : requested;
+}
+
 /**
  * Rough USD cost estimator. Azure bills per 1K tokens, priced by deployment.
  * We use a conservative default of gpt-4o-mini-ish rates. When a real price
@@ -89,6 +96,7 @@ async function chat({
   temperature = 0.4,
   maxTokens = 600,
   responseFormat,
+  allowEmptyRetry = true,
 }) {
   const client = getClient();
   if (!client) throw new LLMDisabledError();
@@ -100,7 +108,8 @@ async function chat({
     messages,
   };
   if (isReasoningDeployment()) {
-    params.max_completion_tokens = maxTokens;
+    params.max_completion_tokens = completionBudget(maxTokens);
+    params.reasoning_effort = "low";
   } else {
     params.temperature = temperature;
     params.max_tokens = maxTokens;
@@ -112,6 +121,22 @@ async function chat({
   const choice = completion.choices?.[0];
   const text = choice?.message?.content ?? "";
   const usage = completion.usage || {};
+  if (
+    allowEmptyRetry &&
+    isReasoningDeployment() &&
+    !text.trim() &&
+    choice?.finish_reason === "length" &&
+    completionBudget(maxTokens) < 2200
+  ) {
+    return chat({
+      messages,
+      temperature,
+      maxTokens: Math.min(completionBudget(maxTokens) * 2, 2200),
+      responseFormat,
+      allowEmptyRetry: false,
+    });
+  }
+
   const costUSD = estimateCostUSD({
     promptTokens: usage.prompt_tokens || 0,
     completionTokens: usage.completion_tokens || 0,
@@ -157,7 +182,8 @@ async function* streamChat({
     stream_options: { include_usage: true },
   };
   if (isReasoningDeployment()) {
-    params.max_completion_tokens = maxTokens;
+    params.max_completion_tokens = completionBudget(maxTokens);
+    params.reasoning_effort = "low";
   } else {
     params.temperature = temperature;
     params.max_tokens = maxTokens;

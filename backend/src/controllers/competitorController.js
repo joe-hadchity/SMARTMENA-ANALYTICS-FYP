@@ -40,6 +40,11 @@ async function refreshCompetitor(req, res) {
   res.json(result);
 }
 
+async function refreshAllCompetitors(req, res) {
+  const result = await competitorService.refreshAllCompetitors(req.workspaceId);
+  res.json(result);
+}
+
 async function summary(req, res) {
   const result = await competitorService.summary(req.workspaceId);
   res.json(result);
@@ -57,6 +62,7 @@ module.exports = {
   listCandidates,
   listCompetitors,
   manualAddCompetitor,
+  refreshAllCompetitors,
   refreshCompetitor,
   rejectCandidate,
   removeCompetitor,

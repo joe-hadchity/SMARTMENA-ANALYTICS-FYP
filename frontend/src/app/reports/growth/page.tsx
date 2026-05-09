@@ -379,16 +379,16 @@ function ReportBody({
                       <td className="py-2 font-medium text-fg">
                         {p.provider}
                       </td>
-                      <td className="py-2 text-end">
+                      <td className="font-numeric py-2 text-end">
                         {formatNumber(p.posts, locale)}
                       </td>
-                      <td className="py-2 text-end">
+                      <td className="font-numeric py-2 text-end">
                         {formatNumber(p.reach, locale)}
                       </td>
-                      <td className="py-2 text-end">
+                      <td className="font-numeric py-2 text-end">
                         {formatNumber(p.impressions, locale)}
                       </td>
-                      <td className="py-2 text-end">
+                      <td className="font-numeric py-2 text-end">
                         {formatNumber(p.engagements, locale)}
                       </td>
                     </tr>

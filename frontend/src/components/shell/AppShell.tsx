@@ -3,15 +3,14 @@
 import { usePathname } from "next/navigation";
 import { useState, type ReactNode } from "react";
 
-import InsightsDock from "@/components/insights/InsightsDock";
+import DecisionBriefPanel from "@/components/decision/DecisionBriefPanel";
+import LiveSignalsRibbon from "@/components/signals/LiveSignalsRibbon";
 import { cn } from "@/lib/utils";
 
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
 
-// Routes that should render without the app chrome (sidebar + topbar + dock).
-// Public share pages are served standalone so they render cleanly for guests.
-const BARE_ROUTES = ["/r/", "/onboarding"];
+const BARE_ROUTES = ["/login", "/register", "/r/", "/onboarding"];
 
 export default function AppShell({ children }: { children: ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
@@ -25,17 +24,18 @@ export default function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen flex bg-bg">
-      {/* Desktop sidebar */}
       <div
         className={cn(
           "hidden lg:flex shrink-0 transition-[width] duration-200 ease-out-soft",
           collapsed ? "w-[72px]" : "w-64",
         )}
       >
-        <Sidebar collapsed={collapsed} onToggleCollapse={() => setCollapsed((c) => !c)} />
+        <Sidebar
+          collapsed={collapsed}
+          onToggleCollapse={() => setCollapsed((c) => !c)}
+        />
       </div>
 
-      {/* Mobile sidebar */}
       {mobileOpen ? (
         <div className="lg:hidden fixed inset-0 z-40 flex animate-fade-in">
           <div
@@ -54,13 +54,13 @@ export default function AppShell({ children }: { children: ReactNode }) {
 
       <div className="flex-1 flex flex-col min-w-0">
         <Topbar onOpenMobileNav={() => setMobileOpen(true)} />
-        <main className="flex-1 px-4 md:px-6 lg:px-8 py-6">
+        <main className="flex-1 px-4 md:px-6 lg:px-8 xl:pr-[390px] py-6 pb-28">
           <div className="mx-auto max-w-[1400px]">{children}</div>
         </main>
       </div>
 
-      {/* Global AI insights + chat dock */}
-      <InsightsDock />
+      <DecisionBriefPanel />
+      <LiveSignalsRibbon collapsed={collapsed} />
     </div>
   );
 }
