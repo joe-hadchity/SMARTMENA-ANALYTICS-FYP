@@ -3,7 +3,12 @@
     "allow": [
       "PowerShell($proc = Get-NetTCPConnection -LocalPort 3000 -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty OwningProcess; if \\($proc\\) { Stop-Process -Id $proc -Force; Write-Output \"Killed PID $proc\" } else { Write-Output \"Nothing on port 3000\" })",
       "Bash(rm -rf node_modules)",
-      "Bash(npm install *)"
+      "Bash(npm install *)",
+      "WebFetch(domain:claude.ai)",
+      "Bash(cat C:\\\\\\\\Users\\\\\\\\ghadi\\\\\\\\AppData\\\\\\\\Local\\\\\\\\Temp\\\\\\\\claude\\\\\\\\c--RoubaPersonal-Fypv2-SMARTMENA-ANALYTICS-FYP\\\\\\\\20d2456b-63c1-425a-a6c1-c54cdd535eba\\\\\\\\tasks\\\\\\\\bfqo7e821.output)",
+      "Bash(awk '{print $5}')",
+      "Bash(taskkill //PID 1804 //F)",
+      "Bash(curl -s http://localhost:3000 -o /dev/null -w \"%{http_code}\")"
     ]
   }
 }

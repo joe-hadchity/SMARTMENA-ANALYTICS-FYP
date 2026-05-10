@@ -27,6 +27,7 @@ const config: Config = {
     },
     extend: {
       fontFamily: {
+        caveat: ["'Caveat'", "'Kalam'", "cursive"],
         sans: [
           "'IBM Plex Sans'",
           "system-ui",
@@ -44,6 +45,43 @@ const config: Config = {
         mono: ["'IBM Plex Mono'", "'JetBrains Mono'", "ui-monospace", "SFMono-Regular", "monospace"],
       },
       colors: {
+        // ------- new OKLCH brand scales (v2 design) -------
+        teal: {
+          50: "oklch(97% 0.018 195)",
+          100: "oklch(93% 0.038 195)",
+          200: "oklch(86% 0.072 195)",
+          300: "oklch(76% 0.108 195)",
+          400: "oklch(66% 0.128 195)",
+          500: "oklch(56% 0.130 195)",
+          600: "oklch(46% 0.110 195)",
+          700: "oklch(38% 0.088 195)",
+          800: "oklch(30% 0.066 195)",
+          900: "oklch(22% 0.044 195)",
+        },
+        amber: {
+          50: "oklch(97% 0.024 60)",
+          100: "oklch(93% 0.052 60)",
+          200: "oklch(87% 0.094 60)",
+          300: "oklch(80% 0.130 60)",
+          400: "oklch(74% 0.150 60)",
+          500: "oklch(68% 0.162 60)",
+          600: "oklch(58% 0.150 60)",
+          700: "oklch(48% 0.124 60)",
+          800: "oklch(38% 0.094 60)",
+          900: "oklch(28% 0.062 60)",
+        },
+        terra: {
+          50: "oklch(97% 0.014 30)",
+          100: "oklch(92% 0.030 30)",
+          200: "oklch(85% 0.058 30)",
+          300: "oklch(76% 0.090 30)",
+          400: "oklch(66% 0.118 30)",
+          500: "oklch(56% 0.130 30)",
+          600: "oklch(46% 0.118 30)",
+          700: "oklch(38% 0.094 30)",
+          800: "oklch(30% 0.070 30)",
+          900: "oklch(22% 0.046 30)",
+        },
         // ------- brand (literal scale) -------
         brand: {
           50: "#eef6ff",

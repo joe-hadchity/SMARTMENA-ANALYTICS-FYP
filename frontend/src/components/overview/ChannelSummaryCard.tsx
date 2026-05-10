@@ -1,139 +1,178 @@
-"use client";
+'use client';
 
-import { Facebook, Instagram } from "lucide-react";
-import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
+import { useTheme } from 'next-themes';
+import { useI18n } from '@/i18n/I18nProvider';
+import { TOKENS, formatNumber, formatPct, formatDelta } from '@/lib/design-tokens';
+import Icon from '@/components/ui/Icon';
 
-import { useI18n } from "@/i18n/I18nProvider";
+interface ChannelMetric {
+  value: number;
+  delta: number;
+  isPct?: boolean;
+}
 
 interface ChannelSummaryCardProps {
-  platform: "meta_instagram" | "meta_facebook";
+  platform: 'meta_instagram' | 'meta_facebook';
+  handle?: string;
   metrics: {
-    reach: number;
-    engagements: number;
-    posts: number;
-    engagementRate: number;
+    reach: ChannelMetric;
+    engagements: ChannelMetric;
+    posts: ChannelMetric;
+    engRate: ChannelMetric;
   };
 }
 
 const PLATFORM_CONFIG = {
   meta_instagram: {
-    icon: Instagram,
-    color: "#E1306C",
-    label: "Instagram",
-    labelAr: "انستغرام",
+    name: { en: 'Instagram', ar: 'إنستغرام' },
+    icon: 'InstagramLogo' as const,
+    color: '#E1306C',
   },
   meta_facebook: {
-    icon: Facebook,
-    color: "#1877F2",
-    label: "Facebook",
-    labelAr: "فيسبوك",
+    name: { en: 'Facebook', ar: 'فيسبوك' },
+    icon: 'FacebookLogo' as const,
+    color: '#1877F2',
   },
 };
 
-function formatCompact(value: number): string {
-  if (value >= 1e6) return (value / 1e6).toFixed(1) + "M";
-  if (value >= 1e3) return (value / 1e3).toFixed(0) + "K";
-  return value.toLocaleString();
-}
-
-function MetricItem({
-  label,
-  value,
-  ar,
-}: {
-  label: string;
-  value: string | number;
-  ar: boolean;
-}) {
-  return (
-    <div className={`flex flex-col gap-1 ${ar ? "items-end" : "items-start"}`}>
-      <span
-        className="text-[9px] uppercase tracking-wider font-semibold"
-        style={{ color: "oklch(var(--fg-muted))" }}
-      >
-        {label}
-      </span>
-      <span className="font-mono text-base font-bold tracking-tight">
-        {value}
-      </span>
-    </div>
-  );
-}
+const METRIC_LABELS = {
+  en: {
+    reach: 'Reach',
+    engagements: 'Engagements',
+    posts: 'Posts',
+    engRate: 'Eng. Rate',
+  },
+  ar: {
+    reach: 'الوصول',
+    engagements: 'التفاعلات',
+    posts: 'المنشورات',
+    engRate: 'معدل التفاعل',
+  },
+};
 
 export function ChannelSummaryCard({
   platform,
+  handle = '',
   metrics,
 }: ChannelSummaryCardProps) {
-  const { t, locale } = useI18n();
+  const { locale } = useI18n();
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => setMounted(true), []);
 
-  const ar = locale === "ar";
+  const lang = locale === 'ar' ? 'ar' : 'en';
+  const dark = mounted && resolvedTheme === 'dark';
   const config = PLATFORM_CONFIG[platform];
-  const Icon = config.icon;
-  const isDark = mounted && resolvedTheme === "dark";
+  const iconName = config.icon;
+  const labels = METRIC_LABELS[lang];
+
+  const renderMetric = (key: keyof typeof metrics, label: string) => {
+    const metric = metrics[key];
+    const isPositive = metric.delta > 0;
+    const deltaColor = isPositive
+      ? dark
+        ? TOKENS.teal[400]
+        : TOKENS.teal[700]
+      : dark
+        ? TOKENS.terra[400]
+        : TOKENS.terra[700];
+
+    const formattedValue = metric.isPct
+      ? formatPct(metric.value, lang)
+      : formatNumber(metric.value, lang);
+    const formattedDelta = formatDelta(metric.delta, true, lang);
+
+    return (
+      <div key={key} className="flex flex-col gap-1">
+        <div
+          style={{
+            fontFamily: "'IBM Plex Mono', monospace",
+            fontSize: 9,
+            fontWeight: 600,
+            letterSpacing: 0.8,
+            textTransform: 'uppercase',
+            color: dark ? TOKENS.ink[400] : TOKENS.ink[500],
+          }}
+        >
+          {label}
+        </div>
+        <div
+          style={{
+            fontFamily: "'IBM Plex Sans', 'IBM Plex Sans Arabic', sans-serif",
+            fontSize: 18,
+            fontWeight: 700,
+            letterSpacing: -0.3,
+            color: dark ? TOKENS.ink[50] : TOKENS.ink[900],
+            lineHeight: 1,
+          }}
+        >
+          {formattedValue}
+        </div>
+        <div
+          className="flex items-center gap-0.5"
+          style={{
+            fontFamily: "'IBM Plex Mono', monospace",
+            fontSize: 10,
+            fontWeight: 500,
+            color: deltaColor,
+          }}
+        >
+          <span>{isPositive ? '↑' : '↓'}</span>
+          <span>{formattedDelta}</span>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div
-      className="rounded-2xl p-4"
+      className="rounded-lg p-4 border"
       style={{
-        background: isDark
-          ? "rgba(28,23,18,0.80)"
-          : "rgba(255,255,255,0.88)",
-        border: isDark
-          ? "1px solid rgba(255,255,255,0.05)"
-          : "1px solid rgba(180,210,220,0.3)",
-        boxShadow: isDark
-          ? "0 4px 20px rgba(0,0,0,0.18), 0 1px 4px rgba(0,0,0,0.08)"
-          : "0 4px 20px rgba(20,50,80,0.05), 0 1px 4px rgba(20,50,80,0.03)",
-        backdropFilter: "blur(20px) saturate(1.8) brightness(1.02)",
-        WebkitBackdropFilter: "blur(20px) saturate(1.8) brightness(1.02)",
+        background: dark ? TOKENS.surfaceDark : TOKENS.surface,
+        borderColor: dark ? TOKENS.hairlineDark : TOKENS.hairline,
       }}
     >
-        {/* Platform header */}
+      {/* Header */}
+      <div className="flex items-center gap-2 mb-4">
         <div
-          className={`flex items-center gap-2 mb-3 ${
-            ar ? "flex-row-reverse" : ""
-          }`}
+          className="w-8 h-8 rounded-full flex items-center justify-center"
+          style={{ background: `${config.color}15`, color: config.color }}
         >
-          <div className="w-7 h-7 rounded-lg bg-surface flex items-center justify-center">
-            <Icon className="w-4 h-4" style={{ color: config.color }} />
-          </div>
-          <span className="text-sm font-semibold">
-            {ar ? config.labelAr : config.label}
-          </span>
-          {/* Color pill accent */}
-          <div
-            className="flex-1 h-0.5 rounded-full opacity-25"
-            style={{ backgroundColor: config.color }}
-          />
+          <Icon name={iconName} size={16} weight="bold" />
         </div>
+        <div className="flex-1">
+          <div
+            style={{
+              fontFamily: "'IBM Plex Sans', 'IBM Plex Sans Arabic', sans-serif",
+              fontSize: 14,
+              fontWeight: 600,
+              color: dark ? TOKENS.ink[50] : TOKENS.ink[900],
+            }}
+          >
+            {config.name[lang]}
+          </div>
+          {handle && (
+            <div
+              style={{
+                fontFamily: "'IBM Plex Mono', monospace",
+                fontSize: 11,
+                color: dark ? TOKENS.ink[400] : TOKENS.ink[500],
+              }}
+            >
+              {handle}
+            </div>
+          )}
+        </div>
+      </div>
 
-      {/* Metrics grid */}
-      <div className="grid grid-cols-4 gap-2">
-        <MetricItem
-          label={t("dashboard.metrics.reach", "Reach")}
-          value={formatCompact(metrics.reach)}
-          ar={ar}
-        />
-        <MetricItem
-          label={t("dashboard.metrics.engagements", "Engagements")}
-          value={formatCompact(metrics.engagements)}
-          ar={ar}
-        />
-        <MetricItem
-          label={t("dashboard.metrics.posts", "Posts")}
-          value={metrics.posts}
-          ar={ar}
-        />
-        <MetricItem
-          label={t("dashboard.metrics.engRate", "Eng. Rate")}
-          value={`${metrics.engagementRate.toFixed(1)}%`}
-          ar={ar}
-        />
+      {/* Metrics Grid */}
+      <div className="grid grid-cols-4 gap-3">
+        {renderMetric('reach', labels.reach)}
+        {renderMetric('engagements', labels.engagements)}
+        {renderMetric('posts', labels.posts)}
+        {renderMetric('engRate', labels.engRate)}
       </div>
     </div>
   );
