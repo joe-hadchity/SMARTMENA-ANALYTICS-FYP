@@ -35,27 +35,26 @@ const DEFAULT_TILES: PlatformTile[] = [
     provider: "meta_instagram",
     label: "Instagram",
     icon: Instagram,
-    accent:
-      "from-[#F58529]/20 via-[#DD2A7B]/20 to-[#8134AF]/20 text-[#DD2A7B]",
+    accent: "text-[#DD2A7B]",
   },
   {
     provider: "meta_facebook",
     label: "Facebook",
     icon: Facebook,
-    accent: "from-[#1877F2]/20 to-[#1877F2]/5 text-[#1877F2]",
+    accent: "text-[#1877F2]",
   },
   {
     provider: "tiktok",
     label: "TikTok",
     icon: Music2,
-    accent: "from-[#25F4EE]/15 to-[#FE2C55]/15 text-[#FE2C55]",
+    accent: "text-[#FE2C55]",
     comingSoon: true,
   },
   {
     provider: "x",
     label: "X",
     icon: Twitter,
-    accent: "from-fg/10 to-fg/0 text-fg",
+    accent: "text-fg",
     comingSoon: true,
   },
 ];
@@ -143,7 +142,7 @@ export default function ConnectionsStrip({
     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
       {loading
         ? Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-[120px] w-full rounded-xl" />
+            <Skeleton key={i} className="h-[120px] w-full rounded-md" />
           ))
         : tiles.map((tile) => {
             const s = summarize(accountsQ.data ?? [], tile.provider);
@@ -172,30 +171,28 @@ export default function ConnectionsStrip({
               <div
                 key={tile.provider}
                 className={cn(
-                  "group relative overflow-hidden rounded-xl border transition-all",
-                  "bg-surface",
+                  "group relative overflow-hidden rounded-md border transition-all",
+                  "bg-surface shadow-xs",
                   active
-                    ? "border-primary/60 ring-1 ring-primary/40 shadow-sm"
-                    : "border-border hover:shadow-sm hover:border-fg-subtle/40",
+                    ? "border-primary/70 shadow-sm"
+                    : "border-border hover:border-border-strong hover:shadow-sm",
                 )}
               >
-                <div
-                  className={cn(
-                    "pointer-events-none absolute inset-0 opacity-50 bg-gradient-to-br",
-                    tile.accent,
-                  )}
-                />
+                {active ? (
+                  <span className="absolute inset-y-3 start-0 w-[3px] rounded-e-full bg-primary" />
+                ) : null}
                 <button
                   type="button"
                   onClick={() => onToggle(tile.provider)}
-                  className="relative w-full text-start p-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded-xl"
+                  className="relative w-full text-start p-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded-md"
                   aria-pressed={active}
                 >
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
                       <div
                         className={cn(
-                          "h-8 w-8 rounded-lg grid place-items-center bg-surface/80 backdrop-blur-sm border border-border/60",
+                          "h-8 w-8 rounded-md grid place-items-center border border-border/70 bg-surface-muted",
+                          tile.accent,
                         )}
                       >
                         <Icon className="h-4 w-4" />

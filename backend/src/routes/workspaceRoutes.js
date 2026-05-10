@@ -5,7 +5,7 @@ const validate = require("../middleware/validate");
 const workspaceContext = require("../middleware/workspaceContext");
 const {
   createWorkspaceSchema,
-  updateBrandVoiceSchema,
+  updateBusinessProfileSchema,
 } = require("../validators/workspaceValidator");
 const {
   listWorkspaces,
@@ -16,8 +16,9 @@ const {
   listSyncJobsForWorkspace,
   listInsightsForWorkspace,
   listRecommendationsForWorkspace,
-  getBrandVoice,
-  updateBrandVoice,
+  getBusinessProfile,
+  updateBusinessProfile,
+  applyBorn2HikeProfile,
   demoBootstrap,
 } = require("../controllers/workspaceController");
 const {
@@ -30,6 +31,12 @@ const {
   listInsightsQuerySchema,
   listRecommendationsQuerySchema,
 } = require("../validators/aiLayerValidator");
+const {
+  trendIntelligenceQuerySchema,
+} = require("../validators/trendInsightValidator");
+const {
+  getTrendIntelligence,
+} = require("../controllers/trendInsightController");
 
 const router = express.Router();
 
@@ -71,14 +78,23 @@ router.get(
   asyncHandler(listRecommendationsForWorkspace),
 );
 
-// GET  /api/workspaces/:id/brand-voice -- read brand voice + industry_hint + primary_region
-router.get("/:id/brand-voice", asyncHandler(getBrandVoice));
+// GET /api/workspaces/:workspaceId/trend-intelligence
+router.get(
+  "/:workspaceId/trend-intelligence",
+  validate(trendIntelligenceQuerySchema, "query"),
+  asyncHandler(getTrendIntelligence),
+);
 
-// PATCH /api/workspaces/:id/brand-voice -- partial upsert
+// GET/PATCH /api/workspaces/:id/business-profile -- settings used by trend and competitor intelligence.
+router.get("/:id/business-profile", asyncHandler(getBusinessProfile));
 router.patch(
-  "/:id/brand-voice",
-  validate(updateBrandVoiceSchema),
-  asyncHandler(updateBrandVoice),
+  "/:id/business-profile",
+  validate(updateBusinessProfileSchema),
+  asyncHandler(updateBusinessProfile),
+);
+router.post(
+  "/:id/business-profile/born2hike",
+  asyncHandler(applyBorn2HikeProfile),
 );
 
 // POST /api/workspaces/demo-bootstrap  -- resolve workspace from header/body

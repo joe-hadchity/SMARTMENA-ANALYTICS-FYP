@@ -4,7 +4,9 @@ const recommendationService = require("../services/recommendationService");
 const demoBootstrapService = require("../services/demoBootstrapService");
 
 async function listWorkspaces(req, res) {
-  const rows = await workspaceService.listWorkspaces();
+  const rows = req.authUser?.id
+    ? await workspaceService.listWorkspacesForUser(req.authUser.id)
+    : await workspaceService.listWorkspaces();
   res.json(rows);
 }
 
@@ -14,7 +16,9 @@ async function getWorkspace(req, res) {
 }
 
 async function createWorkspace(req, res) {
-  const row = await workspaceService.createWorkspace(req.body);
+  const row = req.authUser?.id
+    ? await workspaceService.createWorkspaceForUser(req.body, req.authUser.id)
+    : await workspaceService.createWorkspace({ ...req.body });
   res.status(201).json(row);
 }
 
@@ -37,7 +41,6 @@ async function listSyncJobsForWorkspace(req, res) {
 }
 
 async function listInsightsForWorkspace(req, res) {
-  // Existence check produces a clean 404 if the id is unknown.
   await workspaceService.getWorkspaceById(req.params.id);
   const rows = await insightsService.listInsightsForWorkspace(req.params.id, {
     insightType: req.query.insightType,
@@ -60,19 +63,22 @@ async function listRecommendationsForWorkspace(req, res) {
   res.json(rows);
 }
 
-async function getBrandVoice(req, res) {
-  const row = await workspaceService.getBrandVoice(req.params.id);
+async function getBusinessProfile(req, res) {
+  const row = await workspaceService.getBusinessProfile(req.params.id);
   res.json(row);
 }
 
-async function updateBrandVoice(req, res) {
-  const row = await workspaceService.upsertBrandVoice(req.params.id, req.body);
+async function updateBusinessProfile(req, res) {
+  const row = await workspaceService.upsertBusinessProfile(req.params.id, req.body);
+  res.json(row);
+}
+
+async function applyBorn2HikeProfile(req, res) {
+  const row = await workspaceService.applyBorn2HikeProfile(req.params.id);
   res.json(row);
 }
 
 async function demoBootstrap(req, res) {
-  // Accept either /:id/demo-bootstrap (path param) or /demo-bootstrap with
-  // x-workspace-id header / body { workspaceId }. The route file binds both.
   const workspaceId =
     req.params.id ||
     req.workspace?.id ||
@@ -100,7 +106,8 @@ module.exports = {
   listSyncJobsForWorkspace,
   listInsightsForWorkspace,
   listRecommendationsForWorkspace,
-  getBrandVoice,
-  updateBrandVoice,
+  getBusinessProfile,
+  updateBusinessProfile,
+  applyBorn2HikeProfile,
   demoBootstrap,
 };

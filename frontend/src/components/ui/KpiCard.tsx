@@ -54,7 +54,7 @@ function DeltaPill({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[11px] font-semibold",
+        "font-numeric inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[11px] font-semibold",
         tone,
       )}
     >
@@ -118,33 +118,35 @@ export default function KpiCard({
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-xl border border-border bg-surface shadow-sm",
-        "transition-[box-shadow,transform] hover:shadow-md",
+        "relative overflow-hidden rounded-md border border-border bg-surface shadow-xs",
+        "transition-[border-color,box-shadow] hover:border-border-strong hover:shadow-sm",
         "p-4",
         className,
       )}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <div className="text-[11px] font-medium uppercase tracking-wider text-fg-muted">
+          <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-fg-muted">
             {label}
           </div>
           <div className="mt-1.5 flex items-baseline gap-2 flex-wrap">
             {loading ? (
               <Skeleton className="h-7 w-20" />
             ) : (
-              <span className="text-2xl font-semibold tracking-tight text-fg">
+              <span className="font-numeric text-[1.6rem] font-semibold leading-none text-fg">
                 {value}
               </span>
             )}
             <DeltaPill delta={delta} invert={deltaInvert} locale={locale} />
           </div>
           {hint ? (
-            <div className="mt-1 text-[11px] text-fg-subtle">{hint}</div>
+            <div className="mt-1.5 text-[11px] leading-snug text-fg-subtle">
+              {hint}
+            </div>
           ) : null}
         </div>
         {Icon ? (
-          <div className="h-8 w-8 shrink-0 rounded-lg bg-primary-soft text-primary grid place-items-center">
+          <div className="h-8 w-8 shrink-0 rounded-md border border-border/70 bg-surface-muted text-fg-muted grid place-items-center">
             <Icon className="h-4 w-4" />
           </div>
         ) : null}

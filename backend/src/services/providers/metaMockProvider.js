@@ -46,6 +46,17 @@ function randInt(rand, min, max) {
   return Math.floor(rand() * (max - min + 1)) + min;
 }
 
+function isOutdoorHandle(...values) {
+  return Boolean(
+    values
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, " ")
+      .match(/\b(born2hike|hike|hiking|trail|outdoor|adventure|lebanon)\b/),
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Bilingual caption pool tuned for MENA SMEs.
 // Keep entries short and realistic; each entry has an Arabic and English
@@ -115,6 +126,60 @@ const CAPTIONS = [
   },
 ];
 
+const HIKING_CAPTIONS = [
+  {
+    en: "Weekend trail reset with the Born2Hike crew. Save this route for your next Lebanon mountain escape.",
+    vertical: "outdoor_travel",
+  },
+  {
+    en: "Waterfall hike recap: fresh air, slow climbs, and a group finish worth the early wake-up.",
+    vertical: "outdoor_travel",
+  },
+  {
+    en: "Sunset views from the ridge. DM us to join next weekend's group hike.",
+    vertical: "outdoor_travel",
+  },
+  {
+    en: "Trail tip: bring 2L of water, layered clothing, and shoes with grip for rocky Lebanon routes.",
+    vertical: "outdoor_travel",
+  },
+  {
+    en: "From cedar shade to mountain views, this route is made for a calm Sunday escape.",
+    vertical: "outdoor_travel",
+  },
+  {
+    en: "Group hikes hit different when the whole crew reaches the viewpoint together.",
+    vertical: "outdoor_travel",
+  },
+  {
+    en: "New route check: easy-to-medium trail, early start, coffee stop after the hike.",
+    vertical: "outdoor_travel",
+  },
+  {
+    en: "Leave only footprints. This weekend's hike includes a quick trail cleanup with the crew.",
+    vertical: "outdoor_travel",
+  },
+  {
+    en: "Save this checklist before your next Lebanon hike: water, snacks, sunscreen, power bank, and a light jacket.",
+    vertical: "outdoor_travel",
+  },
+  {
+    en: "A short reel from today's climb: trail start, group moments, summit view, and the way back down.",
+    vertical: "outdoor_travel",
+  },
+];
+
+function captionPoolForAccount(account) {
+  return isOutdoorHandle(
+    account.handle,
+    account.display_name,
+    account.external_account_id,
+    account.metadata?.bio,
+  )
+    ? HIKING_CAPTIONS
+    : CAPTIONS;
+}
+
 const POST_TYPES_INSTAGRAM = ["image", "reel", "carousel", "story", "video"];
 const POST_TYPES_FACEBOOK = ["image", "video", "carousel", "text"];
 
@@ -146,6 +211,7 @@ function metaMockProvider(providerKey) {
 
     const seed = seedFrom(`${providerKey}:${resolvedHandle}`);
     const rand = mulberry32(seed);
+    const outdoor = isOutdoorHandle(resolvedHandle, displayName);
 
     const externalAccountId = `mock_${providerKey}_${seed.toString(16)}`;
     const avatarHue = randInt(rand, 0, 360);
@@ -166,8 +232,9 @@ function metaMockProvider(providerKey) {
       metadata: {
         mockSeed: seed,
         kind: kindLabel.toLowerCase(),
-        followers: randInt(rand, 1500, 120000),
+        followers: outdoor ? randInt(rand, 6500, 24000) : randInt(rand, 1500, 120000),
         following: randInt(rand, 50, 900),
+        demoVertical: outdoor ? "outdoor_travel" : "generic_sme",
         bio:
           providerKey === "meta_instagram"
             ? "MENA SME demo account — تجربة"
@@ -213,17 +280,18 @@ function metaMockProvider(providerKey) {
 
     const now = Date.now();
     const dayMs = 24 * 60 * 60 * 1000;
+    const captions = captionPoolForAccount(account);
 
     const posts = [];
     for (let i = 0; i < limit; i += 1) {
-      const entry = pick(rand, CAPTIONS);
+      const entry = pick(rand, captions);
       const langRoll = rand();
       let caption;
       let captionLang;
-      if (langRoll < 0.45) {
+      if (entry.ar && langRoll < 0.45) {
         caption = entry.ar;
         captionLang = "ar";
-      } else if (langRoll < 0.8) {
+      } else if (!entry.ar || langRoll < 0.8) {
         caption = entry.en;
         captionLang = "en";
       } else {

@@ -3,20 +3,21 @@ import axios, { AxiosInstance } from "axios";
 import type {
   AnalyticsOverview,
   AnalyticsTimeseries,
-  BrandVoice,
+  BusinessProfile,
   Campaign,
   CampaignWithRelations,
-  HealthCheck,
-  Insight,
   CompetitorAccount,
-  CompetitorAggregate,
-  CompetitorDigestRun,
-  CompetitorPost,
-  TrendDetail,
-  TrendKind,
-  TrendRebuildSummary,
-  TrendSortBy,
-  TrendsListResponse,
+  CompetitorCandidate,
+  CompetitorComparisonResponse,
+  CompetitorDiscoveryResponse,
+  HealthCheck,
+  HashtagSearchResponse,
+  HashtagTrendResponse,
+  TrackedHashtag,
+  Insight,
+  InboxItem,
+  InboxSummary,
+  TrendIntelligenceResponse,
   MenaRecommendation,
   OAuthStatus,
   Provider,
@@ -30,13 +31,37 @@ import type {
   SyncedPost,
   TopPost,
   Workspace,
-  WorkspaceBrandVoice,
 } from "./types";
 
 const BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4000/api";
 
 const WORKSPACE_STORAGE_KEY = "smartmena.workspaceId";
+const AUTH_TOKEN_STORAGE_KEY = "smartmena.authToken";
+const AUTH_REFRESH_STORAGE_KEY = "smartmena.refreshToken";
+
+export type AuthUser = {
+  id: string;
+  email: string;
+  name: string;
+};
+
+export type AuthWorkspace = Workspace & {
+  role?: "owner" | "admin" | "member" | "viewer" | "demo";
+};
+
+export type AuthPayload = {
+  user: AuthUser;
+  session?: {
+    accessToken: string;
+    refreshToken?: string;
+    expiresAt?: number;
+    tokenType?: string;
+  };
+  workspaces: AuthWorkspace[];
+  activeWorkspace: Workspace | null;
+  activeRole: string | null;
+};
 
 function readWorkspaceId(): string | null {
   if (typeof window === "undefined") return null;
@@ -59,6 +84,42 @@ export function setStoredWorkspaceId(id: string | null) {
   }
 }
 
+export function readAuthToken(): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    return window.localStorage.getItem(AUTH_TOKEN_STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+export function setStoredAuthSession(
+  session: AuthPayload["session"] | null,
+) {
+  if (typeof window === "undefined") return;
+  try {
+    if (session?.accessToken) {
+      window.localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, session.accessToken);
+      if (session.refreshToken) {
+        window.localStorage.setItem(
+          AUTH_REFRESH_STORAGE_KEY,
+          session.refreshToken,
+        );
+      }
+    } else {
+      window.localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
+      window.localStorage.removeItem(AUTH_REFRESH_STORAGE_KEY);
+    }
+  } catch {
+    // ignore
+  }
+}
+
+export function clearStoredAuth() {
+  setStoredAuthSession(null);
+  setStoredWorkspaceId(null);
+}
+
 function createClient(): AxiosInstance {
   const client = axios.create({
     baseURL: BASE_URL,
@@ -66,10 +127,14 @@ function createClient(): AxiosInstance {
     headers: { "Content-Type": "application/json" },
   });
 
-  client.interceptors.request.use((config) => {
+  client.interceptors.request.use(async (config) => {
     const wsid = readWorkspaceId();
     if (wsid) {
       config.headers["x-workspace-id"] = wsid;
+    }
+    const token = readAuthToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   });
@@ -77,6 +142,16 @@ function createClient(): AxiosInstance {
   client.interceptors.response.use(
     (response) => response,
     (error) => {
+      if (
+        error?.response?.status === 401 &&
+        typeof window !== "undefined" &&
+        !window.location.pathname.startsWith("/login") &&
+        !window.location.pathname.startsWith("/register")
+      ) {
+        clearStoredAuth();
+        window.location.assign("/login");
+      }
+
       const data = error?.response?.data;
       const message =
         (data && typeof data === "object" && (data.message as string)) ||
@@ -98,6 +173,56 @@ function createClient(): AxiosInstance {
 const http = createClient();
 
 // ---------------------------------------------------------------------------
+// Authentication
+// ---------------------------------------------------------------------------
+
+export const authApi = {
+  login: async (input: {
+    email: string;
+    password: string;
+  }): Promise<AuthPayload> => {
+    const payload = (await http.post("/auth/login", input)).data;
+    setStoredAuthSession(payload.session);
+    if (payload.activeWorkspace?.id) {
+      setStoredWorkspaceId(payload.activeWorkspace.id);
+    }
+    return payload;
+  },
+  register: async (input: {
+    name: string;
+    email: string;
+    password: string;
+    workspaceName?: string;
+    region?: string;
+    locale?: "ar" | "en";
+    industry?: string;
+  }): Promise<AuthPayload> => {
+    const payload = (await http.post("/auth/register", input)).data;
+    setStoredAuthSession(payload.session);
+    if (payload.activeWorkspace?.id) {
+      setStoredWorkspaceId(payload.activeWorkspace.id);
+    }
+    return payload;
+  },
+  me: async (): Promise<AuthPayload> => (await http.get("/auth/me")).data,
+  bootstrapBorn2Hike: async (input: {
+    email?: string;
+    password?: string;
+    name?: string;
+  } = {}): Promise<{
+    email: string;
+    password: string;
+    user: AuthUser;
+    workspace: Workspace;
+    bootstrap: unknown;
+    warnings: string[];
+  }> => (await http.post("/auth/bootstrap-born2hike", input)).data,
+  logout: () => {
+    clearStoredAuth();
+  },
+};
+
+// ---------------------------------------------------------------------------
 // Workspaces
 // ---------------------------------------------------------------------------
 
@@ -110,20 +235,19 @@ export const workspacesApi = {
     slug?: string;
     region_default?: string;
     locale_default?: "ar" | "en";
+    industry?: string;
   }): Promise<Workspace> => (await http.post("/workspaces", input)).data,
   getById: async (id: string): Promise<Workspace> =>
     (await http.get(`/workspaces/${id}`)).data,
-  brandVoice: async (id: string): Promise<WorkspaceBrandVoice> =>
-    (await http.get(`/workspaces/${id}/brand-voice`)).data,
-  updateBrandVoice: async (
+  businessProfile: async (id: string): Promise<BusinessProfile> =>
+    (await http.get(`/workspaces/${id}/business-profile`)).data,
+  updateBusinessProfile: async (
     id: string,
-    input: {
-      industry_hint?: string | null;
-      primary_region?: string | null;
-      brand_voice?: Partial<BrandVoice>;
-    },
-  ): Promise<WorkspaceBrandVoice> =>
-    (await http.patch(`/workspaces/${id}/brand-voice`, input)).data,
+    input: Partial<BusinessProfile>,
+  ): Promise<BusinessProfile> =>
+    (await http.patch(`/workspaces/${id}/business-profile`, input)).data,
+  applyBorn2HikeProfile: async (id: string): Promise<BusinessProfile> =>
+    (await http.post(`/workspaces/${id}/business-profile/born2hike`, {})).data,
   demoBootstrap: async (
     id?: string,
   ): Promise<{
@@ -134,12 +258,53 @@ export const workspacesApi = {
     metricsRecorded: number;
     insightsGenerated: number;
     recommendationsInserted: number;
-    contentScoresInserted: number;
     warnings: string[];
   }> => {
     const url = id ? `/workspaces/${id}/demo-bootstrap` : `/workspaces/demo-bootstrap`;
     return (await http.post(url, {})).data;
   },
+};
+
+export const trendIntelligenceApi = {
+  get: async (
+    workspaceId: string,
+    params: {
+      scope?: "micro" | "macro" | "all";
+      limit?: number;
+      brand_id?: string;
+    } = {},
+  ): Promise<TrendIntelligenceResponse> =>
+    (
+      await http.get(`/workspaces/${workspaceId}/trend-intelligence`, {
+        params,
+      })
+    ).data,
+};
+
+export const hashtagTrendsApi = {
+  list: async (): Promise<HashtagTrendResponse> =>
+    (await http.get("/hashtags")).data,
+  search: async (q: string): Promise<HashtagSearchResponse> =>
+    (await http.get("/hashtags/search", { params: { q } })).data,
+  create: async (input: {
+    tag: string;
+    platform?: string;
+    display_name?: string;
+    refresh?: boolean;
+    limit?: number;
+  }): Promise<TrackedHashtag> => (await http.post("/hashtags", input)).data,
+  refresh: async (
+    id: string,
+    input: { limit?: number } = {},
+  ): Promise<{ hashtag: TrackedHashtag; warnings: string[] }> =>
+    (await http.post(`/hashtags/${id}/refresh`, input)).data,
+  remove: async (id: string): Promise<{ id: string; deleted: true }> =>
+    (await http.delete(`/hashtags/${id}`)).data,
+  snapshots: async (
+    id: string,
+    params: { limit?: number } = {},
+  ): Promise<TrackedHashtag> =>
+    (await http.get(`/hashtags/${id}/snapshots`, { params })).data,
 };
 
 // ---------------------------------------------------------------------------
@@ -169,6 +334,50 @@ export const socialAccountsApi = {
   }> => (await http.post(`/social-accounts/${id}/sync`, input)).data,
   remove: async (id: string): Promise<{ id: string; deleted: true }> =>
     (await http.delete(`/social-accounts/${id}`)).data,
+};
+
+// ---------------------------------------------------------------------------
+// Social posts (social_posts table — Apify-scraped + future OAuth)
+// ---------------------------------------------------------------------------
+
+export type SocialPostMetrics = {
+  likes: number;
+  comments: number;
+  shares: number;
+  saves: number;
+  impressions: number;
+  reach: number;
+  engagement_rate: number | null;
+  snapshot_time: string;
+};
+
+export type SocialPost = {
+  id: string;
+  social_account_id: string;
+  platform_post_id: string;
+  caption: string | null;
+  media_type: string | null;
+  media_url: string | null;
+  permalink: string | null;
+  published_at: string | null;
+  metadata_json: Record<string, unknown>;
+  created_at: string;
+  social_accounts: { handle: string; display_name: string | null; provider: string } | null;
+  latest_metrics: SocialPostMetrics | null;
+};
+
+export const socialPostsApi = {
+  list: async (params: {
+    socialAccountId?: string;
+    mediaType?: string;
+    limit?: number;
+  } = {}): Promise<SocialPost[]> =>
+    (await http.get("/social-posts", { params })).data,
+  refresh: async (input: { limit?: number } = {}): Promise<{
+    posts_imported: number;
+    account_id: string;
+    warnings: string[];
+  }> => (await http.post("/social-posts/refresh", input)).data,
 };
 
 // ---------------------------------------------------------------------------
@@ -214,6 +423,158 @@ export const analyticsApi = {
     } = {},
   ): Promise<TopPost[]> =>
     (await http.get("/analytics/top-posts", { params })).data,
+};
+
+// ---------------------------------------------------------------------------
+// Audience insights
+// ---------------------------------------------------------------------------
+
+export type AudienceInsightRow = {
+  value: number;
+  share?: number | null;
+};
+
+export type AudienceInsightsPayload = {
+  source: "meta_graph";
+  generated_at: string;
+  window_days: number;
+  account: {
+    id: string;
+    handle: string | null;
+    display_name: string | null;
+    provider: string;
+    last_synced_at: string | null;
+  } | null;
+  kpis: {
+    followers: number | null;
+    follower_delta: number | null;
+    reach: number;
+    impressions: number;
+    engaged_accounts: number;
+    profile_views: number;
+    posts_analyzed: number;
+  };
+  follower_growth: Array<{
+    date: string;
+    followers: number;
+    following: number;
+  }>;
+  active_times: {
+    source: "meta_graph" | "derived_from_posts" | "unavailable";
+    by_hour: Array<{ hour: number; score: number; posts?: number }>;
+    by_day: Array<{ day: string; score: number; posts?: number }>;
+  };
+  gender_distribution: Array<AudienceInsightRow & { gender: string }>;
+  age_ranges: Array<AudienceInsightRow & { range: string }>;
+  top_cities: Array<AudienceInsightRow & { name: string }>;
+  top_countries: Array<AudienceInsightRow & { name: string }>;
+  content_response: Array<{ format: string; avg_engagement: number; posts: number }>;
+  sentiment_distribution?: {
+    positive: number;
+    neutral: number;
+    negative: number;
+    total: number;
+    avg_confidence: number | null;
+    coverage: number;
+  };
+  sentiment_source?: "comments" | "captions" | "unavailable";
+  comments_analyzed?: number;
+  caption_sentiment_distribution?: {
+    positive: number;
+    neutral: number;
+    negative: number;
+    total: number;
+    avg_confidence: number | null;
+    coverage: number;
+  };
+  comment_sentiment_distribution?: {
+    positive: number;
+    neutral: number;
+    negative: number;
+    total: number;
+    avg_confidence: number | null;
+    coverage: number;
+  };
+  sentiment_samples?: Array<{
+    id: string;
+    caption: string;
+    permalink: string | null;
+    published_at: string | null;
+    source?: "comments" | "captions";
+    post_caption?: string | null;
+    author?: string | null;
+    sentiment: "positive" | "neutral" | "negative";
+    confidence: number;
+  }>;
+  caption_sentiment_samples?: Array<{
+    id: string;
+    caption: string;
+    permalink: string | null;
+    published_at: string | null;
+    source?: "comments" | "captions";
+    post_caption?: string | null;
+    author?: string | null;
+    sentiment: "positive" | "neutral" | "negative";
+    confidence: number;
+  }>;
+  comment_sentiment_samples?: Array<{
+    id: string;
+    caption: string;
+    permalink: string | null;
+    published_at: string | null;
+    source?: "comments" | "captions";
+    post_caption?: string | null;
+    author?: string | null;
+    sentiment: "positive" | "neutral" | "negative";
+    confidence: number;
+  }>;
+  ai_insights?: Array<{
+    kind: "growth" | "demographic" | "geo" | "timing" | "content" | "sentiment";
+    text: string;
+  }>;
+  warnings: string[];
+  refresh?: {
+    posts_imported: number;
+    metrics_snapshots_inserted: number;
+    comments_imported?: number;
+    warnings: string[];
+  };
+};
+
+export const audienceInsightsApi = {
+  get: async (params: { days?: number } = {}): Promise<AudienceInsightsPayload> =>
+    (await http.get("/audience-insights", { params })).data,
+  refresh: async (input: { limit?: number } = {}): Promise<AudienceInsightsPayload> =>
+    (await http.post("/audience-insights/refresh", input)).data,
+};
+
+// ---------------------------------------------------------------------------
+// Inbox
+// ---------------------------------------------------------------------------
+
+export const inboxApi = {
+  list: async (
+    params: {
+      type?: "all" | "comment" | "message";
+      status?: "all" | "unread" | "read" | "replied" | "archived" | "failed";
+      limit?: number;
+    } = {},
+  ): Promise<InboxItem[]> => (await http.get("/inbox", { params })).data,
+  summary: async (): Promise<InboxSummary> => (await http.get("/inbox/summary")).data,
+  sync: async (input: { limit?: number } = {}): Promise<{
+    comments_imported: number;
+    messages_imported: number;
+    warnings: string[];
+  }> => (await http.post("/inbox/sync", input)).data,
+  markStatus: async (
+    id: string,
+    status: "unread" | "read" | "replied" | "archived",
+  ): Promise<InboxItem> => (await http.patch(`/inbox/${id}/status`, { status })).data,
+  reply: async (
+    id: string,
+    message: string,
+  ): Promise<{ inbound: InboxItem; outbound: InboxItem }> =>
+    (await http.post(`/inbox/${id}/reply`, { message })).data,
 };
 
 // ---------------------------------------------------------------------------
@@ -548,21 +909,30 @@ export const healthApi = {
 // Competitors
 // ---------------------------------------------------------------------------
 
-export type CreateCompetitorInput = {
-  platform: Provider;
+export type CompetitorDiscoveryInput = {
+  platform?: Provider;
+  category?: string;
+  location?: string;
+  page_name?: string;
+  keywords?: string[];
+  hashtags?: string[];
+  audience_size?: string | number;
+  limit?: number;
+};
+
+export type ManualCompetitorInput = {
+  platform?: Provider;
   handle: string;
-  display_name?: string | null;
-  region?: string | null;
-  industry?: string | null;
+  display_name?: string;
+  profile_url?: string;
+  region?: string;
+  industry?: string;
   tags?: string[];
-  source?: "manual" | "ad_library" | "business_discovery" | "mock";
-  is_active?: boolean;
-  metadata?: Record<string, unknown>;
 };
 
 export const competitorsApi = {
   list: async (params?: {
-    platform?: string;
+    platform?: Provider;
     include_inactive?: boolean;
   }): Promise<CompetitorAccount[]> =>
     (
@@ -573,47 +943,77 @@ export const competitorsApi = {
         },
       })
     ).data,
-  get: async (id: string): Promise<CompetitorAccount> =>
-    (await http.get(`/competitors/${id}`)).data,
-  create: async (input: CreateCompetitorInput): Promise<CompetitorAccount> =>
+  candidates: async (params?: {
+    status?: "pending" | "approved" | "rejected" | "all";
+    limit?: number;
+  }): Promise<CompetitorCandidate[]> =>
+    (await http.get("/competitors/candidates", { params })).data,
+  discover: async (
+    input: CompetitorDiscoveryInput,
+  ): Promise<CompetitorDiscoveryResponse> =>
+    (await http.post("/competitors/discover", input)).data,
+  manualAdd: async (
+    input: ManualCompetitorInput,
+  ): Promise<{
+    competitor: CompetitorAccount;
+    candidate: CompetitorCandidate;
+    posts_imported?: number;
+    metrics_snapshots_inserted?: number;
+    warnings: string[];
+  }> =>
     (await http.post("/competitors", input)).data,
-  update: async (
+  approve: async (
     id: string,
-    patch: Partial<CreateCompetitorInput>,
-  ): Promise<CompetitorAccount> =>
-    (await http.patch(`/competitors/${id}`, patch)).data,
-  remove: async (id: string): Promise<{ id: string; deleted: boolean }> =>
-    (await http.delete(`/competitors/${id}`)).data,
-  posts: async (id: string, limit = 20): Promise<CompetitorPost[]> =>
-    (await http.get(`/competitors/${id}/posts`, { params: { limit } })).data,
-  refresh: async (id: string): Promise<{ posts_upserted: number; source: string }> =>
+  ): Promise<{
+    competitor: CompetitorAccount;
+    candidate: CompetitorCandidate;
+    posts_imported?: number;
+    metrics_snapshots_inserted?: number;
+    warnings?: string[];
+  }> =>
+    (await http.post(`/competitors/candidates/${id}/approve`)).data,
+  reject: async (id: string): Promise<CompetitorCandidate> =>
+    (await http.post(`/competitors/candidates/${id}/reject`)).data,
+  refresh: async (
+    id: string,
+  ): Promise<{
+    competitor: CompetitorAccount;
+    snapshot: unknown;
+    posts_imported?: number;
+    metrics_snapshots_inserted?: number;
+    warnings: string[];
+  }> =>
     (await http.post(`/competitors/${id}/refresh`)).data,
-  refreshAll: async (): Promise<{ refreshed: number; results: unknown[] }> =>
-    (await http.post(`/competitors/refresh-all`)).data,
-  latestDigest: async (): Promise<CompetitorDigestRun | null> => {
-    try {
-      return (await http.get("/competitors/digest/latest")).data;
-    } catch (err: unknown) {
-      const status = (err as { response?: { status?: number } })?.response?.status;
-      if (status === 404) return null;
-      throw err;
-    }
-  },
-  digestRuns: async (): Promise<CompetitorDigestRun[]> =>
-    (await http.get("/competitors/digest/runs")).data,
-  previewAggregate: async (windowDays = 7): Promise<CompetitorAggregate> =>
+  refreshAll: async (): Promise<{
+    refreshed_count: number;
+    posts_imported: number;
+    metrics_snapshots_inserted: number;
+    results: Array<{
+      competitor_id: string;
+      handle: string;
+      platform: Provider;
+      posts_imported: number;
+      metrics_snapshots_inserted: number;
+      warnings: string[];
+    }>;
+    warnings: string[];
+  }> =>
+    (await http.post("/competitors/refresh-all")).data,
+  remove: async (id: string): Promise<CompetitorAccount> =>
+    (await http.delete(`/competitors/${id}`)).data,
+  summary: async (): Promise<{
+    approved_count: number;
+    pending_count: number;
+    rejected_count: number;
+    approved: CompetitorAccount[];
+    pending: CompetitorCandidate[];
+  }> => (await http.get("/competitors/summary")).data,
+  comparison: async (windowDays = 30): Promise<CompetitorComparisonResponse> =>
     (
-      await http.get("/competitors/digest/preview", {
+      await http.get("/competitors/comparison", {
         params: { window_days: windowDays },
       })
     ).data,
-  generateDigest: async (input?: {
-    window_days?: number;
-    locale?: "en" | "ar";
-    delivery_target?: string | null;
-    skip_refresh?: boolean;
-  }): Promise<{ run: CompetitorDigestRun }> =>
-    (await http.post("/competitors/digest/generate", input || {})).data,
 };
 
 // ---------------------------------------------------------------------------
@@ -624,7 +1024,7 @@ export type AssistantConversation = {
   id: string;
   workspace_id: string;
   title: string | null;
-  feature: "assistant" | "caption_studio" | "other";
+  feature: "assistant" | "report_narrative" | "other";
   metadata_json: Record<string, unknown>;
   created_at: string;
   updated_at: string;
@@ -782,95 +1182,6 @@ export const assistantApi = {
 };
 
 // ---------------------------------------------------------------------------
-// Caption Studio (ranked variant composer)
-// ---------------------------------------------------------------------------
-
-export type ContentFormat =
-  | "post"
-  | "story"
-  | "reel_script"
-  | "thread"
-  | "tweet"
-  | "facebook_post"
-  | "ad";
-
-export type ComposeRequest = {
-  brief: string;
-  platform: string;
-  format?: ContentFormat;
-  language?: "ar" | "en" | "mix";
-  dialect?: "khaleeji" | "levantine" | "egyptian" | "maghrebi" | "msa";
-  tone?: string;
-  length?: "short" | "medium" | "long";
-  count?: number;
-  callToAction?: string;
-  hashtags?: string[];
-  audience?: string;
-  locale?: "en" | "ar";
-};
-
-export type ComposeVariantFormatMeta = {
-  hook?: string | null;
-  beats?: string[] | null;
-  cta?: string | null;
-  parts?: string[] | null;
-  emoji_set?: string[] | null;
-};
-
-export type ComposeVariantScore = {
-  predicted_sentiment: "positive" | "neutral" | "negative";
-  sentiment_confidence: number;
-  predicted_roi: number | null;
-  predicted_engagement: number | null;
-  confidence_score: number | null;
-  language_mix: string;
-  tips: Array<{ id: string; text?: string; text_en?: string; text_ar?: string; priority?: string }>;
-  recommendation_text: string;
-  recommendation_ar: string;
-  length_chars: number;
-};
-
-export type ComposeVariant = {
-  index: number;
-  rank: number;
-  is_recommended: boolean;
-  text: string;
-  language: "ar" | "en" | "mix";
-  dialect: string;
-  tone: string | null;
-  hashtags: string[];
-  length_chars: number;
-  rationale: string | null;
-  composite_score: number;
-  score: ComposeVariantScore | null;
-  score_error?: string;
-  format?: ContentFormat;
-  format_meta?: ComposeVariantFormatMeta;
-};
-
-export type ComposeResponse = {
-  workspace_id: string;
-  platform: string;
-  format?: ContentFormat;
-  brief: string;
-  language: "ar" | "en" | "mix";
-  dialect: string;
-  length: "short" | "medium" | "long";
-  tone: string | null;
-  count: number;
-  source: "llm" | "fallback";
-  llm_error: string | null;
-  variants: ComposeVariant[];
-  shared_tips: string;
-  generated_at: string;
-};
-
-export const composeApi = {
-  compose: async (input: ComposeRequest): Promise<ComposeResponse> =>
-    (await http.post("/content/compose", input)).data,
-};
-
-// ---------------------------------------------------------------------------
 // Growth Report
 // ---------------------------------------------------------------------------
 
@@ -962,7 +1273,7 @@ export type GrowthReport = {
 export type ReportShare = {
   id: string;
   token: string;
-  report_type: "growth" | "competitor";
+  report_type: "growth";
   locale: "en" | "ar";
   created_at: string;
   expires_at: string | null;
@@ -971,7 +1282,7 @@ export type ReportShare = {
 
 export type SharedGrowthReport = {
   token: string;
-  report_type: "growth" | "competitor";
+  report_type: "growth";
   locale: "en" | "ar";
   created_at: string;
   expires_at: string | null;
@@ -1103,35 +1414,3 @@ export const reportsApi = {
   },
 };
 
-// ---------------------------------------------------------------------------
-// Trend Radar (Phase 7 Layer 1)
-// ---------------------------------------------------------------------------
-
-export type TrendsListParams = {
-  kind?: TrendKind | "all";
-  window_days?: 7 | 14 | 30 | number;
-  sort_by?: TrendSortBy;
-  limit?: number;
-  platform?: string;
-  source?: "own" | "competitor" | "all";
-  search?: string;
-};
-
-export const trendsApi = {
-  list: async (params?: TrendsListParams): Promise<TrendsListResponse> =>
-    (await http.get("/trends", { params })).data,
-  detail: async (
-    id: string,
-    windowDays = 30,
-  ): Promise<TrendDetail> =>
-    (
-      await http.get(`/trends/${id}`, {
-        params: { window_days: windowDays },
-      })
-    ).data,
-  rebuild: async (input?: {
-    window_days?: number;
-    allow_llm?: boolean;
-  }): Promise<TrendRebuildSummary> =>
-    (await http.post("/trends/rebuild", input || {})).data,
-};

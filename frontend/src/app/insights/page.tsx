@@ -118,6 +118,9 @@ export default function InsightsPage() {
         {q.data?.map((i) => {
           const title = locale === "ar" ? i.title_ar : i.title_en;
           const body = locale === "ar" ? i.body_ar : i.body_en;
+          const isAzure =
+            i.model_version?.startsWith("azure-openai") ||
+            i.data?.source === "azure_openai";
           const tone: "amber" | "green" | "neutral" =
             i.severity === "warning"
               ? "amber"
@@ -130,6 +133,7 @@ export default function InsightsPage() {
                 <Chip tone={tone}>
                   {t(`insights.severity.${i.severity}`)}
                 </Chip>
+                {isAzure ? <Chip tone="green">Azure AI</Chip> : null}
                 <Chip>{i.insight_type}</Chip>
                 <span className="ms-auto text-[11px] text-fg-subtle">
                   {formatDate(i.generated_at, locale)}
@@ -141,7 +145,7 @@ export default function InsightsPage() {
               ) : null}
               {i.confidence != null ? (
                 <div className="mt-3 text-[11px] text-fg-muted">
-                  confidence: {(Number(i.confidence) * 100).toFixed(0)}%
+                  confidence: <span className="font-numeric">{(Number(i.confidence) * 100).toFixed(0)}%</span>
                 </div>
               ) : null}
               <details className="mt-3 text-xs text-fg-muted">

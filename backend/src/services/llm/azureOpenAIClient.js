@@ -2,8 +2,8 @@
  * Shared Azure OpenAI client for SmartMENA.
  *
  * One place that knows how to talk to Azure OpenAI from the backend. Every
- * LLM-powered feature in the product (assistant dock, caption studio, report
- * narrative, competitor digest) should import from here and NEVER re-wire
+ * LLM-powered feature in the product (assistant dock, report narrative) should
+ * import from here and NEVER re-wire
  * Azure config on its own.
  *
  * Design notes
@@ -55,6 +55,17 @@ function isEnabled() {
   return Boolean(env.AZURE_OPENAI_ENABLED);
 }
 
+function isReasoningDeployment() {
+  return /^o\d/i.test(env.AZURE_OPENAI_DEPLOYMENT || "");
+}
+
+function completionBudget(maxTokens) {
+  const requested = Number(maxTokens) || 600;
+  // o-series deployments spend part of max_completion_tokens on hidden
+  // reasoning tokens. Small budgets can produce an empty visible answer.
+  return isReasoningDeployment() ? Math.max(requested, 900) : requested;
+}
+
 /**
  * Rough USD cost estimator. Azure bills per 1K tokens, priced by deployment.
  * We use a conservative default of gpt-4o-mini-ish rates. When a real price
@@ -85,6 +96,7 @@ async function chat({
   temperature = 0.4,
   maxTokens = 600,
   responseFormat,
+  allowEmptyRetry = true,
 }) {
   const client = getClient();
   if (!client) throw new LLMDisabledError();
@@ -94,9 +106,14 @@ async function chat({
     // the SDK but ignored by Azure (the deployment in the URL wins).
     model: env.AZURE_OPENAI_DEPLOYMENT,
     messages,
-    temperature,
-    max_tokens: maxTokens,
   };
+  if (isReasoningDeployment()) {
+    params.max_completion_tokens = completionBudget(maxTokens);
+    params.reasoning_effort = "low";
+  } else {
+    params.temperature = temperature;
+    params.max_tokens = maxTokens;
+  }
   if (responseFormat) params.response_format = responseFormat;
 
   const completion = await client.chat.completions.create(params);
@@ -104,6 +121,22 @@ async function chat({
   const choice = completion.choices?.[0];
   const text = choice?.message?.content ?? "";
   const usage = completion.usage || {};
+  if (
+    allowEmptyRetry &&
+    isReasoningDeployment() &&
+    !text.trim() &&
+    choice?.finish_reason === "length" &&
+    completionBudget(maxTokens) < 2200
+  ) {
+    return chat({
+      messages,
+      temperature,
+      maxTokens: Math.min(completionBudget(maxTokens) * 2, 2200),
+      responseFormat,
+      allowEmptyRetry: false,
+    });
+  }
+
   const costUSD = estimateCostUSD({
     promptTokens: usage.prompt_tokens || 0,
     completionTokens: usage.completion_tokens || 0,
@@ -142,14 +175,21 @@ async function* streamChat({
   const client = getClient();
   if (!client) throw new LLMDisabledError();
 
-  const stream = await client.chat.completions.create({
+  const params = {
     model: env.AZURE_OPENAI_DEPLOYMENT,
     messages,
-    temperature,
-    max_tokens: maxTokens,
     stream: true,
     stream_options: { include_usage: true },
-  });
+  };
+  if (isReasoningDeployment()) {
+    params.max_completion_tokens = completionBudget(maxTokens);
+    params.reasoning_effort = "low";
+  } else {
+    params.temperature = temperature;
+    params.max_tokens = maxTokens;
+  }
+
+  const stream = await client.chat.completions.create(params);
 
   let fullText = "";
   let usage = { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
@@ -183,6 +223,7 @@ module.exports = {
   chat,
   streamChat,
   isEnabled,
+  isReasoningDeployment,
   estimateCostUSD,
   LLMDisabledError,
 };

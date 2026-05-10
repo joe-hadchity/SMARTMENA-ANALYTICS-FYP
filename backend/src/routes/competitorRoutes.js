@@ -3,52 +3,55 @@ const express = require("express");
 const asyncHandler = require("../utils/asyncHandler");
 const validate = require("../middleware/validate");
 const workspaceContext = require("../middleware/workspaceContext");
+const controller = require("../controllers/competitorController");
 const {
-  createCompetitorSchema,
-  updateCompetitorSchema,
-  runDigestSchema,
+  comparisonQuerySchema,
+  discoverCompetitorsSchema,
+  listCandidatesQuerySchema,
+  listCompetitorsQuerySchema,
+  manualCompetitorSchema,
 } = require("../validators/competitorValidator");
-const {
-  list,
-  getOne,
-  create,
-  update,
-  remove,
-  listPosts,
-  refreshOne,
-  refreshAll,
-  latestDigest,
-  listDigestRuns,
-  generateDigest,
-  previewAggregate,
-} = require("../controllers/competitorController");
 
 const router = express.Router();
 
 router.use(workspaceContext());
 
-// ---------------------------------------------------------------------------
-// Collection
-// ---------------------------------------------------------------------------
-router.get("/", asyncHandler(list));
-router.post("/", validate(createCompetitorSchema), asyncHandler(create));
-router.post("/refresh-all", asyncHandler(refreshAll));
+router.get(
+  "/",
+  validate(listCompetitorsQuerySchema, "query"),
+  asyncHandler(controller.listCompetitors),
+);
 
-// ---------------------------------------------------------------------------
-// Digest (mounted BEFORE /:id so the word "digest" doesn't look like a UUID)
-// ---------------------------------------------------------------------------
-router.get("/digest/latest", asyncHandler(latestDigest));
-router.get("/digest/runs", asyncHandler(listDigestRuns));
-router.get("/digest/preview", asyncHandler(previewAggregate));
-router.post("/digest/generate", validate(runDigestSchema), asyncHandler(generateDigest));
+router.post(
+  "/",
+  validate(manualCompetitorSchema),
+  asyncHandler(controller.manualAddCompetitor),
+);
 
-// ---------------------------------------------------------------------------
-// Item
-// ---------------------------------------------------------------------------
-router.get("/:id", asyncHandler(getOne));
-router.patch("/:id", validate(updateCompetitorSchema), asyncHandler(update));
-router.delete("/:id", asyncHandler(remove));
-router.get("/:id/posts", asyncHandler(listPosts));
-router.post("/:id/refresh", asyncHandler(refreshOne));
+router.get("/summary", asyncHandler(controller.summary));
+
+router.get(
+  "/comparison",
+  validate(comparisonQuerySchema, "query"),
+  asyncHandler(controller.comparison),
+);
+
+router.post(
+  "/discover",
+  validate(discoverCompetitorsSchema),
+  asyncHandler(controller.discoverCompetitors),
+);
+
+router.get(
+  "/candidates",
+  validate(listCandidatesQuerySchema, "query"),
+  asyncHandler(controller.listCandidates),
+);
+
+router.post("/candidates/:id/approve", asyncHandler(controller.approveCandidate));
+router.post("/candidates/:id/reject", asyncHandler(controller.rejectCandidate));
+router.post("/refresh-all", asyncHandler(controller.refreshAllCompetitors));
+router.post("/:id/refresh", asyncHandler(controller.refreshCompetitor));
+router.delete("/:id", asyncHandler(controller.removeCompetitor));
 
 module.exports = router;

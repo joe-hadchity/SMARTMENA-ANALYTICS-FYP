@@ -11,11 +11,17 @@ import {
   ChevronLeft,
   ChevronRight,
   Flag,
+  Hash,
+  Instagram,
   Landmark,
+  MessageSquare,
+  MoreHorizontal,
+  PencilLine,
   PlayCircle,
   Sparkles,
   Store,
   Trash2,
+  UploadCloud,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -45,10 +51,12 @@ import { useI18n } from "@/i18n/I18nProvider";
 import {
   scheduledPostsApi,
   socialAccountsApi,
+  socialPostsApi,
   type CreateScheduledPostInput,
   type MenaEvent,
   type ScheduledPost,
   type ScheduledPostStatus,
+  type SocialPost,
 } from "@/lib/api";
 import type { Provider } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -93,6 +101,9 @@ export default function CalendarPage() {
     | { mode: "edit"; post: ScheduledPost }
     | null
   >(null);
+  const [filterProfile, setFilterProfile] = useState<string>("all");
+  const [filterPostType, setFilterPostType] = useState<string>("all");
+  const [filterTag, setFilterTag] = useState<string>("all");
 
   const range = useMemo(() => {
     // Fetch a cushion of 7 days before and after to render adjacent-month cells.
@@ -110,6 +121,13 @@ export default function CalendarPage() {
   const accountsQ = useQuery({
     queryKey: ["social-accounts"],
     queryFn: socialAccountsApi.list,
+  });
+
+  // Pull published posts from Instagram Graph only — these are existing IG posts
+  // shown in the calendar on the dates they went live, with real metrics.
+  const publishedQ = useQuery({
+    queryKey: ["calendar-published"],
+    queryFn: () => socialPostsApi.list({ limit: 500 }),
   });
 
   const publishNow = useMutation({
@@ -140,16 +158,89 @@ export default function CalendarPage() {
     return map;
   }, [calendarQ.data]);
 
+  const allPosts = calendarQ.data?.scheduled_posts ?? [];
+
+  const filterOptions = useMemo(() => {
+    const profiles = new Set<string>();
+    const types = new Set<string>();
+    const tags = new Set<string>();
+    for (const p of allPosts) {
+      if (p.social_account_id) profiles.add(p.social_account_id);
+      else if (p.platform) profiles.add(p.platform);
+      if (p.platform) types.add(p.platform);
+      for (const h of p.hashtags || []) tags.add(h);
+    }
+    return {
+      profiles: Array.from(profiles),
+      types: Array.from(types),
+      tags: Array.from(tags).slice(0, 50),
+    };
+  }, [allPosts]);
+
+  const filteredPosts = useMemo(() => {
+    return allPosts.filter((p) => {
+      if (filterProfile !== "all") {
+        if (p.social_account_id !== filterProfile && p.platform !== filterProfile) {
+          return false;
+        }
+      }
+      if (filterPostType !== "all" && p.platform !== filterPostType) return false;
+      if (filterTag !== "all" && !(p.hashtags || []).includes(filterTag)) return false;
+      return true;
+    });
+  }, [allPosts, filterProfile, filterPostType, filterTag]);
+
   const postsByDay = useMemo(() => {
     const map = new Map<string, ScheduledPost[]>();
-    for (const p of calendarQ.data?.scheduled_posts ?? []) {
+    for (const p of filteredPosts) {
       const key = dayKey(new Date(p.scheduled_at));
       const list = map.get(key) ?? [];
       list.push(p);
       map.set(key, list);
     }
+    // Sort within day by scheduled time
+    for (const list of map.values()) {
+      list.sort(
+        (a, b) =>
+          new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime(),
+      );
+    }
     return map;
-  }, [calendarQ.data]);
+  }, [filteredPosts]);
+
+  const anyFilterActive =
+    filterProfile !== "all" || filterPostType !== "all" || filterTag !== "all";
+
+  const clearFilters = () => {
+    setFilterProfile("all");
+    setFilterPostType("all");
+    setFilterTag("all");
+  };
+
+  const accountsById = useMemo(
+    () => new Map((accountsQ.data ?? []).map((a) => [a.id, a] as const)),
+    [accountsQ.data],
+  );
+
+  const publishedByDay = useMemo(() => {
+    const map = new Map<string, SocialPost[]>();
+    for (const p of publishedQ.data ?? []) {
+      if (p.metadata_json?.source !== "meta_graph") continue;
+      if (!p.published_at) continue;
+      const key = dayKey(new Date(p.published_at));
+      const list = map.get(key) ?? [];
+      list.push(p);
+      map.set(key, list);
+    }
+    for (const list of map.values()) {
+      list.sort(
+        (a, b) =>
+          new Date(b.published_at || 0).getTime() -
+          new Date(a.published_at || 0).getTime(),
+      );
+    }
+    return map;
+  }, [publishedQ.data]);
 
   const days = useMemo(() => buildMonthGrid(anchor), [anchor]);
   const monthLabel = useMemo(
@@ -219,25 +310,66 @@ export default function CalendarPage() {
           </Button>
         </div>
         <div className="text-lg font-semibold text-fg">{monthLabel}</div>
-        <div className="ms-auto flex items-center gap-3 text-xs text-fg-muted">
-          <span className="inline-flex items-center gap-1.5">
-            <span className="h-2.5 w-2.5 rounded-sm bg-primary" />
-            {t("calendar.postsLegend")}
-          </span>
-          <span className="inline-flex items-center gap-1.5">
-            <span className="h-2.5 w-2.5 rounded-sm bg-warning" />
-            {t("calendar.eventsLegend")}
-          </span>
-        </div>
       </div>
+
+      {/* Filter bar — Profiles / Post Types / Tags / Clear all */}
+      <Card padded={false} className="overflow-hidden">
+        <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-border relative">
+          <FilterCell
+            label="Profiles"
+            value={filterProfile}
+            onChange={setFilterProfile}
+            options={[
+              { value: "all", label: "Viewing all" },
+              ...filterOptions.profiles.map((id) => {
+                const acct = accountsById.get(id);
+                return {
+                  value: id,
+                  label: acct ? `@${acct.handle}` : id,
+                };
+              }),
+            ]}
+          />
+          <FilterCell
+            label="Post Types"
+            value={filterPostType}
+            onChange={setFilterPostType}
+            options={[
+              { value: "all", label: "Viewing all" },
+              ...filterOptions.types.map((t) => ({ value: t, label: t })),
+            ]}
+          />
+          <FilterCell
+            label="Tags"
+            value={filterTag}
+            onChange={setFilterTag}
+            options={[
+              { value: "all", label: "Viewing all" },
+              ...filterOptions.tags.map((tag) => ({
+                value: tag,
+                label: `#${tag}`,
+              })),
+            ]}
+          />
+          {anyFilterActive ? (
+            <button
+              type="button"
+              onClick={clearFilters}
+              className="absolute right-3 top-3 text-xs font-medium text-primary hover:underline"
+            >
+              Clear All
+            </button>
+          ) : null}
+        </div>
+      </Card>
 
       {/* Month grid */}
       <Card padded={false} className="overflow-hidden">
-        <div className="grid grid-cols-7 border-b border-border bg-surface-muted">
+        <div className="grid grid-cols-7 border-b border-border bg-surface">
           {weekdayHeaders(locale).map((w) => (
             <div
               key={w}
-              className="px-2 py-2 text-[11px] uppercase tracking-wider text-fg-subtle font-semibold"
+              className="px-3 py-3 text-center text-xs font-medium tracking-wide text-fg-muted border-e last:border-e-0 border-border"
             >
               {w}
             </div>
@@ -248,101 +380,41 @@ export default function CalendarPage() {
             const key = dayKey(d);
             const inMonth = d.getMonth() === anchor.getMonth();
             const isToday = dayKey(new Date()) === key;
+            const isPast =
+              dayKey(d) < dayKey(new Date()) && !isToday;
             const events = eventsByDay.get(key) ?? [];
             const posts = postsByDay.get(key) ?? [];
+            const published = publishedByDay.get(key) ?? [];
+            const isEmpty = events.length + posts.length + published.length === 0;
             return (
-              <button
+              <DayCell
                 key={key}
-                type="button"
-                onClick={() =>
+                date={d}
+                inMonth={inMonth}
+                isToday={isToday}
+                isPast={isPast}
+                events={events}
+                posts={posts}
+                published={published}
+                isEmpty={isEmpty}
+                locale={locale}
+                onScheduleClick={() =>
                   setDrawer({
                     mode: "create",
                     defaultDate: d,
                     eventId: events[0]?.id ?? null,
                   })
                 }
-                className={cn(
-                  "group text-start h-32 sm:h-36 p-1.5 border-t border-s border-border",
-                  "hover:bg-surface-hover transition-colors",
-                  !inMonth && "bg-surface-muted/40",
-                  isToday && "ring-1 ring-inset ring-primary/40",
-                )}
-              >
-                <div className="flex items-center justify-between">
-                  <span
-                    className={cn(
-                      "inline-flex h-6 w-6 items-center justify-center rounded-full text-xs",
-                      isToday
-                        ? "bg-primary text-primary-fg font-semibold"
-                        : inMonth
-                          ? "text-fg"
-                          : "text-fg-subtle",
-                    )}
-                  >
-                    {d.getDate()}
-                  </span>
-                  {events.length + posts.length === 0 && inMonth ? (
-                    <CalendarPlus className="h-3.5 w-3.5 opacity-0 group-hover:opacity-70 text-fg-muted" />
-                  ) : null}
-                </div>
-
-                <div className="mt-1 space-y-1">
-                  {events.slice(0, 2).map((ev) => {
-                    const meta = EVENT_TYPE_META[ev.event_type];
-                    const Icon = meta.icon;
-                    return (
-                      <div
-                        key={ev.id}
-                        className={cn(
-                          "truncate rounded-md px-1.5 py-0.5 text-[11px] flex items-center gap-1",
-                          "bg-warning-soft text-warning-fg/90 border border-warning/30",
-                        )}
-                        title={
-                          locale === "ar"
-                            ? ev.title_ar || ev.title_en
-                            : ev.title_en
-                        }
-                      >
-                        <Icon className="h-3 w-3 shrink-0" />
-                        <span className="truncate">
-                          {locale === "ar"
-                            ? ev.title_ar || ev.title_en
-                            : ev.title_en}
-                        </span>
-                      </div>
-                    );
-                  })}
-                  {posts.slice(0, 3).map((p) => (
-                    <div
-                      key={p.id}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setDrawer({ mode: "edit", post: p });
-                      }}
-                      className={cn(
-                        "truncate rounded-md px-1.5 py-0.5 text-[11px] cursor-pointer",
-                        "bg-primary-soft text-primary border border-primary/20",
-                      )}
-                    >
-                      <span className="font-medium">
-                        {formatTime(p.scheduled_at, locale)}
-                      </span>{" "}
-                      <span className="text-fg-muted">· {p.platform}</span>{" "}
-                      <span>{p.caption}</span>
-                    </div>
-                  ))}
-                  {events.length + posts.length === 0 && inMonth ? (
-                    <div className="text-[10px] text-fg-subtle opacity-0 group-hover:opacity-100 transition">
-                      {t("calendar.noPostsDay")}
-                    </div>
-                  ) : null}
-                  {events.length + posts.length > 5 ? (
-                    <div className="text-[10px] text-fg-muted">
-                      +{events.length + posts.length - 5} more
-                    </div>
-                  ) : null}
-                </div>
-              </button>
+                onDraftClick={() =>
+                  setDrawer({
+                    mode: "create",
+                    defaultDate: d,
+                    eventId: events[0]?.id ?? null,
+                  })
+                }
+                onEditPost={(p) => setDrawer({ mode: "edit", post: p })}
+                accountsById={accountsById}
+              />
             );
           })}
         </div>
@@ -379,6 +451,343 @@ export default function CalendarPage() {
       />
     </div>
   );
+}
+
+// ---------------------------------------------------------------------------
+// Filter bar cell (Profiles / Post Types / Tags)
+// ---------------------------------------------------------------------------
+
+function FilterCell({
+  label,
+  value,
+  onChange,
+  options,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  options: Array<{ value: string; label: string }>;
+}) {
+  const current = options.find((o) => o.value === value) ?? options[0];
+  return (
+    <label className="block px-4 py-3 cursor-pointer hover:bg-surface-hover transition-colors">
+      <div className="text-xs font-semibold text-fg">{label}</div>
+      <div className="mt-0.5 flex items-center justify-between gap-2">
+        <select
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="appearance-none bg-transparent text-xs text-fg-muted focus:outline-none cursor-pointer w-full"
+        >
+          {options.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
+      </div>
+    </label>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Day cell — rich post cards + empty hover state
+// ---------------------------------------------------------------------------
+
+function DayCell({
+  date,
+  inMonth,
+  isToday,
+  isPast,
+  events,
+  posts,
+  published,
+  isEmpty,
+  locale,
+  onScheduleClick,
+  onDraftClick,
+  onEditPost,
+  accountsById,
+}: {
+  date: Date;
+  inMonth: boolean;
+  isToday: boolean;
+  isPast: boolean;
+  events: MenaEvent[];
+  posts: ScheduledPost[];
+  published: SocialPost[];
+  isEmpty: boolean;
+  locale: "en" | "ar";
+  onScheduleClick: () => void;
+  onDraftClick: () => void;
+  onEditPost: (p: ScheduledPost) => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  accountsById: Map<string, any>;
+}) {
+  return (
+    <div
+      className={cn(
+        "group relative min-h-[180px] p-2 border-t border-s border-border",
+        "hover:bg-surface-hover/40 transition-colors",
+        !inMonth && "bg-surface-muted/30",
+        isPast && "opacity-70",
+        isToday && "ring-1 ring-inset ring-primary/40 bg-primary-soft/20",
+      )}
+    >
+      <div className="flex items-center justify-between mb-1.5">
+        <span
+          className={cn(
+            "inline-flex h-6 min-w-6 px-1.5 items-center justify-center rounded-full text-xs font-medium",
+            isToday
+              ? "bg-primary text-primary-fg"
+              : inMonth
+                ? "text-fg"
+                : "text-fg-subtle",
+          )}
+        >
+          {date.getDate()}
+        </span>
+      </div>
+
+      <div className="space-y-1.5">
+        {events.slice(0, 1).map((ev) => {
+          const meta = EVENT_TYPE_META[ev.event_type];
+          const Icon = meta.icon;
+          return (
+            <div
+              key={ev.id}
+              className="rounded-md border border-warning/30 bg-warning-soft px-2 py-1 text-[11px] text-warning-fg/90 flex items-center gap-1 truncate"
+              title={locale === "ar" ? ev.title_ar || ev.title_en : ev.title_en}
+            >
+              <Icon className="h-3 w-3 shrink-0" />
+              <span className="truncate">
+                {locale === "ar" ? ev.title_ar || ev.title_en : ev.title_en}
+              </span>
+            </div>
+          );
+        })}
+
+        {posts.map((p) => (
+          <ScheduledPostCard
+            key={p.id}
+            post={p}
+            locale={locale}
+            account={p.social_account_id ? accountsById.get(p.social_account_id) : null}
+            onEdit={() => onEditPost(p)}
+          />
+        ))}
+
+        {published.map((p) => (
+          <PublishedPostCard key={p.id} post={p} locale={locale} />
+        ))}
+      </div>
+
+      {/* Empty-cell hover overlay with two CTAs */}
+      {isEmpty && inMonth && !isPast ? (
+        <div className="pointer-events-none absolute inset-2 flex flex-col items-stretch justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onScheduleClick();
+            }}
+            className="pointer-events-auto inline-flex items-center justify-center gap-1.5 rounded-md border border-border bg-surface px-2 py-1.5 text-xs font-medium text-fg shadow-sm hover:bg-surface-hover"
+          >
+            <CalendarPlus className="h-3.5 w-3.5" />
+            Schedule Post
+          </button>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDraftClick();
+            }}
+            className="pointer-events-auto inline-flex items-center justify-center gap-1.5 rounded-md bg-primary px-2 py-1.5 text-xs font-medium text-primary-fg shadow-sm hover:opacity-90"
+          >
+            <PencilLine className="h-3.5 w-3.5" />
+            Start a Draft
+          </button>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Scheduled post card — for posts queued in the publish-worker (future)
+// ---------------------------------------------------------------------------
+
+function ScheduledPostCard({
+  post,
+  locale,
+  account,
+  onEdit,
+}: {
+  post: ScheduledPost;
+  locale: "en" | "ar";
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  account: any | null;
+  onEdit: () => void;
+}) {
+  const media = post.media_urls || [];
+  const extraMedia = Math.max(0, media.length - 1);
+
+  return (
+    <div className="rounded-md border border-border bg-surface px-1.5 py-1.5 shadow-xs">
+      {/* Big thumbnail at top */}
+      {media[0] ? (
+        <div className="relative -mx-1.5 -mt-1.5 mb-1.5 aspect-[4/3] overflow-hidden rounded-t-md bg-surface-muted">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={media[0]}
+            alt={post.caption || ""}
+            className="h-full w-full object-cover"
+            referrerPolicy="no-referrer"
+            onError={(e) => ((e.currentTarget as HTMLImageElement).style.display = "none")}
+          />
+          {extraMedia > 0 ? (
+            <span className="absolute right-1 top-1 rounded bg-black/70 px-1.5 py-0.5 text-[9px] font-bold text-white">
+              +{extraMedia}
+            </span>
+          ) : null}
+        </div>
+      ) : null}
+
+      <div className="flex items-center gap-1 text-[10px] text-fg-muted">
+        <UploadCloud className="h-3 w-3" />
+        <Instagram className="h-3 w-3 text-[#E1306C]" />
+        <span className="ms-auto font-medium">{formatTime(post.scheduled_at, locale)}</span>
+      </div>
+
+      <p className="mt-1 line-clamp-2 text-[11px] leading-tight text-fg">
+        {post.caption || (account?.handle ? `@${account.handle}` : "—")}
+      </p>
+
+      <div className="mt-1.5 flex items-center gap-1.5 border-t border-border/60 pt-1 text-fg-muted">
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onEdit();
+          }}
+          className="hover:text-fg"
+          aria-label="Edit"
+        >
+          <MoreHorizontal className="h-3 w-3" />
+        </button>
+        <Hash className="h-3 w-3" />
+        <MessageSquare className="h-3 w-3" />
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Published post card — shows real Instagram media + engagement-rate badge
+// ---------------------------------------------------------------------------
+
+function PublishedPostCard({
+  post,
+  locale,
+}: {
+  post: SocialPost;
+  locale: "en" | "ar";
+}) {
+  const m = post.latest_metrics;
+  const likes = m?.likes ?? 0;
+  const comments = m?.comments ?? 0;
+  const shares = m?.shares ?? 0;
+  const saves = m?.saves ?? 0;
+  const impressions = m?.impressions ?? 0;
+  const reach = m?.reach ?? 0;
+  const engagement = likes + comments + shares + saves;
+
+  // Engagement rate per impression: prefer impressions, fall back to reach,
+  // then to the precomputed rate (which is engagement / followers).
+  const erPerImpression =
+    impressions > 0
+      ? engagement / impressions
+      : reach > 0
+        ? engagement / reach
+        : m?.engagement_rate ?? null;
+  const erBasis =
+    impressions > 0 ? "impressions" : reach > 0 ? "reach" : "followers";
+  const erPercent =
+    erPerImpression != null ? Math.round(erPerImpression * 1000) / 10 : null;
+
+  const isVideo = post.media_type === "video" || post.media_type === "reel";
+
+  return (
+    <div className="rounded-md border border-border bg-surface px-1.5 py-1.5 shadow-xs">
+      {/* Thumbnail at top — always shown for published posts */}
+      {post.media_url ? (
+        <div className="relative -mx-1.5 -mt-1.5 mb-1.5 aspect-[4/3] overflow-hidden rounded-t-md bg-black">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={post.media_url}
+            alt={post.caption || ""}
+            className="h-full w-full object-cover"
+            referrerPolicy="no-referrer"
+            onError={(e) => ((e.currentTarget as HTMLImageElement).style.display = "none")}
+          />
+          {isVideo ? (
+            <span className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-black/60 ring-2 ring-white/80">
+                <PlayCircle className="h-4 w-4 text-white" />
+              </span>
+            </span>
+          ) : null}
+          {erPercent != null ? (
+            <span
+              className={cn(
+                "absolute right-1 top-1 rounded px-1.5 py-0.5 text-[9px] font-bold backdrop-blur-sm",
+                erPercent >= 5
+                  ? "bg-success/80 text-white"
+                  : erPercent >= 2
+                    ? "bg-warning/80 text-white"
+                    : "bg-black/60 text-white",
+              )}
+              title={`Engagement / ${erBasis}`}
+            >
+              {erPercent}% ER
+            </span>
+          ) : null}
+        </div>
+      ) : null}
+
+      <div className="flex items-center gap-1 text-[10px] text-fg-muted">
+        <Instagram className="h-3 w-3 text-[#E1306C]" />
+        <span className="font-medium">Published</span>
+        <span className="ms-auto">{formatTime(post.published_at || "", locale)}</span>
+      </div>
+
+      <p className="mt-1 line-clamp-2 text-[11px] leading-tight text-fg">
+        {post.caption || "—"}
+      </p>
+
+      <div className="mt-1.5 flex items-center gap-2 border-t border-border/60 pt-1 text-[10px] text-fg-muted">
+        <span title="Likes">❤ {compact(likes)}</span>
+        <span title="Comments">💬 {compact(comments)}</span>
+        {reach > 0 ? <span title="Reach">↗ {compact(reach)}</span> : null}
+        {post.permalink ? (
+          <a
+            href={post.permalink}
+            target="_blank"
+            rel="noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="ms-auto text-primary hover:underline"
+          >
+            View
+          </a>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+function compact(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
+  return String(n);
 }
 
 // ---------------------------------------------------------------------------

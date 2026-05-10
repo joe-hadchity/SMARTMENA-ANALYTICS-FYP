@@ -12,7 +12,7 @@ import {
   ShieldOff,
   Trash2,
 } from "lucide-react";
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { toast } from "sonner";
 
 import PageHeader from "@/components/ui/PageHeader";
@@ -30,6 +30,14 @@ function providerIcon(p: SocialAccount["provider"]) {
 }
 
 export default function ConnectionsPage() {
+  return (
+    <Suspense fallback={null}>
+      <ConnectionsPageContent />
+    </Suspense>
+  );
+}
+
+function ConnectionsPageContent() {
   const { t, locale } = useI18n();
   const qc = useQueryClient();
   const searchParams = useSearchParams();
@@ -125,8 +133,8 @@ export default function ConnectionsPage() {
   return (
     <div className="space-y-6 max-w-6xl">
       <PageHeader
+        variant="compact"
         title={t("connections.title")}
-        subtitle={t("connections.subtitle")}
         actions={
           <>
             {liveEnabled ? (

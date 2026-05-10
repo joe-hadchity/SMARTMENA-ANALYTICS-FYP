@@ -52,7 +52,7 @@ async function fetchSyncedPostsWithLatestMetrics(workspaceId) {
     )
     .eq("workspace_id", workspaceId)
     .limit(2000);
-  throwIf(postsRes.error, "Failed to load synced posts");
+  if (postsRes.error) return [];
 
   const posts = postsRes.data || [];
   if (posts.length === 0) return [];
@@ -64,7 +64,9 @@ async function fetchSyncedPostsWithLatestMetrics(workspaceId) {
     .select("*")
     .in("synced_post_id", postIds)
     .limit(20000);
-  throwIf(metricsRes.error, "Failed to load metrics");
+  if (metricsRes.error) {
+    return posts.map((p) => ({ ...p, latestMetrics: null }));
+  }
 
   const latestMetrics = latestByKey(
     metricsRes.data || [],
@@ -76,6 +78,91 @@ async function fetchSyncedPostsWithLatestMetrics(workspaceId) {
     ...p,
     latestMetrics: latestMetrics.get(p.id) || null,
   }));
+}
+
+/**
+ * Loads social_posts (Apify + Meta Graph + future OAuth) and merges in the
+ * latest post_metrics_snapshots row per post. Returned shape matches
+ * fetchSyncedPostsWithLatestMetrics so downstream aggregations don't care
+ * which table the data came from.
+ */
+async function fetchSocialPostsWithLatestMetrics(workspaceId) {
+  const supabase = requireClient();
+
+  const accountsRes = await supabase
+    .from("social_accounts")
+    .select("id")
+    .eq("workspace_id", workspaceId);
+  if (accountsRes.error) return [];
+  const accountIds = (accountsRes.data || []).map((a) => a.id);
+  if (accountIds.length === 0) return [];
+
+  // Use a nested PostgREST select so the snapshots come back inline. This
+  // avoids a separate `.in("social_post_id", [...])` query whose URL would
+  // exceed PostgREST's limit once the workspace has more than ~200 posts.
+  const postsRes = await supabase
+    .from("social_posts")
+    .select("*, post_metrics_snapshots(*)")
+    .in("social_account_id", accountIds)
+    .limit(2000);
+  if (postsRes.error) return [];
+  const posts = postsRes.data || [];
+  if (posts.length === 0) return [];
+
+  return posts.map((p) => {
+    const snaps = Array.isArray(p.post_metrics_snapshots)
+      ? p.post_metrics_snapshots
+      : [];
+    const latest =
+      snaps.length > 0
+        ? snaps
+            .slice()
+            .sort(
+              (a, b) =>
+                new Date(b.snapshot_time) - new Date(a.snapshot_time),
+            )[0]
+        : null;
+    const { post_metrics_snapshots: _ignored, ...rest } = p;
+    return mapSocialPost(rest, latest);
+  });
+}
+
+function mapSocialPost(post, snapshot) {
+  return {
+    id: post.id,
+    workspace_id: null, // social_posts isn't keyed by workspace; scoped via social_account
+    social_account_id: post.social_account_id,
+    post_type: post.media_type || "unknown",
+    caption: post.caption,
+    caption_lang: null,
+    permalink: post.permalink,
+    posted_at: post.published_at || post.created_at,
+    latestMetrics: snapshot
+      ? {
+          reach: snapshot.reach,
+          impressions: snapshot.impressions,
+          likes: snapshot.likes,
+          comments: snapshot.comments,
+          shares: snapshot.shares,
+          saves: snapshot.saves,
+          engagement_rate: snapshot.engagement_rate,
+          captured_at: snapshot.snapshot_time,
+        }
+      : null,
+  };
+}
+
+/**
+ * Unified loader — combines synced_posts (legacy OAuth path) with
+ * social_posts (current Apify + Meta Graph path). Most workspaces will only
+ * have data in one table; merging is cheap when one side is empty.
+ */
+async function fetchAllPostsWithLatestMetrics(workspaceId) {
+  const [synced, social] = await Promise.all([
+    fetchSyncedPostsWithLatestMetrics(workspaceId),
+    fetchSocialPostsWithLatestMetrics(workspaceId),
+  ]);
+  return [...synced, ...social];
 }
 
 async function fetchAccounts(workspaceId) {
@@ -152,7 +239,7 @@ function sentimentToScore(label) {
 
 async function getOverview(workspaceId) {
   const [posts, accounts, campaigns, predictions, sentiments] = await Promise.all([
-    fetchSyncedPostsWithLatestMetrics(workspaceId),
+    fetchAllPostsWithLatestMetrics(workspaceId),
     fetchAccounts(workspaceId),
     fetchCampaigns(workspaceId),
     fetchLatestPredictionsForWorkspace(workspaceId),
@@ -224,29 +311,20 @@ function startOfBucket(date, groupBy) {
 }
 
 async function getTimeseries(workspaceId, { metric = "engagement", groupBy = "day" } = {}) {
-  const supabase = requireClient();
-
-  // Pull the posts scoped to workspace, then pull their metrics and roll up.
-  const { data: posts, error: postsErr } = await supabase
-    .from("synced_posts")
-    .select("id, workspace_id")
-    .eq("workspace_id", workspaceId);
-  throwIf(postsErr, "Failed to load synced posts");
-
-  const ids = (posts || []).map((p) => p.id);
-  if (ids.length === 0) return { metric, groupBy, points: [] };
-
-  const { data: metrics, error } = await supabase
-    .from("post_metrics")
-    .select("*")
-    .in("synced_post_id", ids)
-    .order("captured_at", { ascending: true })
-    .limit(20000);
-  throwIf(error, "Failed to load metrics");
+  // Use the unified loader so we cover both synced_posts and social_posts.
+  // Bucket by the post's published date so a single fresh sync produces a
+  // chart that maps engagement to *when posts went live*, not when we
+  // happened to scrape metrics.
+  const posts = await fetchAllPostsWithLatestMetrics(workspaceId);
+  if (posts.length === 0) return { metric, groupBy, points: [] };
 
   const buckets = new Map();
-  for (const m of metrics || []) {
-    const key = startOfBucket(m.captured_at, groupBy);
+  for (const p of posts) {
+    const m = p.latestMetrics;
+    if (!m) continue;
+    const when = p.posted_at || m.captured_at;
+    if (!when) continue;
+    const key = startOfBucket(when, groupBy);
     if (!buckets.has(key)) {
       buckets.set(key, { bucket: key, reach: 0, impressions: 0, engagement: 0, samples: 0 });
     }
@@ -276,7 +354,7 @@ async function getTimeseries(workspaceId, { metric = "engagement", groupBy = "da
 
 async function getPlatformBreakdown(workspaceId) {
   const [posts, accounts] = await Promise.all([
-    fetchSyncedPostsWithLatestMetrics(workspaceId),
+    fetchAllPostsWithLatestMetrics(workspaceId),
     fetchAccounts(workspaceId),
   ]);
 
@@ -332,7 +410,7 @@ async function getSentimentBreakdown(workspaceId) {
 }
 
 async function getTopPosts(workspaceId, { limit = 10, sortBy = "engagement" } = {}) {
-  const posts = await fetchSyncedPostsWithLatestMetrics(workspaceId);
+  const posts = await fetchAllPostsWithLatestMetrics(workspaceId);
 
   const withScore = posts.map((p) => {
     const m = p.latestMetrics || {};

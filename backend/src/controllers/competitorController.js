@@ -1,132 +1,70 @@
-/**
- * competitorController -- HTTP layer for competitor tracking + weekly digest.
- *
- * Every route expects `workspaceContext` middleware upstream; the workspace
- * is resolved from `req.workspaceId`.
- */
+const competitorService = require("../services/competitors/competitorService");
 
-const competitorService = require("../services/competitorService");
-const competitorScraperService = require("../services/competitorScraperService");
-const competitorDigestService = require("../services/competitorDigestService");
-
-// ---------------------------------------------------------------------------
-// competitor_accounts
-// ---------------------------------------------------------------------------
-
-async function list(req, res) {
-  const platform = req.query.platform ? String(req.query.platform) : undefined;
-  const includeInactive = String(req.query.include_inactive) === "true";
-  const competitors = await competitorService.listCompetitors(req.workspaceId, {
-    platform,
-    includeInactive,
-  });
-  res.status(200).json(competitors);
+async function listCompetitors(req, res) {
+  const rows = await competitorService.listApproved(req.workspaceId, req.query);
+  res.json(rows);
 }
 
-async function getOne(req, res) {
-  const competitor = await competitorService.getCompetitorById(req.params.id);
-  res.status(200).json(competitor);
+async function listCandidates(req, res) {
+  const rows = await competitorService.listCandidates(req.workspaceId, req.query);
+  res.json(rows);
 }
 
-async function create(req, res) {
-  const competitor = await competitorService.createCompetitor(
-    req.workspaceId,
-    req.body,
-  );
-  res.status(201).json(competitor);
+async function discoverCompetitors(req, res) {
+  const result = await competitorService.discover(req.workspaceId, req.body);
+  res.json(result);
 }
 
-async function update(req, res) {
-  const competitor = await competitorService.updateCompetitor(
-    req.params.id,
-    req.body,
-  );
-  res.status(200).json(competitor);
-}
-
-async function remove(req, res) {
-  const result = await competitorService.deleteCompetitor(req.params.id);
-  res.status(200).json(result);
-}
-
-// ---------------------------------------------------------------------------
-// posts + snapshots
-// ---------------------------------------------------------------------------
-
-async function listPosts(req, res) {
-  const limit = Math.min(Number(req.query.limit) || 20, 100);
-  const posts = await competitorService.listPostsForCompetitor(req.params.id, {
-    limit,
-  });
-  res.status(200).json(posts);
-}
-
-async function refreshOne(req, res) {
-  const competitor = await competitorService.getCompetitorById(req.params.id);
-  const result = await competitorScraperService.refreshCompetitor(competitor, {
-    limit: Math.min(Number(req.query.limit) || 12, 50),
-  });
-  res.status(200).json({ competitor_id: competitor.id, ...result });
-}
-
-async function refreshAll(req, res) {
-  const results = await competitorScraperService.refreshAll(req.workspaceId);
-  res.status(200).json({ refreshed: results.length, results });
-}
-
-// ---------------------------------------------------------------------------
-// digest
-// ---------------------------------------------------------------------------
-
-async function latestDigest(req, res) {
-  const run = await competitorDigestService.latestRun(req.workspaceId);
-  if (!run) return res.status(404).json({ message: "No digest runs yet." });
-  res.status(200).json(run);
-}
-
-async function listDigestRuns(req, res) {
-  const limit = Math.min(Number(req.query.limit) || 10, 50);
-  const runs = await competitorDigestService.listRuns(req.workspaceId, { limit });
-  res.status(200).json(runs);
-}
-
-async function generateDigest(req, res) {
-  const {
-    window_days,
-    locale,
-    delivery_target,
-    skip_refresh,
-  } = req.body || {};
-  const result = await competitorDigestService.runDigest({
-    workspaceId: req.workspaceId,
-    windowDays: window_days,
-    locale,
-    deliveryTarget: delivery_target || null,
-    skipRefresh: Boolean(skip_refresh),
-  });
+async function manualAddCompetitor(req, res) {
+  const result = await competitorService.manualAdd(req.workspaceId, req.body);
   res.status(201).json(result);
 }
 
-async function previewAggregate(req, res) {
-  const windowDays = Math.min(Number(req.query.window_days) || 7, 30);
-  const aggregate = await competitorDigestService.aggregateWorkspace(
-    req.workspaceId,
-    { windowDays },
-  );
-  res.status(200).json(aggregate);
+async function approveCandidate(req, res) {
+  const result = await competitorService.approveCandidate(req.workspaceId, req.params.id);
+  res.json(result);
+}
+
+async function rejectCandidate(req, res) {
+  const result = await competitorService.rejectCandidate(req.workspaceId, req.params.id);
+  res.json(result);
+}
+
+async function removeCompetitor(req, res) {
+  const result = await competitorService.removeCompetitor(req.workspaceId, req.params.id);
+  res.json(result);
+}
+
+async function refreshCompetitor(req, res) {
+  const result = await competitorService.refreshCompetitor(req.workspaceId, req.params.id);
+  res.json(result);
+}
+
+async function refreshAllCompetitors(req, res) {
+  const result = await competitorService.refreshAllCompetitors(req.workspaceId);
+  res.json(result);
+}
+
+async function summary(req, res) {
+  const result = await competitorService.summary(req.workspaceId);
+  res.json(result);
+}
+
+async function comparison(req, res) {
+  const result = await competitorService.comparison(req.workspaceId, req.query);
+  res.json(result);
 }
 
 module.exports = {
-  list,
-  getOne,
-  create,
-  update,
-  remove,
-  listPosts,
-  refreshOne,
-  refreshAll,
-  latestDigest,
-  listDigestRuns,
-  generateDigest,
-  previewAggregate,
+  approveCandidate,
+  comparison,
+  discoverCompetitors,
+  listCandidates,
+  listCompetitors,
+  manualAddCompetitor,
+  refreshAllCompetitors,
+  refreshCompetitor,
+  rejectCandidate,
+  removeCompetitor,
+  summary,
 };

@@ -1,249 +1,78 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { useQuery } from "@tanstack/react-query";
+import { Mountain, Settings } from "lucide-react";
 
-import PageHeader from "@/components/ui/PageHeader";
+import BusinessProfileSettings from "@/components/settings/BusinessProfileSettings";
 import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
-import { Card, CardTitle } from "@/components/ui/Card";
-import BrandVoiceForm from "@/components/settings/BrandVoiceForm";
-import DemoDataCard from "@/components/settings/DemoDataCard";
-import { useI18n } from "@/i18n/I18nProvider";
 import {
-  healthApi,
-  setStoredWorkspaceId,
-  workspacesApi,
-} from "@/lib/api";
-import { formatDate } from "@/lib/format";
-
-const REGIONS = ["LB", "AE", "SA", "EG", "JO", "QA", "KW", "OM", "BH", "MA"] as const;
-const LOCALES = ["ar", "en"] as const;
-
-const schema = z.object({
-  name: z.string().min(1).max(120),
-  slug: z
-    .string()
-    .regex(/^[a-z0-9-]+$/, "lowercase letters, digits and hyphens only")
-    .optional(),
-  region_default: z.enum(REGIONS).optional(),
-  locale_default: z.enum(LOCALES).optional(),
-});
-
-type FormValues = z.infer<typeof schema>;
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/Card";
+import PageHeader from "@/components/ui/PageHeader";
+import { workspacesApi } from "@/lib/api";
 
 export default function SettingsPage() {
-  const { t, locale } = useI18n();
-  const qc = useQueryClient();
-
   const current = useQuery({
     queryKey: ["workspace", "current"],
     queryFn: workspacesApi.current,
   });
-  const list = useQuery({
-    queryKey: ["workspaces"],
-    queryFn: workspacesApi.list,
-  });
-  const health = useQuery({
-    queryKey: ["health"],
-    queryFn: healthApi.check,
-    refetchInterval: 60_000,
-  });
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-    reset,
-  } = useForm<FormValues>({
-    resolver: zodResolver(schema),
-    defaultValues: {
-      region_default: "AE",
-      locale_default: "ar",
-    },
-  });
-
-  const create = useMutation({
-    mutationFn: (values: FormValues) => workspacesApi.create(values),
-    onSuccess: (w) => {
-      setStoredWorkspaceId(w.id);
-      reset();
-      qc.invalidateQueries();
-    },
-  });
-
-  const onSubmit = (values: FormValues) => create.mutate(values);
-
-  const llm = health.data?.features?.llm;
+  const workspace = current.data;
 
   return (
-    <div className="space-y-6 max-w-4xl">
-      <PageHeader title={t("settings.title")} subtitle={t("settings.subtitle")} />
+    <div className="space-y-6 max-w-6xl">
+      <PageHeader
+        title="Business settings"
+        subtitle="Born2Hike profile, market, and discovery seeds."
+      />
 
-      <Card>
-        <div className="flex items-center justify-between">
-          <CardTitle>{t("settings.llm.title")}</CardTitle>
-          <Badge tone={llm?.enabled ? "success" : "warning"} dot>
-            {llm?.enabled
-              ? t("settings.llm.enabled")
-              : t("settings.llm.disabled")}
+      <Card padded={false}>
+        <CardHeader>
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              <Mountain className="h-4 w-4 text-primary" />
+              Born2Hike intelligence profile
+            </CardTitle>
+            <CardDescription>
+              Lebanon hiking group profile.
+            </CardDescription>
+          </div>
+          <Badge tone="success" dot>
+            Evidence-first setup
           </Badge>
-        </div>
-        {llm?.enabled ? (
-          <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-            <div>
-              <div className="label">{t("settings.llm.deployment")}</div>
-              <div className="mt-1 font-medium">{llm.deployment}</div>
+        </CardHeader>
+        <CardContent>
+          {workspace ? (
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+              <MiniStat label="Workspace" value={workspace.name} />
+              <MiniStat label="Region" value={workspace.region_default || "LB"} />
+              <MiniStat label="Industry" value={workspace.industry || "outdoor_travel"} />
             </div>
-            <div>
-              <div className="label">{t("settings.llm.apiVersion")}</div>
-              <div className="mt-1 font-medium">{llm.apiVersion}</div>
+          ) : (
+            <div className="flex items-center gap-2 text-sm text-fg-muted">
+              <Settings className="h-4 w-4 animate-spin" />
+              Loading workspace...
             </div>
-            <div>
-              <div className="label">{t("settings.llm.budget")}</div>
-              <div className="mt-1 font-medium">
-                {llm.monthlyTokenBudget.toLocaleString()} tokens / mo
-              </div>
-            </div>
-          </div>
-        ) : (
-          <p className="text-sm text-fg-muted mt-3">
-            {t("settings.llm.disabled")}
-          </p>
-        )}
+          )}
+        </CardContent>
       </Card>
 
-      <Card>
-        <CardTitle>Active workspace</CardTitle>
-        {current.data ? (
-          <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-            <div>
-              <div className="label">{t("settings.name")}</div>
-              <div className="mt-1 font-medium">{current.data.name}</div>
-            </div>
-            <div>
-              <div className="label">{t("settings.slug")}</div>
-              <div className="mt-1 font-medium">{current.data.slug}</div>
-            </div>
-            <div>
-              <div className="label">{t("settings.region")}</div>
-              <div className="mt-1 font-medium">
-                {current.data.region_default ?? "—"}
-              </div>
-            </div>
-            <div>
-              <div className="label">{t("settings.locale")}</div>
-              <div className="mt-1 font-medium">
-                {current.data.locale_default}
-              </div>
-            </div>
-            <div className="md:col-span-4 text-xs text-fg-muted">
-              id: <code>{current.data.id}</code> ·{" "}
-              {formatDate(current.data.created_at, locale)}
-            </div>
-          </div>
-        ) : (
-          <div className="text-sm text-fg-muted">{t("common.loading")}</div>
-        )}
-      </Card>
+      {workspace ? (
+        <BusinessProfileSettings workspaceId={workspace.id} />
+      ) : null}
+    </div>
+  );
+}
 
-      {current.data ? <BrandVoiceForm workspaceId={current.data.id} /> : null}
-
-      {current.data ? <DemoDataCard workspaceId={current.data.id} /> : null}
-
-      <Card>
-        <CardTitle>{t("settings.switch")}</CardTitle>
-        <div className="flex items-center gap-2 flex-wrap mt-3">
-          {list.data?.map((w) => (
-            <button
-              key={w.id}
-              className="btn btn-secondary text-xs"
-              onClick={() => {
-                setStoredWorkspaceId(w.id);
-                qc.invalidateQueries();
-              }}
-            >
-              {w.name}
-            </button>
-          ))}
-          <button
-            className="btn btn-ghost text-xs"
-            onClick={() => {
-              setStoredWorkspaceId(null);
-              qc.invalidateQueries();
-            }}
-          >
-            {t("settings.clearStored")}
-          </button>
-        </div>
-      </Card>
-
-      <Card>
-        <CardTitle>{t("settings.create")}</CardTitle>
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-4"
-        >
-          <div>
-            <label className="label">{t("settings.name")}</label>
-            <input className="input mt-1" {...register("name")} />
-            {errors.name ? (
-              <p className="text-xs text-danger mt-1">
-                {errors.name.message as string}
-              </p>
-            ) : null}
-          </div>
-          <div>
-            <label className="label">{t("settings.slug")}</label>
-            <input
-              className="input mt-1"
-              placeholder="my-brand"
-              {...register("slug")}
-            />
-            {errors.slug ? (
-              <p className="text-xs text-danger mt-1">
-                {errors.slug.message as string}
-              </p>
-            ) : null}
-          </div>
-          <div>
-            <label className="label">{t("settings.region")}</label>
-            <select className="input mt-1" {...register("region_default")}>
-              {REGIONS.map((r) => (
-                <option key={r} value={r}>
-                  {r}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="label">{t("settings.locale")}</label>
-            <select className="input mt-1" {...register("locale_default")}>
-              {LOCALES.map((l) => (
-                <option key={l} value={l}>
-                  {l}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="md:col-span-2 flex justify-end">
-            <Button
-              type="submit"
-              disabled={isSubmitting || create.isPending}
-              loading={create.isPending}
-            >
-              {t("common.create")}
-            </Button>
-          </div>
-          {create.isError ? (
-            <p className="md:col-span-2 text-sm text-danger">
-              {(create.error as Error).message}
-            </p>
-          ) : null}
-        </form>
-      </Card>
+function MiniStat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-lg border border-border bg-surface-muted px-3 py-2">
+      <div className="text-xs text-fg-muted">{label}</div>
+      <div className="mt-0.5 font-medium text-fg truncate">{value}</div>
     </div>
   );
 }

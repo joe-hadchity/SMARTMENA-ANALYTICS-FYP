@@ -33,6 +33,9 @@ const SCOPES = [
   "instagram_manage_insights",
   "business_management",
 ];
+const ACTIVE_SCOPES = env.META_OAUTH_SCOPES.length
+  ? env.META_OAUTH_SCOPES
+  : SCOPES;
 
 const GRAPH_BASE = () =>
   `https://graph.facebook.com/${env.META_GRAPH_VERSION}`;
@@ -54,7 +57,7 @@ function assertEnabled() {
  * `state` must come from oauthConnectionService.createState() so the callback
  * can verify it.
  */
-function buildAuthorizationUrl({ state, scopes = SCOPES }) {
+function buildAuthorizationUrl({ state, scopes = ACTIVE_SCOPES }) {
   assertEnabled();
   const params = new URLSearchParams({
     client_id: env.META_APP_ID,
@@ -302,7 +305,7 @@ async function handleCallback({ code, state }) {
     workspaceId: stateRow.workspace_id,
     provider: "meta",
     externalUserId: me.id,
-    scope: SCOPES.join(" "),
+    scope: ACTIVE_SCOPES.join(" "),
     accessToken: token.accessToken,
     refreshToken: null,
     tokenType: token.tokenType,
@@ -324,7 +327,7 @@ async function handleCallback({ code, state }) {
 }
 
 module.exports = {
-  SCOPES,
+  SCOPES: ACTIVE_SCOPES,
   GRAPH_VERSION: env.META_GRAPH_VERSION,
   buildAuthorizationUrl,
   exchangeCodeForToken,

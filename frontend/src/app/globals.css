@@ -9,55 +9,56 @@
  * Format: Lightness% Chroma Hue
  */
 :root {
-  /* surfaces - warm sand tones */
-  --bg:              97.8% 0.007 72;   /* warm off-white background */
-  --bg-elevated:     99.8% 0.003 72;   /* cards, elevated surfaces */
-  --surface:         99.8% 0.003 72;   /* card surfaces */
-  --surface-muted:   95.5% 0.009 72;   /* muted backgrounds */
-  --surface-hover:   95.5% 0.009 72;   /* hover states */
+  /* ── SmartMENA palette: "Cedar & Brass" — Levantine / Gulf-rooted ────────
+   * primary  cedar teal (mosque domes, Lebanon cedars)
+   * accent   brass amber (lanterns, market signage) — uses --warning
+   * danger   terracotta  (earthen, not lab-red)
+   * success  olive-green (date palm, not bootstrap-green)
+   * surfaces warm parchment + pure-white cards
+   */
 
-  /* borders - subtle warm gray */
-  --border:          90% 0.008 60;     /* default borders */
-  --border-strong:   84% 0.010 60;     /* emphasized borders */
+  /* surfaces */
+  --bg:              38 35% 96%;   /* warm parchment page bg */
+  --bg-elevated:     0 0% 100%;    /* nav, modals — pure white */
+  --surface:         0 0% 100%;    /* cards — pure white */
+  --surface-muted:   38 25% 95%;
+  --surface-hover:   38 30% 93%;
 
-  /* text - warm inkstone */
-  --fg:              14% 0.015 50;     /* primary text */
-  --fg-muted:        38% 0.013 50;     /* secondary text */
-  --fg-subtle:       50% 0.010 50;     /* subtle text */
-  --fg-inverse:      98% 0.004 75;     /* inverse text (on dark) */
+  /* borders — warm and subtle, shadows do the depth */
+  --border:          38 20% 88%;
+  --border-strong:   38 18% 78%;
 
-  /* brand primary - Deep Teal */
-  --primary:         52% 0.13 195;     /* primary action color */
-  --primary-fg:      100% 0 0;         /* white */
-  --primary-soft:    96% 0.015 195;    /* teal tint background */
-  --primary-hover:   46% 0.12 195;     /* darker teal on hover */
+  /* text — slightly cool ink against warm surfaces */
+  --fg:              210 18% 13%;
+  --fg-muted:        210 10% 38%;
+  --fg-subtle:       210 8% 55%;
+  --fg-inverse:      0 0% 100%;
 
-  /* semantic */
-  --success:         54% 0.13 148;     /* green */
-  --success-soft:    96% 0.04 148;     /* light green bg */
-  --warning:         70% 0.18 60;      /* warm amber */
-  --warning-soft:    98% 0.02 60;      /* light amber bg */
-  --danger:          54% 0.18 20;      /* red */
-  --danger-soft:     97% 0.04 20;      /* light red bg */
-  --info:            52% 0.13 195;     /* same as primary teal */
-  --info-soft:       96% 0.015 195;    /* light teal bg */
+  /* primary — deep cedar teal */
+  --primary:         175 50% 28%;
+  --primary-fg:      0 0% 100%;
+  --primary-soft:    175 30% 92%;
+  --primary-hover:   175 55% 22%;
 
-  --ring:            52% 0.13 195;     /* focus ring = primary */
+  /* semantic — MENA-native palette, no off-the-shelf greens/reds */
+  --success:         150 45% 35%;   /* olive-green */
+  --success-soft:    150 30% 92%;
+  --warning:         38 90% 50%;    /* brass amber — also our warm accent */
+  --warning-soft:    38 80% 92%;
+  --danger:          15 70% 48%;    /* terracotta */
+  --danger-soft:     15 60% 94%;
+  --info:            205 50% 40%;
+  --info-soft:       205 40% 92%;
 
-  /* data-viz - warm palette for charts */
-  --viz-1:           52% 0.13 195;     /* teal */
-  --viz-2:           70% 0.18 60;      /* amber */
-  --viz-3:           60% 0.14 30;      /* terracotta */
-  --viz-4:           58% 0.12 140;     /* sage */
-  --viz-5:           56% 0.13 295;     /* plum */
-  --viz-6:           60% 0.11 240;     /* sky blue */
+  --ring:            175 50% 35%;
 
-  /* sidebar - always dark */
-  --sidebar-bg:      15% 0.014 48;     /* dark background */
-  --sidebar-fg:      92% 0.01 80;      /* light text */
-  --sidebar-hover:   22% 0.016 50;     /* hover state */
-  --sidebar-active:  26% 0.018 195;    /* active item (teal tint) */
-  --sidebar-border:  0% 0 0 / 0.07;    /* transparent white border */
+  /* data-viz — cedar → brass → terracotta → olive → ink-violet → sand-gold */
+  --viz-1:           175 50% 32%;   /* cedar teal */
+  --viz-2:           38 80% 55%;    /* brass */
+  --viz-3:           15 65% 50%;    /* terracotta */
+  --viz-4:           150 40% 38%;   /* olive */
+  --viz-5:           260 35% 50%;   /* ink violet */
+  --viz-6:           45 50% 45%;    /* sand gold */
 
   /* fonts */
   --font-sans:       "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -66,55 +67,43 @@
 }
 
 html.dark {
-  /* surfaces - still warm, not cold gray */
-  --bg:              14% 0.012 50;     /* warm dark background */
-  --bg-elevated:     17% 0.013 50;     /* slightly lighter */
-  --surface:         20% 0.013 50;     /* card surfaces */
-  --surface-muted:   22% 0.016 50;     /* muted backgrounds */
-  --surface-hover:   24% 0.018 50;     /* hover states */
+  /* ── Dark mode: deep ink-teal, like night sky over the Gulf ───────── */
+  --bg:              200 30% 6%;
+  --bg-elevated:     200 25% 9%;
+  --surface:         200 22% 11%;
+  --surface-muted:   200 20% 14%;
+  --surface-hover:   200 18% 17%;
 
-  /* borders */
-  --border:          28% 0.014 60;     /* subtle borders */
-  --border-strong:   38% 0.016 60;     /* emphasized borders */
+  --border:          200 15% 22%;
+  --border-strong:   200 12% 30%;
 
-  /* text */
-  --fg:              92% 0.01 80;      /* primary text (warm white) */
-  --fg-muted:        72% 0.009 60;     /* secondary text */
-  --fg-subtle:       55% 0.008 60;     /* subtle text */
-  --fg-inverse:      14% 0.015 50;     /* inverse text (on light) */
+  --fg:              38 25% 96%;     /* warm cream ink for warmth on dark */
+  --fg-muted:        38 12% 70%;
+  --fg-subtle:       38 10% 55%;
+  --fg-inverse:      210 18% 13%;
 
-  /* brand primary - lightened for dark mode */
-  --primary:         60% 0.11 195;     /* lighter teal */
-  --primary-fg:      100% 0 0;         /* white */
-  --primary-soft:    26% 0.06 195;     /* dark teal tint */
-  --primary-hover:   68% 0.10 195;     /* even lighter on hover */
+  --primary:         175 50% 50%;    /* lifted cedar for contrast */
+  --primary-fg:      210 18% 8%;
+  --primary-soft:    175 40% 18%;
+  --primary-hover:   175 55% 58%;
 
-  /* semantic */
-  --success:         58% 0.12 148;     /* lighter green */
-  --success-soft:    22% 0.06 148;     /* dark green bg */
-  --warning:         75% 0.16 60;      /* lighter amber */
-  --warning-soft:    24% 0.08 60;      /* dark amber bg */
-  --danger:          62% 0.16 20;      /* lighter red */
-  --danger-soft:     24% 0.08 20;      /* dark red bg */
-  --info:            60% 0.11 195;     /* lighter teal */
-  --info-soft:       26% 0.06 195;     /* dark teal bg */
+  --success:         150 45% 50%;
+  --success-soft:    150 30% 18%;
+  --warning:         38 85% 60%;
+  --warning-soft:    38 50% 18%;
+  --danger:          15 70% 60%;
+  --danger-soft:     15 50% 18%;
+  --info:            205 60% 60%;
+  --info-soft:       205 50% 18%;
 
-  --ring:            60% 0.11 195;     /* focus ring = primary */
+  --ring:            175 50% 55%;
 
-  /* data-viz - adjusted for dark mode */
-  --viz-1:           60% 0.11 195;     /* teal */
-  --viz-2:           75% 0.16 60;      /* amber */
-  --viz-3:           68% 0.12 30;      /* terracotta */
-  --viz-4:           65% 0.10 140;     /* sage */
-  --viz-5:           65% 0.11 295;     /* plum */
-  --viz-6:           68% 0.10 240;     /* sky blue */
-
-  /* sidebar - same as light theme (always dark) */
-  --sidebar-bg:      15% 0.014 48;     /* dark background */
-  --sidebar-fg:      92% 0.01 80;      /* light text */
-  --sidebar-hover:   22% 0.016 50;     /* hover state */
-  --sidebar-active:  26% 0.018 195;    /* active item (teal tint) */
-  --sidebar-border:  0% 0 0 / 0.07;    /* transparent white border */
+  --viz-1:           175 55% 50%;
+  --viz-2:           38 80% 60%;
+  --viz-3:           15 65% 58%;
+  --viz-4:           150 45% 52%;
+  --viz-5:           260 40% 65%;
+  --viz-6:           45 60% 58%;
 }
 
 html,
@@ -182,14 +171,14 @@ html.color-theme-in-transition * {
  */
 @layer components {
   .card {
-    @apply bg-surface border border-border rounded-xl shadow-sm;
+    @apply bg-surface border border-border rounded-md shadow-xs;
   }
   .card-elevated {
-    @apply bg-surface border border-border rounded-xl shadow-md;
+    @apply bg-surface border border-border rounded-md shadow-sm;
   }
 
   .input {
-    @apply w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm
+    @apply w-full rounded-md border border-border bg-surface px-3 py-2 text-sm
            placeholder:text-fg-subtle
            focus-visible:border-primary focus-visible:shadow-glow
            disabled:opacity-60 disabled:cursor-not-allowed transition-colors;
@@ -203,25 +192,24 @@ html.color-theme-in-transition * {
            shadow-[inset_0_-1px_0_rgba(0,0,0,0.05)];
   }
 
-  /* Marketing-grade gradient tile used in logo, empty states, illustrations. */
+  /* Marketing-grade gradient tile used in logo, empty states, illustrations.
+     Cedar deep → cedar teal → brass amber. The signature SmartMENA gradient. */
   .gradient-tile {
     background-image:
-      radial-gradient(120% 120% at 0% 0%, oklch(var(--viz-2) / 0.55) 0%, transparent 60%),
-      linear-gradient(135deg, oklch(var(--primary)) 0%, oklch(var(--viz-3)) 100%);
+      linear-gradient(135deg, hsl(175 55% 16%) 0%, hsl(var(--primary)) 55%, hsl(var(--viz-2)) 100%);
   }
   .gradient-text {
-    background: linear-gradient(90deg, oklch(var(--primary)) 0%, oklch(var(--viz-3)) 100%);
+    background: linear-gradient(90deg, hsl(var(--primary)) 0%, hsl(var(--viz-2)) 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
   }
 
-  /* Subtle background orbs for hero / empty states (pure CSS, no assets). */
+  /* Quiet page wash retained for older call sites that still use this class. */
   .bg-orbs {
     background-image:
-      radial-gradient(60% 70% at 10% 0%, oklch(var(--primary) / 0.12) 0%, transparent 60%),
-      radial-gradient(55% 65% at 100% 20%, oklch(var(--viz-3) / 0.10) 0%, transparent 60%),
-      radial-gradient(40% 50% at 50% 100%, oklch(var(--viz-2) / 0.10) 0%, transparent 60%);
+      linear-gradient(180deg, hsl(var(--surface-muted) / 0.8) 0%, transparent 44%),
+      linear-gradient(90deg, hsl(var(--primary) / 0.04), hsl(var(--viz-2) / 0.04));
   }
 
   /* Subtle grid backdrop for dashboards (CSS mask fades the edges). */
@@ -244,7 +232,7 @@ html.color-theme-in-transition * {
    * correctly until their call sites are swept to the new component.
    */
   .btn {
-    @apply inline-flex items-center justify-center gap-2 h-9 px-3.5 rounded-lg
+    @apply inline-flex items-center justify-center gap-2 h-9 px-3.5 rounded-md
            text-sm font-medium whitespace-nowrap select-none
            transition-[background-color,color,box-shadow,transform] duration-150 ease-out-soft
            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring
@@ -284,6 +272,80 @@ html.color-theme-in-transition * {
     );
     background-size: 800px 100%;
     @apply animate-shimmer rounded-md;
+  }
+
+  .audience-leaflet-map.leaflet-container {
+    @apply h-full min-h-[390px] w-full bg-surface-muted font-sans;
+    z-index: 0;
+  }
+
+  .audience-leaflet-map .leaflet-control-zoom {
+    @apply overflow-hidden rounded-md border border-border shadow-sm;
+  }
+
+  .audience-leaflet-map .leaflet-control-zoom a {
+    @apply border-0 bg-surface text-fg transition-colors;
+  }
+
+  .audience-leaflet-map .leaflet-control-zoom a:hover {
+    @apply bg-surface-muted text-fg;
+  }
+
+  .audience-leaflet-map .leaflet-control-attribution {
+    @apply bg-surface/80 text-[10px] text-fg-muted backdrop-blur;
+  }
+
+  .audience-leaflet-map .leaflet-popup-content-wrapper {
+    @apply rounded-md border border-border bg-surface text-fg shadow-lg;
+  }
+
+  .audience-leaflet-map .leaflet-popup-content {
+    @apply m-2 text-xs;
+  }
+
+  .audience-leaflet-map .leaflet-popup-tip {
+    @apply bg-surface;
+  }
+
+  .live-signals-track {
+    animation: live-signals-marquee 42s linear infinite;
+  }
+
+  .live-signals-track:hover {
+    animation-play-state: paused;
+  }
+}
+
+@keyframes live-signals-marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .live-signals-track {
+    animation: none;
+  }
+}
+
+/*
+ * Numeric typography — apply to any metric, stat, or data value.
+ * JetBrains Mono with tabular figures so numbers don't shift width as they update.
+ */
+@layer utilities {
+  .font-numeric {
+    font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+  }
+  /* Every existing tabular-nums usage also gets the mono font automatically. */
+  .tabular-nums {
+    font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
   }
 }
 

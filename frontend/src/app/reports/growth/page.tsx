@@ -224,7 +224,7 @@ function ReportBody({
         <Badge tone={isFallback ? "warning" : "success"}>
           {isFallback
             ? t("reports.growth.fallbackNote")
-            : t("compose.source.llm", "Azure OpenAI")}
+            : "Azure OpenAI"}
         </Badge>
         {llmError && !isFallback ? (
           <Badge tone="warning" title={llmError}>
@@ -379,16 +379,16 @@ function ReportBody({
                       <td className="py-2 font-medium text-fg">
                         {p.provider}
                       </td>
-                      <td className="py-2 text-end">
+                      <td className="font-numeric py-2 text-end">
                         {formatNumber(p.posts, locale)}
                       </td>
-                      <td className="py-2 text-end">
+                      <td className="font-numeric py-2 text-end">
                         {formatNumber(p.reach, locale)}
                       </td>
-                      <td className="py-2 text-end">
+                      <td className="font-numeric py-2 text-end">
                         {formatNumber(p.impressions, locale)}
                       </td>
-                      <td className="py-2 text-end">
+                      <td className="font-numeric py-2 text-end">
                         {formatNumber(p.engagements, locale)}
                       </td>
                     </tr>
@@ -625,8 +625,8 @@ function SharesCard({
                   }
                 >
                   {copiedId === s.token
-                    ? t("compose.copied", "Copied")
-                    : t("compose.copy", "Copy")}
+                    ? "Copied"
+                    : t("common.copy", "Copy")}
                 </Button>
                 <Button
                   variant="ghost"

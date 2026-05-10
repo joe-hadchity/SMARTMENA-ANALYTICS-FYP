@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import "leaflet/dist/leaflet.css";
 import "./globals.css";
 import Providers from "./providers";
 import AppShell from "@/components/shell/AppShell";
