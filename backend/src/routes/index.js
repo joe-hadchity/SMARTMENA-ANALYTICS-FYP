@@ -25,6 +25,9 @@ const trendRoutes = require("./trendRoutes");
 const hashtagTrendRoutes = require("./hashtagTrendRoutes");
 const inboxRoutes = require("./inboxRoutes");
 const webhookRoutes = require("./webhookRoutes");
+const advisorRoutes = require("./advisorRoutes");
+const advisorChatRoutes = require("./advisorChatRoutes");
+const advisorContextRoutes = require("./advisorContextRoutes");
 
 const router = express.Router();
 
@@ -53,5 +56,8 @@ router.use("/trends", trendRoutes);
 router.use("/hashtags", hashtagTrendRoutes);
 router.use("/inbox", inboxRoutes);
 router.use("/webhooks", webhookRoutes);
+router.use("/advisor", advisorRoutes);
+router.use("/advisor-chat", advisorChatRoutes);
+router.use("/advisor-context", advisorContextRoutes);
 
 module.exports = router;

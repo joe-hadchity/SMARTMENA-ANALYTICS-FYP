@@ -42,7 +42,7 @@ export default function KpiStrip({
   return (
     <div
       className={cn(
-        "grid grid-cols-1 overflow-hidden rounded-md border border-border bg-surface shadow-xs",
+        "grid grid-cols-1 overflow-hidden rounded-xl bg-white",
         // grow to as many columns as items provided (max 6)
         items.length === 2 && "md:grid-cols-2",
         items.length === 3 && "md:grid-cols-3",
@@ -51,6 +51,10 @@ export default function KpiStrip({
         items.length >= 6 && "md:grid-cols-6",
         className,
       )}
+      style={{
+        border: "1px solid oklch(88% 0.022 320)",
+        boxShadow: "0 1px 3px rgba(30,22,12,0.06)",
+      }}
     >
       {items.map((item, i) => (
         <Cell
@@ -133,47 +137,94 @@ function Cell({
         "relative flex items-center gap-4 px-5 py-5 md:px-6 md:py-6",
         // vertical divider on every cell except the first (and on mobile, horizontal between rows)
         !isFirst &&
-          "border-t border-border md:border-t-0 md:border-s md:border-border",
+          "border-t md:border-t-0 md:border-s",
       )}
+      style={{
+        borderColor: !isFirst ? "oklch(92% 0.015 320)" : undefined,
+      }}
     >
       <div className="min-w-0 flex-1">
-        <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-fg-muted">
+        <div
+          className="text-[10px] font-semibold uppercase tracking-[0.12em] mb-2"
+          style={{
+            fontFamily: "'IBM Plex Mono', monospace",
+            color: "oklch(52% 0.050 320)",
+          }}
+        >
           {item.label}
         </div>
         {loading ? (
           <Skeleton className="mt-2 h-8 w-24" />
         ) : (
-          <div className="mt-1.5 font-numeric text-[1.65rem] font-bold leading-none tracking-tight text-fg">
+          <div
+            className="text-[2rem] font-bold leading-none mb-2"
+            style={{
+              fontFamily: "'IBM Plex Sans', sans-serif",
+              color: "oklch(15% 0.014 50)",
+              letterSpacing: "-0.02em",
+            }}
+          >
             {item.value}
           </div>
         )}
         {formattedDelta ? (
-          <div
-            className={cn(
-              "font-numeric mt-2 inline-flex items-center gap-0.5 text-[12px] font-semibold",
-              trendTone,
-            )}
-          >
-            <TrendIcon className="h-3 w-3" />
-            {formattedDelta}
+          <div className="flex items-center gap-1.5">
+            <span
+              className="text-[10px] font-semibold"
+              style={{
+                fontFamily: "'IBM Plex Mono', monospace",
+                color: isGood ? "oklch(40% 0.090 150)" : isBad ? "oklch(50% 0.150 25)" : "oklch(52% 0.050 320)",
+              }}
+            >
+              {trend === "up" ? "▲" : trend === "down" ? "▼" : "—"} {formattedDelta}
+            </span>
             {item.hint ? (
-              <span className="ms-1.5 text-fg-subtle font-medium">
+              <span
+                className="text-[10px]"
+                style={{
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  color: "oklch(52% 0.050 320)",
+                }}
+              >
                 {item.hint}
               </span>
             ) : null}
           </div>
         ) : item.hint ? (
-          <div className="mt-2 text-[11px] text-fg-subtle">{item.hint}</div>
+          <div
+            className="text-[10px]"
+            style={{
+              fontFamily: "'IBM Plex Mono', monospace",
+              color: "oklch(52% 0.050 320)",
+            }}
+          >
+            {item.hint}
+          </div>
         ) : null}
       </div>
 
       {item.series && item.series.length > 1 ? (
-        <div className={cn("w-20 shrink-0 md:w-28", seriesTone)}>
+        <div className="w-20 shrink-0 md:w-28">
           <Sparkline
             data={item.series}
             width={120}
             height={40}
             className="w-full"
+            color={
+              item.tone === "primary"
+                ? "oklch(46% 0.108 320)"
+                : item.tone === "success"
+                  ? "oklch(40% 0.090 150)"
+                  : item.tone === "warning"
+                    ? "oklch(54% 0.130 60)"
+                    : item.tone === "danger"
+                      ? "oklch(50% 0.150 25)"
+                      : isGood
+                        ? "oklch(40% 0.090 150)"
+                        : isBad
+                          ? "oklch(50% 0.150 25)"
+                          : "oklch(46% 0.108 320)"
+            }
           />
         </div>
       ) : null}

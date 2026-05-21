@@ -16,8 +16,9 @@ export function Sparkline({
   width = 120,
   height = 36,
   className,
-  strokeWidth = 1.75,
+  strokeWidth = 2,
   fill = true,
+  color,
 }: {
   data: number[];
   width?: number;
@@ -25,8 +26,10 @@ export function Sparkline({
   className?: string;
   strokeWidth?: number;
   fill?: boolean;
+  color?: string;
 }) {
   const gradId = useId();
+  const shadowId = useId();
   const points = data.length > 1 ? data : [0, 0];
 
   const max = Math.max(...points);
@@ -34,13 +37,15 @@ export function Sparkline({
   const range = max - min || 1;
 
   const step = points.length > 1 ? width / (points.length - 1) : 0;
-  const y = (v: number) => height - ((v - min) / range) * (height - 4) - 2;
+  const y = (v: number) => height - ((v - min) / range) * (height - 6) - 3;
 
   const coords = points.map((v, i) => [i * step, y(v)] as const);
   const path = coords
     .map(([x, yy], i) => `${i === 0 ? "M" : "L"}${x.toFixed(2)} ${yy.toFixed(2)}`)
     .join(" ");
   const areaPath = `${path} L${width} ${height} L0 ${height} Z`;
+
+  const lineColor = color || "currentColor";
 
   return (
     <svg
@@ -51,22 +56,35 @@ export function Sparkline({
       preserveAspectRatio="none"
       aria-hidden="true"
     >
-      {fill ? (
-        <defs>
+      <defs>
+        {fill ? (
           <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="currentColor" stopOpacity={0.25} />
-            <stop offset="100%" stopColor="currentColor" stopOpacity={0} />
+            <stop offset="0%" stopColor={lineColor} stopOpacity={0.2} />
+            <stop offset="100%" stopColor={lineColor} stopOpacity={0} />
           </linearGradient>
-        </defs>
-      ) : null}
+        ) : null}
+        {/* Drop shadow for the line */}
+        <filter id={shadowId} x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur in="SourceAlpha" stdDeviation="1.5" />
+          <feOffset dx="0" dy="1" result="offsetblur" />
+          <feComponentTransfer>
+            <feFuncA type="linear" slope="0.3" />
+          </feComponentTransfer>
+          <feMerge>
+            <feMergeNode />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
       {fill ? <path d={areaPath} fill={`url(#${gradId})`} /> : null}
       <path
         d={path}
         fill="none"
-        stroke="currentColor"
+        stroke={lineColor}
         strokeWidth={strokeWidth}
         strokeLinecap="round"
         strokeLinejoin="round"
+        filter={`url(#${shadowId})`}
       />
     </svg>
   );

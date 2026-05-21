@@ -30,8 +30,17 @@ type ChatMsg = {
   streaming?: boolean;
 };
 
-export default function DecisionBriefPanel() {
+type DecisionBriefPanelProps = {
+  onOpenChange?: (open: boolean) => void;
+};
+
+export default function DecisionBriefPanel({ onOpenChange }: DecisionBriefPanelProps) {
   const [open, setOpen] = useState(true);
+
+  const handleOpenChange = (newOpen: boolean) => {
+    setOpen(newOpen);
+    onOpenChange?.(newOpen);
+  };
   const [draft, setDraft] = useState("");
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMsg[]>([]);
@@ -80,7 +89,7 @@ export default function DecisionBriefPanel() {
     return (
       <button
         type="button"
-        onClick={() => setOpen(true)}
+        onClick={() => handleOpenChange(true)}
         className="fixed right-4 top-24 z-30 flex items-center gap-2 rounded-full border border-border bg-bg-elevated px-3 py-2 text-xs font-semibold text-fg shadow-lg backdrop-blur-xl transition-colors hover:border-primary/40 hover:bg-primary/5"
       >
         <Brain className="h-4 w-4 text-primary" />
@@ -167,7 +176,7 @@ export default function DecisionBriefPanel() {
           </div>
           <button
             type="button"
-            onClick={() => setOpen(false)}
+            onClick={() => handleOpenChange(false)}
             className="grid h-8 w-8 place-items-center rounded-md text-fg-muted transition-colors hover:bg-surface-muted hover:text-fg"
             aria-label="Hide AI Decision Brief"
           >

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  body { margin: 0; padding: 20px; background: var(--bg-base); font-family: var(--font-sans); }
+  .section-label { font-size: 11px; font-weight: 600; color: var(--fg-secondary); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 12px; }
+  .chart-row { display: flex; gap: 8px; margin-bottom: 20px; }
+  .chip { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); flex: 1; }
+  .dot { width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; }
+  .chip-name { font-size: 12px; font-weight: 600; color: var(--fg-primary); }
+  .chip-use { font-size: 10px; color: var(--fg-tertiary); margin-top: 1px; }
+  .bar-demo { margin-top: 16px; }
+  .bar-track { display: flex; gap: 3px; height: 32px; border-radius: var(--radius-md); overflow: hidden; }
+  .bar-seg { height: 100%; }
+  .legend { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--fg-secondary); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+</style>
+</head>
+<body>
+
+<div class="section-label">Chart Color Palette — 8 Categorical Series</div>
+<div class="chart-row">
+  <div class="chip"><div class="dot" style="background: var(--chart-1)"></div><div><div class="chip-name">Teal</div><div class="chip-use">Primary series</div></div></div>
+  <div class="chip"><div class="dot" style="background: var(--chart-2)"></div><div><div class="chip-name">Amber</div><div class="chip-use">Secondary series</div></div></div>
+  <div class="chip"><div class="dot" style="background: var(--chart-3)"></div><div><div class="chip-name">Terracotta</div><div class="chip-use">Tertiary series</div></div></div>
+  <div class="chip"><div class="dot" style="background: var(--chart-4)"></div><div><div class="chip-name">Sage</div><div class="chip-use">4th series</div></div></div>
+</div>
+<div class="chart-row">
+  <div class="chip"><div class="dot" style="background: var(--chart-5)"></div><div><div class="chip-name">Plum</div><div class="chip-use">5th series</div></div></div>
+  <div class="chip"><div class="dot" style="background: var(--chart-6)"></div><div><div class="chip-name">Sky</div><div class="chip-use">6th series</div></div></div>
+  <div class="chip"><div class="dot" style="background: var(--chart-7)"></div><div><div class="chip-name">Gold</div><div class="chip-use">7th series</div></div></div>
+  <div class="chip"><div class="dot" style="background: var(--chart-8)"></div><div><div class="chip-name">Slate</div><div class="chip-use">8th series</div></div></div>
+</div>
+
+<div class="section-label">Usage Preview — Stacked Bar</div>
+<div class="bar-demo">
+  <div class="bar-track">
+    <div class="bar-seg" style="width:28%; background: var(--chart-1)"></div>
+    <div class="bar-seg" style="width:22%; background: var(--chart-2)"></div>
+    <div class="bar-seg" style="width:17%; background: var(--chart-3)"></div>
+    <div class="bar-seg" style="width:13%; background: var(--chart-4)"></div>
+    <div class="bar-seg" style="width:10%; background: var(--chart-5)"></div>
+    <div class="bar-seg" style="width:6%;  background: var(--chart-6)"></div>
+    <div class="bar-seg" style="width:4%;  background: var(--chart-7)"></div>
+  </div>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background: var(--chart-1)"></div>Revenue</div>
+    <div class="legend-item"><div class="legend-dot" style="background: var(--chart-2)"></div>Expenses</div>
+    <div class="legend-item"><div class="legend-dot" style="background: var(--chart-3)"></div>Tax</div>
+    <div class="legend-item"><div class="legend-dot" style="background: var(--chart-4)"></div>Payroll</div>
+    <div class="legend-item"><div class="legend-dot" style="background: var(--chart-5)"></div>Logistics</div>
+    <div class="legend-item"><div class="legend-dot" style="background: var(--chart-6)"></div>Marketing</div>
+    <div class="legend-item"><div class="legend-dot" style="background: var(--chart-7)"></div>Other</div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -63,7 +63,7 @@ export type AuthPayload = {
   activeRole: string | null;
 };
 
-function readWorkspaceId(): string | null {
+export function readWorkspaceId(): string | null {
   if (typeof window === "undefined") return null;
   const env = process.env.NEXT_PUBLIC_WORKSPACE_ID;
   if (env) return env;
@@ -839,6 +839,227 @@ export const analyzeApi = {
     text: string;
   }): Promise<SentimentResult> =>
     (await http.post("/analyze/sentiment", input)).data,
+};
+
+// ---------------------------------------------------------------------------
+// Advisor API Campaigns
+// ---------------------------------------------------------------------------
+
+export type AdvisorApiStatus = "live" | "not_configured" | "error";
+
+export type AdvisorCampaign = {
+  id: string;
+  name: string;
+  status: "ACTIVE" | "PAUSED" | "ARCHIVED";
+  effective_status?: "ACTIVE" | "PAUSED" | "ARCHIVED";
+  objective: string;
+  daily_budget: string;
+  budget_remaining?: string;
+  created_time: string;
+  start_time?: string;
+  stop_time?: string;
+};
+
+export type AdvisorCampaignDetails = AdvisorCampaign & {
+  buying_type?: string;
+  bid_strategy?: string;
+  special_ad_categories?: string[];
+  updated_time?: string;
+};
+
+export type AdvisorCampaignInsights = {
+  spend: number;
+  impressions: number;
+  clicks: number;
+  cpc: number;
+  ctr: number;
+  conversions?: number;
+  purchase_roas?: number;
+};
+
+export type AdvisorAdSet = {
+  id: string;
+  name: string;
+  campaign_id: string;
+  status: "ACTIVE" | "PAUSED" | "ARCHIVED";
+  effective_status?: "ACTIVE" | "PAUSED" | "ARCHIVED";
+  daily_budget?: string;
+  lifetime_budget?: string;
+  optimization_goal?: string;
+  billing_event?: string;
+  start_time?: string;
+  end_time?: string;
+  created_time: string;
+  updated_time?: string;
+};
+
+export type AdvisorAd = {
+  id: string;
+  name: string;
+  adset_id: string;
+  status: "ACTIVE" | "PAUSED" | "ARCHIVED";
+  effective_status?: "ACTIVE" | "PAUSED" | "ARCHIVED";
+  creative?: {
+    id: string;
+    name: string;
+    object_story_spec?: any;
+  };
+  created_time: string;
+  updated_time?: string;
+};
+
+export type AdvisorListResponse<T> = {
+  _status: AdvisorApiStatus;
+  _note?: string;
+  data: T[];
+};
+
+export type AdvisorSingleResponse<T> = {
+  _status: AdvisorApiStatus;
+  _note?: string;
+  data: T | null;
+};
+
+export const advisorApi = {
+  // Campaigns
+  listCampaigns: async (params?: {
+    status?: string;
+    limit?: number;
+  }): Promise<AdvisorListResponse<AdvisorCampaign>> =>
+    (await http.get("/advisor/campaigns", { params })).data,
+
+  getCampaignDetails: async (
+    campaignId: string
+  ): Promise<AdvisorSingleResponse<AdvisorCampaignDetails>> =>
+    (await http.get(`/advisor/campaigns/${campaignId}`)).data,
+
+  getCampaignInsights: async (
+    campaignId: string,
+    params?: {
+      date_range?: "last_7d" | "last_30d" | "last_90d";
+      date_start?: string;
+      date_stop?: string;
+    }
+  ): Promise<AdvisorSingleResponse<AdvisorCampaignInsights>> =>
+    (await http.get(`/advisor/campaigns/${campaignId}/insights`, { params })).data,
+
+  // Ad Sets
+  listAdSets: async (
+    campaignId: string
+  ): Promise<AdvisorListResponse<AdvisorAdSet>> =>
+    (await http.get(`/advisor/campaigns/${campaignId}/adsets`)).data,
+
+  getAdSetDetails: async (
+    campaignId: string,
+    adsetId: string
+  ): Promise<AdvisorSingleResponse<AdvisorAdSet>> =>
+    (await http.get(`/advisor/campaigns/${campaignId}/adsets/${adsetId}`)).data,
+
+  // Ads
+  listAds: async (
+    campaignId: string,
+    adsetId: string
+  ): Promise<AdvisorListResponse<AdvisorAd>> =>
+    (await http.get(`/advisor/campaigns/${campaignId}/adsets/${adsetId}/ads`)).data,
+
+  getAdDetails: async (
+    campaignId: string,
+    adsetId: string,
+    adId: string
+  ): Promise<AdvisorSingleResponse<AdvisorAd>> =>
+    (await http.get(`/advisor/campaigns/${campaignId}/adsets/${adsetId}/ads/${adId}`)).data,
+};
+
+export type AdvisorConversation = {
+  id: string;
+  workspace_id: string;
+  external_session_id: string | null;
+  title: string;
+  mode: "general" | "create_campaign";
+  status: "active" | "archived";
+  message_count: number;
+  created_at: string;
+  last_message_at: string;
+  metadata: Record<string, any>;
+};
+
+export type AdvisorMessage = {
+  id: string;
+  conversation_id: string;
+  role: "user" | "assistant";
+  content: string;
+  campaign_created: boolean;
+  campaign_id: string | null;
+  created_at: string;
+  metadata: Record<string, any>;
+};
+
+export type AdvisorConversationWithMessages = AdvisorConversation & {
+  messages: AdvisorMessage[];
+};
+
+export const advisorChatApi = {
+  /**
+   * Send a message in a conversation
+   * Creates new conversation if conversationId is not provided
+   */
+  sendMessage: async (input: {
+    message: string;
+    conversationId?: string;
+    mode?: "general" | "create_campaign";
+  }): Promise<{
+    conversationId: string;
+    externalSessionId: string;
+    message: string;
+    campaignCreated?: boolean;
+    campaignId?: string;
+  }> => (await http.post("/advisor-chat/chat", input)).data,
+
+  /**
+   * List recent conversations
+   */
+  listConversations: async (params?: {
+    limit?: number;
+    status?: "active" | "archived" | "all";
+  }): Promise<{
+    conversations: AdvisorConversation[];
+    count: number;
+  }> => (await http.get("/advisor-chat/conversations", { params })).data,
+
+  /**
+   * Get a conversation with all its messages
+   */
+  getConversation: async (
+    id: string
+  ): Promise<{ conversation: AdvisorConversationWithMessages }> =>
+    (await http.get(`/advisor-chat/conversations/${id}`)).data,
+
+  /**
+   * Create a new empty conversation
+   */
+  createConversation: async (input: {
+    title?: string;
+    mode?: "general" | "create_campaign";
+  }): Promise<{ conversation: AdvisorConversation }> =>
+    (await http.post("/advisor-chat/conversations", input)).data,
+
+  /**
+   * Update conversation metadata (title, status)
+   */
+  updateConversation: async (
+    id: string,
+    input: {
+      title?: string;
+      status?: "active" | "archived";
+    }
+  ): Promise<{ conversation: AdvisorConversation }> =>
+    (await http.patch(`/advisor-chat/conversations/${id}`, input)).data,
+
+  /**
+   * Delete a conversation permanently
+   */
+  deleteConversation: async (id: string): Promise<void> =>
+    (await http.delete(`/advisor-chat/conversations/${id}`)).data,
 };
 
 export const predictApi = {

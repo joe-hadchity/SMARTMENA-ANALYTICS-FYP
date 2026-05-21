@@ -73,6 +73,16 @@ export type Provider =
   | "tiktok"
   | "x";
 
+export type SocialAccountMetadata = {
+  bio?: string;
+  followers?: number;
+  following?: number;
+  mockSeed?: number;
+  kind?: string;
+  demoVertical?: string;
+  [key: string]: unknown;
+};
+
 export type SocialAccount = {
   id: string;
   workspace_id: string;
@@ -86,7 +96,7 @@ export type SocialAccount = {
   is_mock: boolean;
   connected_at: string;
   last_synced_at: string | null;
-  metadata: Record<string, unknown>;
+  metadata: SocialAccountMetadata;
 };
 
 export type PostType =

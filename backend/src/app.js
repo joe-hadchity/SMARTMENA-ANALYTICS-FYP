@@ -38,6 +38,7 @@ app.use(
  *   /api/oauth/meta/*     - Meta connection status/callback
  *   /api/webhooks/*       - Meta webhook verification/events
  *   /api/reports/shared/* - token-based public report read
+ *   /api/advisor-chat/*   - AI advisor chat proxy (MVP - no auth)
  */
 const PUBLIC_PATTERNS = [
   /^\/api\/health(?:\/|$)/,
@@ -45,6 +46,7 @@ const PUBLIC_PATTERNS = [
   /^\/api\/oauth\/meta\/(?:status|callback)(?:\/|$)/,
   /^\/api\/webhooks(?:\/|$)/,
   /^\/api\/reports\/shared\//,
+  /^\/api\/advisor-chat(?:\/|$)/,
 ];
 
 function isPublic(path) {

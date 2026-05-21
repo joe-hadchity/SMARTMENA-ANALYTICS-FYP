@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=IBM+Plex+Mono:wght@400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<style>
+  body { margin: 0; padding: 20px; background: var(--bg-base); font-family: var(--font-sans); }
+  .section-label { font-size: 11px; font-weight: 600; color: var(--fg-secondary); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 12px; margin-top: 20px; }
+  .section-label:first-child { margin-top: 0; }
+  .divider { height: 1px; background: var(--border-subtle); margin: 16px 0; }
+  .cards-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-start; }
+
+  /* ── KPI / Stat Card ── */
+  .kpi-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: 16px 18px;
+    box-shadow: var(--shadow-sm);
+    min-width: 160px;
+    flex: 1;
+  }
+  .kpi-label { font-size: 12px; font-weight: 600; color: var(--fg-tertiary); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+  .kpi-value { font-family: var(--font-mono); font-size: 26px; font-weight: 700; color: var(--fg-primary); line-height: 1.1; }
+  .kpi-delta { font-size: 12px; margin-top: 5px; display: flex; align-items: center; gap: 4px; }
+  .kpi-delta.up   { color: var(--color-success-text); }
+  .kpi-delta.down { color: var(--color-danger-text); }
+  .kpi-sub { font-size: 11px; color: var(--fg-tertiary); margin-top: 2px; }
+
+  /* ── Content Card ── */
+  .content-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+  }
+  .card-header { padding: 14px 16px; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; }
+  .card-title  { font-size: 14px; font-weight: 600; color: var(--fg-primary); }
+  .card-action { font-size: 12px; color: var(--color-primary-600); font-weight: 500; cursor: pointer; }
+  .card-body   { padding: 14px 16px; }
+  .card-footer { padding: 10px 16px; border-top: 1px solid var(--border-subtle); background: var(--bg-base); display: flex; justify-content: space-between; align-items: center; }
+  .card-footer-text { font-size: 12px; color: var(--fg-tertiary); }
+
+  /* ── Table Row ── */
+  .mini-table { width: 100%; border-collapse: collapse; }
+  .mini-table th { font-size: 11px; font-weight: 600; color: var(--fg-tertiary); text-transform: uppercase; letter-spacing: 0.05em; padding: 6px 0; border-bottom: 1px solid var(--border-subtle); text-align: left; }
+  .mini-table td { font-size: 13px; color: var(--fg-primary); padding: 8px 0; border-bottom: 1px solid var(--border-subtle); }
+  .mini-table tr:last-child td { border-bottom: none; }
+  .mini-table tr:hover td { background: var(--bg-hover); }
+  .td-mono { font-family: var(--font-mono); font-size: 13px; }
+  .td-muted { color: var(--fg-secondary); }
+
+  /* ── Image placeholder ── */
+  .img-placeholder {
+    background: repeating-linear-gradient(
+      45deg,
+      var(--color-neutral-100) 0px,
+      var(--color-neutral-100) 4px,
+      var(--color-neutral-50) 4px,
+      var(--color-neutral-50) 10px
+    );
+    border-radius: var(--radius-md);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--fg-tertiary); font-family: var(--font-mono); font-size: 11px;
+  }
+
+  /* ── Alert/Banner ── */
+  .alert { border-radius: var(--radius-md); padding: 12px 14px; display: flex; gap: 10px; align-items: flex-start; margin-bottom: 8px; }
+  .alert-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .alert-title { font-size: 13px; font-weight: 600; }
+  .alert-body  { font-size: 12px; margin-top: 2px; opacity: 0.85; }
+
+  /* ── Sidebar card ── */
+  .sidebar-demo {
+    background: var(--bg-sidebar);
+    border-radius: var(--radius-lg);
+    padding: 12px 0;
+    width: 180px;
+  }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 14px; font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.55); cursor: pointer; transition: all 0.15s; border-radius: 0; }
+  .nav-item.active { background: var(--bg-sidebar-active); color: rgba(255,255,255,0.95); }
+  .nav-item:hover:not(.active) { color: rgba(255,255,255,0.8); background: rgba(255,255,255,0.05); }
+  .nav-divider { height: 1px; background: rgba(255,255,255,0.08); margin: 6px 0; }
+  .nav-section { font-size: 9px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.3); padding: 6px 14px 2px; }
+</style>
+</head>
+<body>
+
+<div class="section-label">KPI / Stat Cards</div>
+<div class="cards-row">
+  <div class="kpi-card">
+    <div class="kpi-label">Net Revenue</div>
+    <div class="kpi-value">4.21M</div>
+    <div class="kpi-delta up"><i class="ph ph-trend-up"></i> +14.3%</div>
+    <div class="kpi-sub">vs Q2 2025 · SAR</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Operating Expenses</div>
+    <div class="kpi-value">1.08M</div>
+    <div class="kpi-delta down"><i class="ph ph-trend-down"></i> −6.2%</div>
+    <div class="kpi-sub">vs Q2 2025 · SAR</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Active Clients</div>
+    <div class="kpi-value">247</div>
+    <div class="kpi-delta up"><i class="ph ph-trend-up"></i> +18 this month</div>
+    <div class="kpi-sub">Verified businesses</div>
+  </div>
+  <div class="kpi-card" style="border-top: 3px solid var(--color-amber-400);">
+    <div class="kpi-label">Outstanding Invoices</div>
+    <div class="kpi-value" style="color: var(--color-amber-700);">38</div>
+    <div class="kpi-delta" style="color: var(--color-warning-text);"><i class="ph ph-clock"></i> 12 overdue</div>
+    <div class="kpi-sub">Pending payment</div>
+  </div>
+</div>
+
+<div class="divider"></div>
+<div class="section-label">Content Card — Table</div>
+<div class="content-card">
+  <div class="card-header">
+    <div class="card-title">Recent Transactions</div>
+    <div class="card-action">View all <i class="ph ph-arrow-right"></i></div>
+  </div>
+  <div class="card-body">
+    <table class="mini-table">
+      <thead>
+        <tr>
+          <th>Ref</th>
+          <th>Client</th>
+          <th style="text-align:right">Amount</th>
+          <th style="text-align:right">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="td-mono td-muted">TXN-0042</td>
+          <td>Al Nakheel Trading</td>
+          <td class="td-mono" style="text-align:right">SAR 84,200</td>
+          <td style="text-align:right"><span style="background: var(--color-success-subtle); color: var(--color-success-text); font-size:11px; font-weight:600; padding: 2px 8px; border-radius: 99px;">Paid</span></td>
+        </tr>
+        <tr>
+          <td class="td-mono td-muted">TXN-0041</td>
+          <td>Masdar Logistics</td>
+          <td class="td-mono" style="text-align:right">SAR 32,750</td>
+          <td style="text-align:right"><span style="background: var(--color-warning-subtle); color: var(--color-warning-text); font-size:11px; font-weight:600; padding: 2px 8px; border-radius: 99px;">Pending</span></td>
+        </tr>
+        <tr>
+          <td class="td-mono td-muted">TXN-0040</td>
+          <td>Reem Capital Group</td>
+          <td class="td-mono" style="text-align:right">SAR 121,000</td>
+          <td style="text-align:right"><span style="background: var(--color-danger-subtle); color: var(--color-danger-text); font-size:11px; font-weight:600; padding: 2px 8px; border-radius: 99px;">Overdue</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="card-footer">
+    <div class="card-footer-text">Showing 3 of 247 transactions</div>
+    <div class="card-action" style="font-size:12px; display:flex; align-items:center; gap:4px;">Export CSV <i class="ph ph-download-simple"></i></div>
+  </div>
+</div>
+
+<div class="divider"></div>
+<div class="section-label">Alert / Banner Cards</div>
+<div class="alert" style="background: var(--color-info-subtle); border: 1px solid var(--color-info);">
+  <i class="ph ph-info alert-icon" style="color: var(--color-info)"></i>
+  <div><div class="alert-title" style="color: var(--color-info-text)">Data sync scheduled</div><div class="alert-body" style="color: var(--color-info-text)">Your ERP integration will sync at 02:00 GST. No action needed.</div></div>
+</div>
+<div class="alert" style="background: var(--color-warning-subtle); border: 1px solid var(--color-warning);">
+  <i class="ph ph-warning alert-icon" style="color: var(--color-warning)"></i>
+  <div><div class="alert-title" style="color: var(--color-warning-text)">12 invoices overdue</div><div class="alert-body" style="color: var(--color-warning-text)">Review and follow up to maintain cash flow health.</div></div>
+</div>
+<div class="alert" style="background: var(--color-danger-subtle); border: 1px solid var(--color-danger);">
+  <i class="ph ph-x-circle alert-icon" style="color: var(--color-danger)"></i>
+  <div><div class="alert-title" style="color: var(--color-danger-text)">Export failed</div><div class="alert-body" style="color: var(--color-danger-text)">The PDF export encountered an error. Please retry or contact support.</div></div>
+</div>
+
+<div class="divider"></div>
+<div class="section-label">Navigation Sidebar</div>
+<div class="sidebar-demo">
+  <div class="nav-section">Main</div>
+  <div class="nav-item active"><i class="ph ph-squares-four"></i> Dashboard</div>
+  <div class="nav-item"><i class="ph ph-chart-line"></i> Reports</div>
+  <div class="nav-item"><i class="ph ph-receipt"></i> Invoices</div>
+  <div class="nav-item"><i class="ph ph-users"></i> Clients</div>
+  <div class="nav-divider"></div>
+  <div class="nav-section">System</div>
+  <div class="nav-item"><i class="ph ph-plugs"></i> Integrations</div>
+  <div class="nav-item"><i class="ph ph-gear"></i> Settings</div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  body { margin: 0; padding: 20px; background: var(--bg-base); font-family: var(--font-sans); }
+  .grid { display: grid; grid-template-columns: repeat(11, 1fr); gap: 4px; margin-bottom: 24px; }
+  .swatch { height: 52px; border-radius: 6px; position: relative; }
+  .swatch-label { font-size: 10px; color: var(--fg-tertiary); margin-top: 4px; text-align: center; font-family: var(--font-mono); }
+  .section-label { font-size: 11px; font-weight: 600; color: var(--fg-secondary); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px; margin-top: 4px; }
+  .base-tag { position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); font-size: 9px; font-weight: 600; color: white; background: rgba(0,0,0,0.3); padding: 1px 5px; border-radius: 99px; white-space: nowrap; }
+</style>
+</head>
+<body>
+
+<div class="section-label">Primary — Deep Teal</div>
+<div class="grid">
+  <div><div class="swatch" style="background: var(--color-primary-50)"></div><div class="swatch-label">50</div></div>
+  <div><div class="swatch" style="background: var(--color-primary-100)"></div><div class="swatch-label">100</div></div>
+  <div><div class="swatch" style="background: var(--color-primary-200)"></div><div class="swatch-label">200</div></div>
+  <div><div class="swatch" style="background: var(--color-primary-300)"></div><div class="swatch-label">300</div></div>
+  <div><div class="swatch" style="background: var(--color-primary-400)"></div><div class="swatch-label">400</div></div>
+  <div><div class="swatch" style="background: var(--color-primary-500); position:relative"><div class="base-tag">base</div></div><div class="swatch-label">500</div></div>
+  <div><div class="swatch" style="background: var(--color-primary-600)"></div><div class="swatch-label">600</div></div>
+  <div><div class="swatch" style="background: var(--color-primary-700)"></div><div class="swatch-label">700</div></div>
+  <div><div class="swatch" style="background: var(--color-primary-800)"></div><div class="swatch-label">800</div></div>
+  <div><div class="swatch" style="background: var(--color-primary-900)"></div><div class="swatch-label">900</div></div>
+  <div><div class="swatch" style="background: var(--color-primary-950)"></div><div class="swatch-label">950</div></div>
+</div>
+
+<div class="section-label">Amber — Warm Accent</div>
+<div class="grid">
+  <div><div class="swatch" style="background: var(--color-amber-50)"></div><div class="swatch-label">50</div></div>
+  <div><div class="swatch" style="background: var(--color-amber-100)"></div><div class="swatch-label">100</div></div>
+  <div><div class="swatch" style="background: var(--color-amber-200)"></div><div class="swatch-label">200</div></div>
+  <div><div class="swatch" style="background: var(--color-amber-300)"></div><div class="swatch-label">300</div></div>
+  <div><div class="swatch" style="background: var(--color-amber-400)"></div><div class="swatch-label">400</div></div>
+  <div><div class="swatch" style="background: var(--color-amber-500); position:relative"><div class="base-tag">base</div></div><div class="swatch-label">500</div></div>
+  <div><div class="swatch" style="background: var(--color-amber-600)"></div><div class="swatch-label">600</div></div>
+  <div><div class="swatch" style="background: var(--color-amber-700)"></div><div class="swatch-label">700</div></div>
+  <div><div class="swatch" style="background: var(--color-amber-800)"></div><div class="swatch-label">800</div></div>
+  <div><div class="swatch" style="background: var(--color-amber-900)"></div><div class="swatch-label">900</div></div>
+  <div><div class="swatch" style="background: var(--color-amber-950)"></div><div class="swatch-label">950</div></div>
+</div>
+
+<div class="section-label">Terracotta — Brand Identity</div>
+<div class="grid">
+  <div><div class="swatch" style="background: var(--color-terra-50)"></div><div class="swatch-label">50</div></div>
+  <div><div class="swatch" style="background: var(--color-terra-100)"></div><div class="swatch-label">100</div></div>
+  <div><div class="swatch" style="background: var(--color-terra-200)"></div><div class="swatch-label">200</div></div>
+  <div><div class="swatch" style="background: var(--color-terra-300)"></div><div class="swatch-label">300</div></div>
+  <div><div class="swatch" style="background: var(--color-terra-400)"></div><div class="swatch-label">400</div></div>
+  <div><div class="swatch" style="background: var(--color-terra-500); position:relative"><div class="base-tag">base</div></div><div class="swatch-label">500</div></div>
+  <div><div class="swatch" style="background: var(--color-terra-600)"></div><div class="swatch-label">600</div></div>
+  <div><div class="swatch" style="background: var(--color-terra-700)"></div><div class="swatch-label">700</div></div>
+  <div><div class="swatch" style="background: var(--color-terra-800)"></div><div class="swatch-label">800</div></div>
+  <div><div class="swatch" style="background: var(--color-terra-900)"></div><div class="swatch-label">900</div></div>
+  <div><div class="swatch" style="background: var(--color-terra-950)"></div><div class="swatch-label">950</div></div>
+</div>
+
+<div class="section-label">Neutrals — Warm Inkstone</div>
+<div class="grid">
+  <div><div class="swatch" style="background: var(--color-neutral-25); border: 1px solid var(--border-subtle)"></div><div class="swatch-label">25</div></div>
+  <div><div class="swatch" style="background: var(--color-neutral-50)"></div><div class="swatch-label">50</div></div>
+  <div><div class="swatch" style="background: var(--color-neutral-100)"></div><div class="swatch-label">100</div></div>
+  <div><div class="swatch" style="background: var(--color-neutral-200)"></div><div class="swatch-label">200</div></div>
+  <div><div class="swatch" style="background: var(--color-neutral-300)"></div><div class="swatch-label">300</div></div>
+  <div><div class="swatch" style="background: var(--color-neutral-400)"></div><div class="swatch-label">400</div></div>
+  <div><div class="swatch" style="background: var(--color-neutral-500)"></div><div class="swatch-label">500</div></div>
+  <div><div class="swatch" style="background: var(--color-neutral-600)"></div><div class="swatch-label">600</div></div>
+  <div><div class="swatch" style="background: var(--color-neutral-700)"></div><div class="swatch-label">700</div></div>
+  <div><div class="swatch" style="background: var(--color-neutral-900)"></div><div class="swatch-label">900</div></div>
+  <div><div class="swatch" style="background: var(--color-neutral-950)"></div><div class="swatch-label">950</div></div>
+</div>
+
+</body>
+</html>

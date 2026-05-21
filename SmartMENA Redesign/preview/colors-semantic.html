@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  body { margin: 0; padding: 20px; background: var(--bg-base); font-family: var(--font-sans); }
+  .row { display: flex; gap: 8px; margin-bottom: 20px; }
+  .token-card {
+    flex: 1;
+    padding: 12px 14px;
+    border-radius: var(--radius-lg);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    box-shadow: var(--shadow-sm);
+  }
+  .swatch-bar { height: 36px; border-radius: var(--radius-md); margin-bottom: 8px; }
+  .token-name { font-size: 11px; font-weight: 600; color: var(--fg-primary); font-family: var(--font-mono); }
+  .token-desc { font-size: 10px; color: var(--fg-tertiary); margin-top: 2px; }
+  .section-label { font-size: 11px; font-weight: 600; color: var(--fg-secondary); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px; margin-top: 4px; }
+  .pair { display: flex; gap: 4px; }
+  .pair-swatch { height: 36px; border-radius: var(--radius-md); flex: 1; }
+</style>
+</head>
+<body>
+
+<div class="section-label">Semantic — Status</div>
+<div class="row">
+  <div class="token-card">
+    <div class="pair">
+      <div class="pair-swatch" style="background: var(--color-success)"></div>
+      <div class="pair-swatch" style="background: var(--color-success-subtle); border: 1px solid var(--border-subtle)"></div>
+    </div>
+    <div class="token-name">Success</div>
+    <div class="token-desc">Positive outcomes, growth</div>
+  </div>
+  <div class="token-card">
+    <div class="pair">
+      <div class="pair-swatch" style="background: var(--color-warning)"></div>
+      <div class="pair-swatch" style="background: var(--color-warning-subtle); border: 1px solid var(--border-subtle)"></div>
+    </div>
+    <div class="token-name">Warning</div>
+    <div class="token-desc">Caution, pending review</div>
+  </div>
+  <div class="token-card">
+    <div class="pair">
+      <div class="pair-swatch" style="background: var(--color-danger)"></div>
+      <div class="pair-swatch" style="background: var(--color-danger-subtle); border: 1px solid var(--border-subtle)"></div>
+    </div>
+    <div class="token-name">Danger</div>
+    <div class="token-desc">Errors, destructive actions</div>
+  </div>
+  <div class="token-card">
+    <div class="pair">
+      <div class="pair-swatch" style="background: var(--color-info)"></div>
+      <div class="pair-swatch" style="background: var(--color-info-subtle); border: 1px solid var(--border-subtle)"></div>
+    </div>
+    <div class="token-name">Info</div>
+    <div class="token-desc">Neutral information</div>
+  </div>
+</div>
+
+<div class="section-label">Semantic — Surfaces</div>
+<div class="row">
+  <div class="token-card">
+    <div class="swatch-bar" style="background: var(--bg-base); border: 1px solid var(--border-subtle)"></div>
+    <div class="token-name">--bg-base</div>
+    <div class="token-desc">App canvas / page background</div>
+  </div>
+  <div class="token-card">
+    <div class="swatch-bar" style="background: var(--bg-surface); border: 1px solid var(--border-subtle)"></div>
+    <div class="token-name">--bg-surface</div>
+    <div class="token-desc">Card and panel surfaces</div>
+  </div>
+  <div class="token-card">
+    <div class="swatch-bar" style="background: var(--bg-hover)"></div>
+    <div class="token-name">--bg-hover</div>
+    <div class="token-desc">Row/item hover state</div>
+  </div>
+  <div class="token-card">
+    <div class="swatch-bar" style="background: var(--bg-sidebar)"></div>
+    <div class="token-name">--bg-sidebar</div>
+    <div class="token-desc">Dark nav sidebar</div>
+  </div>
+</div>
+
+<div class="section-label">Semantic — Foreground</div>
+<div class="row">
+  <div class="token-card">
+    <div style="background: var(--bg-surface); border-radius: 6px; padding: 8px; display: flex; flex-direction: column; gap: 4px;">
+      <div style="font-size: 13px; font-weight: 600; color: var(--fg-primary)">Primary text</div>
+      <div style="font-size: 12px; color: var(--fg-secondary)">Secondary text</div>
+      <div style="font-size: 12px; color: var(--fg-tertiary)">Tertiary / placeholder</div>
+      <div style="font-size: 12px; color: var(--fg-disabled)">Disabled state</div>
+    </div>
+    <div class="token-name" style="margin-top:6px">Foreground scale</div>
+  </div>
+  <div class="token-card">
+    <div style="background: var(--bg-sidebar); border-radius: 6px; padding: 8px; display: flex; flex-direction: column; gap: 4px;">
+      <div style="font-size: 13px; font-weight: 600; color: var(--fg-inverse)">Inverse primary</div>
+      <div style="font-size: 12px; color: rgba(255,255,255,0.6)">Inverse secondary</div>
+    </div>
+    <div class="token-name" style="margin-top:6px">Inverse foreground</div>
+  </div>
+  <div class="token-card">
+    <div style="background: var(--bg-surface); border-radius: 6px; padding: 8px; display: flex; flex-direction: column; gap: 4px;">
+      <div style="font-size: 12px; height: 14px; background: var(--border-subtle); border-radius: 2px; margin-bottom: 2px;"></div>
+      <div style="font-size: 12px; height: 14px; background: var(--border-default); border-radius: 2px; margin-bottom: 2px;"></div>
+      <div style="font-size: 12px; height: 14px; background: var(--border-strong); border-radius: 2px;"></div>
+    </div>
+    <div class="token-name" style="margin-top:6px">Border scale</div>
+    <div class="token-desc">Subtle · Default · Strong</div>
+  </div>
+</div>
+
+</body>
+</html>

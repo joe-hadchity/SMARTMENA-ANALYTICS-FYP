@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Kalam:wght@300;400;700&family=Newsreader:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -9,56 +11,65 @@
  * Format: Lightness% Chroma Hue
  */
 :root {
-  /* ── SmartMENA palette: "Cedar & Brass" — Levantine / Gulf-rooted ────────
-   * primary  cedar teal (mosque domes, Lebanon cedars)
-   * accent   brass amber (lanterns, market signage) — uses --warning
-   * danger   terracotta  (earthen, not lab-red)
-   * success  olive-green (date palm, not bootstrap-green)
-   * surfaces warm parchment + pure-white cards
+  /* ── SmartMENA palette: Warm Desert Modernism ────────
+   * Drawn from MENA architecture and material culture
+   * Warm sandstone, geometric precision, structured openness
    */
 
-  /* surfaces */
-  --bg:              38 35% 96%;   /* warm parchment page bg */
-  --bg-elevated:     0 0% 100%;    /* nav, modals — pure white */
-  --surface:         0 0% 100%;    /* cards — pure white */
-  --surface-muted:   38 25% 95%;
-  --surface-hover:   38 30% 93%;
+  /* surfaces — warm off-white canvas */
+  --bg:              98.5% 0.008 75;  /* Warm off-white canvas */
+  --bg-elevated:     100% 0.004 75;   /* Card/panel surfaces */
+  --bg-raised:       99% 0.006 75;    /* Slightly raised elements */
+  --surface:         100% 0.004 75;   /* Cards — white with warm tint */
+  --surface-muted:   96% 0.008 75;    /* Muted backgrounds */
+  --surface-hover:   94% 0.010 75;    /* Hover state */
 
-  /* borders — warm and subtle, shadows do the depth */
-  --border:          38 20% 88%;
-  --border-strong:   38 18% 78%;
+  /* borders — warm and subtle */
+  --border:          84% 0.010 60;    /* Standard borders */
+  --border-subtle:   90% 0.008 60;    /* Hairline dividers */
+  --border-strong:   72% 0.012 60;    /* Emphasized borders */
 
-  /* text — slightly cool ink against warm surfaces */
-  --fg:              210 18% 13%;
-  --fg-muted:        210 10% 38%;
-  --fg-subtle:       210 8% 55%;
-  --fg-inverse:      0 0% 100%;
+  /* text — inkstone base with warm tint */
+  --fg:              14% 0.015 50;    /* Main body text (inkstone) */
+  --fg-muted:        38% 0.013 50;    /* Supporting text */
+  --fg-subtle:       50% 0.012 50;    /* Placeholder, muted */
+  --fg-inverse:      98% 0.004 75;    /* On dark backgrounds */
 
-  /* primary — deep cedar teal */
-  --primary:         175 50% 28%;
-  --primary-fg:      0 0% 100%;
-  --primary-soft:    175 30% 92%;
-  --primary-hover:   175 55% 22%;
+  /* primary — Deep Teal (trust, precision, regional warmth) */
+  --primary:         52% 0.13 195;
+  --primary-fg:      100% 0 0;
+  --primary-soft:    96% 0.015 195;
+  --primary-hover:   46% 0.12 195;
 
-  /* semantic — MENA-native palette, no off-the-shelf greens/reds */
-  --success:         150 45% 35%;   /* olive-green */
-  --success-soft:    150 30% 92%;
-  --warning:         38 90% 50%;    /* brass amber — also our warm accent */
-  --warning-soft:    38 80% 92%;
-  --danger:          15 70% 48%;    /* terracotta */
-  --danger-soft:     15 60% 94%;
-  --info:            205 50% 40%;
-  --info-soft:       205 40% 92%;
+  /* semantic — MENA-native palette */
+  --success:         54% 0.13 148;    /* Not bootstrap-green */
+  --success-soft:    96% 0.04 148;
+  --warning:         70% 0.18 60;     /* Warm Amber — data highlights */
+  --warning-soft:    98% 0.02 60;
+  --danger:          54% 0.18 20;     /* Terracotta, not lab-red */
+  --danger-soft:     97% 0.04 20;
+  --info:            56% 0.13 240;
+  --info-soft:       96% 0.04 240;
 
-  --ring:            175 50% 35%;
+  --ring:            52% 0.13 195;
 
-  /* data-viz — cedar → brass → terracotta → olive → ink-violet → sand-gold */
-  --viz-1:           175 50% 32%;   /* cedar teal */
-  --viz-2:           38 80% 55%;    /* brass */
-  --viz-3:           15 65% 50%;    /* terracotta */
-  --viz-4:           150 40% 38%;   /* olive */
-  --viz-5:           260 35% 50%;   /* ink violet */
-  --viz-6:           45 50% 45%;    /* sand gold */
+  /* data-viz — 8-color categorical palette */
+  --viz-1:           52% 0.13 195;    /* Teal */
+  --viz-2:           70% 0.18 60;     /* Amber */
+  --viz-3:           56% 0.13 30;     /* Terracotta */
+  --viz-4:           58% 0.10 148;    /* Sage */
+  --viz-5:           52% 0.12 300;    /* Plum */
+  --viz-6:           62% 0.13 240;    /* Sky */
+  --viz-7:           68% 0.15 85;     /* Gold */
+  --viz-8:           52% 0.06 220;    /* Slate */
+
+  /* sidebar — warm paper/cream with plum tint */
+  --sidebar-bg:      96% 0.014 320;   /* Warm plum-tinted cream */
+  --sidebar-border:  88% 0.022 320;   /* Soft plum border */
+  --sidebar-fg:      40% 0.040 320;   /* Muted text */
+  --sidebar-hover:   93% 0.024 320;   /* Soft plum hover */
+  --sidebar-label:   52% 0.050 320;   /* Section label color */
+  --sidebar-active:  46% 0.108 320;   /* Active item (plum) */
 
   /* fonts */
   --font-sans:       "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -67,43 +78,55 @@
 }
 
 html.dark {
-  /* ── Dark mode: deep ink-teal, like night sky over the Gulf ───────── */
-  --bg:              200 30% 6%;
-  --bg-elevated:     200 25% 9%;
-  --surface:         200 22% 11%;
-  --surface-muted:   200 20% 14%;
-  --surface-hover:   200 18% 17%;
+  /* ── Dark mode: deep ink with warm tint ───────── */
+  --bg:              18% 0.014 50;
+  --bg-elevated:     17% 0.013 50;
+  --bg-raised:       24% 0.018 50;
+  --surface:         20% 0.015 50;
+  --surface-muted:   28% 0.014 50;
+  --surface-hover:   32% 0.016 50;
 
-  --border:          200 15% 22%;
-  --border-strong:   200 12% 30%;
+  --border:          38% 0.013 50;
+  --border-subtle:   28% 0.012 50;
+  --border-strong:   50% 0.012 50;
 
-  --fg:              38 25% 96%;     /* warm cream ink for warmth on dark */
-  --fg-muted:        38 12% 70%;
-  --fg-subtle:       38 10% 55%;
-  --fg-inverse:      210 18% 13%;
+  --fg:              98% 0.004 75;   /* warm cream on dark */
+  --fg-muted:        70% 0.009 50;
+  --fg-subtle:       60% 0.010 50;
+  --fg-inverse:      14% 0.015 50;
 
-  --primary:         175 50% 50%;    /* lifted cedar for contrast */
-  --primary-fg:      210 18% 8%;
-  --primary-soft:    175 40% 18%;
-  --primary-hover:   175 55% 58%;
+  --primary:         60% 0.11 195;   /* Lifted teal for contrast */
+  --primary-fg:      14% 0.015 50;
+  --primary-soft:    24% 0.06 195;
+  --primary-hover:   68% 0.10 195;
 
-  --success:         150 45% 50%;
-  --success-soft:    150 30% 18%;
-  --warning:         38 85% 60%;
-  --warning-soft:    38 50% 18%;
-  --danger:          15 70% 60%;
-  --danger-soft:     15 50% 18%;
-  --info:            205 60% 60%;
-  --info-soft:       205 50% 18%;
+  --success:         62% 0.11 148;
+  --success-soft:    24% 0.06 148;
+  --warning:         78% 0.17 60;
+  --warning-soft:    30% 0.09 60;
+  --danger:          68% 0.16 20;
+  --danger-soft:     28% 0.09 20;
+  --info:            64% 0.12 240;
+  --info-soft:       26% 0.06 240;
 
-  --ring:            175 50% 55%;
+  --ring:            60% 0.11 195;
 
-  --viz-1:           175 55% 50%;
-  --viz-2:           38 80% 60%;
-  --viz-3:           15 65% 58%;
-  --viz-4:           150 45% 52%;
-  --viz-5:           260 40% 65%;
-  --viz-6:           45 60% 58%;
+  --viz-1:           60% 0.12 195;
+  --viz-2:           78% 0.17 60;
+  --viz-3:           68% 0.13 30;
+  --viz-4:           64% 0.10 148;
+  --viz-5:           62% 0.11 300;
+  --viz-6:           68% 0.12 240;
+  --viz-7:           74% 0.14 85;
+  --viz-8:           62% 0.06 220;
+
+  /* sidebar in dark mode — warm paper maintained */
+  --sidebar-bg:      96% 0.014 320;
+  --sidebar-border:  88% 0.022 320;
+  --sidebar-fg:      40% 0.040 320;
+  --sidebar-hover:   93% 0.024 320;
+  --sidebar-label:   52% 0.050 320;
+  --sidebar-active:  46% 0.108 320;
 }
 
 html,
@@ -205,11 +228,19 @@ html.color-theme-in-transition * {
     color: transparent;
   }
 
+  /* Warm tint blobs + grid texture for dashboard background */
+  .bg-warm-blobs {
+    background-image:
+      repeating-linear-gradient(0deg, transparent 0 24px, rgba(50,30,30,0.04) 24px 25px),
+      repeating-linear-gradient(90deg, transparent 0 24px, rgba(50,30,30,0.04) 24px 25px);
+    background-attachment: fixed;
+  }
+
   /* Quiet page wash retained for older call sites that still use this class. */
   .bg-orbs {
     background-image:
-      linear-gradient(180deg, hsl(var(--surface-muted) / 0.8) 0%, transparent 44%),
-      linear-gradient(90deg, hsl(var(--primary) / 0.04), hsl(var(--viz-2) / 0.04));
+      linear-gradient(180deg, oklch(var(--surface-muted) / 0.8) 0%, transparent 44%),
+      linear-gradient(90deg, oklch(var(--primary) / 0.04), oklch(var(--viz-2) / 0.04));
   }
 
   /* Subtle grid backdrop for dashboards (CSS mask fades the edges). */
@@ -325,9 +356,76 @@ html.color-theme-in-transition * {
   }
 }
 
+@keyframes shimmer {
+  0% {
+    background-position: -800px 0;
+  }
+  100% {
+    background-position: 800px 0;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-from-top {
+  from {
+    transform: translateY(-1rem);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-from-bottom {
+  from {
+    transform: translateY(1rem);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-from-left {
+  from {
+    transform: translateX(-1rem);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-from-right {
+  from {
+    transform: translateX(1rem);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .live-signals-track {
     animation: none;
+  }
+  *[class*="animate-"] {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
 
@@ -346,6 +444,59 @@ html.color-theme-in-transition * {
     font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
     font-variant-numeric: tabular-nums;
     font-feature-settings: "tnum";
+  }
+
+  /* Animation utilities */
+  .animate-shimmer {
+    animation: shimmer 2s infinite;
+  }
+  .animate-in {
+    animation-fill-mode: both;
+  }
+  .fade-in {
+    animation: fade-in 0.5s ease-out;
+  }
+  .slide-in-from-top-4 {
+    animation: slide-in-from-top 0.5s ease-out;
+  }
+  .slide-in-from-bottom-2 {
+    animation: slide-in-from-bottom 0.3s ease-out;
+  }
+  .slide-in-from-bottom-4 {
+    animation: slide-in-from-bottom 0.5s ease-out;
+  }
+  .slide-in-from-left-4 {
+    animation: slide-in-from-left 0.5s ease-out;
+  }
+  .slide-in-from-right-4 {
+    animation: slide-in-from-right 0.5s ease-out;
+  }
+  .duration-300 {
+    animation-duration: 0.3s;
+  }
+  .duration-500 {
+    animation-duration: 0.5s;
+  }
+  .duration-700 {
+    animation-duration: 0.7s;
+  }
+  .delay-150 {
+    animation-delay: 0.15s;
+  }
+  .delay-200 {
+    animation-delay: 0.2s;
+  }
+  .delay-300 {
+    animation-delay: 0.3s;
+  }
+
+  /* Hide scrollbar but keep functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
   }
 }
 

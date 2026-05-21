@@ -128,6 +128,15 @@ const env = {
   // Where Meta should send the user back to in the SPA after OAuth finishes.
   // The callback will 302 to `${FRONTEND_URL}${redirect_after}`.
   FRONTEND_URL: process.env.FRONTEND_URL || "http://localhost:3000",
+
+  // ---------------------------------------------------------------------
+  // Advisor API Integration
+  // ---------------------------------------------------------------------
+  ADVISOR_API_BASE_URL: process.env.ADVISOR_API_BASE_URL || "",
+  ADVISOR_CLIENT_ID: process.env.ADVISOR_CLIENT_ID || "",
+  ADVISOR_API_ENABLED: Boolean(
+    process.env.ADVISOR_API_BASE_URL && process.env.ADVISOR_CLIENT_ID
+  ),
 };
 
 module.exports = env;

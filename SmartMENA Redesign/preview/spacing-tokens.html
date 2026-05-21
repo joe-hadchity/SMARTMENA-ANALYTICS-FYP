@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  body { margin: 0; padding: 20px; background: var(--bg-base); font-family: var(--font-sans); }
+  .section-label { font-size: 11px; font-weight: 600; color: var(--fg-secondary); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 12px; }
+  .spacing-row { display: flex; align-items: flex-end; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+  .space-item { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+  .space-block { background: var(--color-primary-200); border-radius: 3px; width: 100%; min-width: 8px; }
+  .space-label { font-family: var(--font-mono); font-size: 9px; color: var(--fg-tertiary); text-align: center; white-space: nowrap; }
+  .space-val { font-family: var(--font-mono); font-size: 9px; color: var(--fg-secondary); font-weight: 500; }
+  .use-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .use-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: 12px;
+    box-shadow: var(--shadow-xs);
+  }
+  .use-title { font-size: 11px; font-weight: 600; color: var(--fg-secondary); margin-bottom: 8px; }
+</style>
+</head>
+<body>
+
+<div class="section-label">Spacing Scale — 8px base grid</div>
+<div class="spacing-row">
+  <div class="space-item"><div class="space-block" style="height: 2px; width: 20px;"></div><div class="space-label">0.5</div><div class="space-val">2px</div></div>
+  <div class="space-item"><div class="space-block" style="height: 4px; width: 20px;"></div><div class="space-label">1</div><div class="space-val">4px</div></div>
+  <div class="space-item"><div class="space-block" style="height: 8px; width: 24px;"></div><div class="space-label">2</div><div class="space-val">8px</div></div>
+  <div class="space-item"><div class="space-block" style="height: 12px; width: 28px;"></div><div class="space-label">3</div><div class="space-val">12px</div></div>
+  <div class="space-item"><div class="space-block" style="height: 16px; width: 32px;"></div><div class="space-label">4</div><div class="space-val">16px</div></div>
+  <div class="space-item"><div class="space-block" style="height: 20px; width: 36px;"></div><div class="space-label">5</div><div class="space-val">20px</div></div>
+  <div class="space-item"><div class="space-block" style="height: 24px; width: 40px;"></div><div class="space-label">6</div><div class="space-val">24px</div></div>
+  <div class="space-item"><div class="space-block" style="height: 32px; width: 44px;"></div><div class="space-label">8</div><div class="space-val">32px</div></div>
+  <div class="space-item"><div class="space-block" style="height: 40px; width: 48px;"></div><div class="space-label">10</div><div class="space-val">40px</div></div>
+  <div class="space-item"><div class="space-block" style="height: 48px; width: 52px;"></div><div class="space-label">12</div><div class="space-val">48px</div></div>
+  <div class="space-item"><div class="space-block" style="height: 64px; width: 56px;"></div><div class="space-label">16</div><div class="space-val">64px</div></div>
+  <div class="space-item"><div class="space-block" style="height: 80px; width: 60px; background: var(--color-primary-100);"></div><div class="space-label">20</div><div class="space-val">80px</div></div>
+  <div class="space-item"><div class="space-block" style="height: 96px; width: 60px; background: var(--color-primary-50); border: 1px dashed var(--color-primary-200);"></div><div class="space-label">24</div><div class="space-val">96px</div></div>
+</div>
+
+<div class="section-label">Spacing in Use</div>
+<div class="use-grid">
+  <div class="use-card">
+    <div class="use-title">Component Padding</div>
+    <div style="display: flex; flex-direction: column; gap: 4px;">
+      <div style="background: var(--color-primary-50); border-radius: 4px; padding: 4px 8px; font-size: 11px; display: flex; justify-content: space-between;"><span>xs button</span><span style="font-family: var(--font-mono); color: var(--fg-tertiary);">4×8px</span></div>
+      <div style="background: var(--color-primary-50); border-radius: 4px; padding: 8px 12px; font-size: 11px; display: flex; justify-content: space-between;"><span>sm button</span><span style="font-family: var(--font-mono); color: var(--fg-tertiary);">8×12px</span></div>
+      <div style="background: var(--color-primary-50); border-radius: 4px; padding: 10px 16px; font-size: 11px; display: flex; justify-content: space-between;"><span>md button</span><span style="font-family: var(--font-mono); color: var(--fg-tertiary);">10×16px</span></div>
+      <div style="background: var(--color-primary-50); border-radius: 4px; padding: 12px 20px; font-size: 11px; display: flex; justify-content: space-between;"><span>lg button</span><span style="font-family: var(--font-mono); color: var(--fg-tertiary);">12×20px</span></div>
+    </div>
+  </div>
+  <div class="use-card">
+    <div class="use-title">Layout Gaps</div>
+    <div style="display: flex; flex-direction: column; gap: 4px;">
+      <div style="background: var(--color-neutral-50); border-radius: 4px; padding: 6px 10px; font-size: 11px; display: flex; justify-content: space-between;"><span>Icon + label</span><span style="font-family: var(--font-mono); color: var(--fg-tertiary);">gap 8px</span></div>
+      <div style="background: var(--color-neutral-50); border-radius: 4px; padding: 6px 10px; font-size: 11px; display: flex; justify-content: space-between;"><span>Form fields</span><span style="font-family: var(--font-mono); color: var(--fg-tertiary);">gap 16px</span></div>
+      <div style="background: var(--color-neutral-50); border-radius: 4px; padding: 6px 10px; font-size: 11px; display: flex; justify-content: space-between;"><span>Section groups</span><span style="font-family: var(--font-mono); color: var(--fg-tertiary);">gap 32px</span></div>
+      <div style="background: var(--color-neutral-50); border-radius: 4px; padding: 6px 10px; font-size: 11px; display: flex; justify-content: space-between;"><span>Page sections</span><span style="font-family: var(--font-mono); color: var(--fg-tertiary);">gap 64px</span></div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SmartMENA — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
+
+<!-- React + Babel -->
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<style>
+/* ── RESET & TOKENS ─────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --font-sans:    'IBM Plex Sans', sans-serif;
+  --font-arabic:  'IBM Plex Sans Arabic', sans-serif;
+  --font-mono:    'IBM Plex Mono', monospace;
+
+  /* Brand */
+  --teal-950: oklch(22% 0.06 195);
+  --teal-800: oklch(34% 0.09 195);
+  --teal-700: oklch(40% 0.10 195);
+  --teal-600: oklch(46% 0.12 195);
+  --teal-500: oklch(52% 0.13 195);
+  --teal-400: oklch(60% 0.11 195);
+  --teal-300: oklch(70% 0.09 195);
+  --teal-200: oklch(82% 0.06 195);
+  --teal-100: oklch(92% 0.03 195);
+  --teal-50:  oklch(96% 0.015 195);
+
+  --amber-700: oklch(46% 0.14 60);
+  --amber-600: oklch(56% 0.17 60);
+  --amber-500: oklch(70% 0.18 60);
+  --amber-200: oklch(91% 0.09 60);
+  --amber-100: oklch(95% 0.05 60);
+  --amber-50:  oklch(98% 0.02 60);
+
+  --terra-600: oklch(52% 0.14 30);
+  --terra-500: oklch(60% 0.14 30);
+  --terra-100: oklch(93% 0.04 30);
+  --terra-50:  oklch(97% 0.02 30);
+
+  --ink-950: oklch(14% 0.015 50);
+  --ink-900: oklch(20% 0.015 50);
+  --ink-800: oklch(28% 0.014 50);
+  --ink-700: oklch(38% 0.013 50);
+  --ink-600: oklch(50% 0.012 50);
+  --ink-500: oklch(60% 0.010 50);
+  --ink-400: oklch(70% 0.009 50);
+  --ink-300: oklch(80% 0.008 50);
+  --ink-200: oklch(88% 0.007 50);
+  --ink-100: oklch(93% 0.005 50);
+  --ink-50:  oklch(97% 0.003 50);
+
+  --success:        oklch(54% 0.13 148);
+  --success-subtle: oklch(96% 0.04 148);
+  --success-text:   oklch(32% 0.10 148);
+  --danger:         oklch(54% 0.18 20);
+  --danger-subtle:  oklch(97% 0.04 20);
+  --danger-text:    oklch(32% 0.14 20);
+  --warning:        oklch(70% 0.18 60);
+  --warning-subtle: oklch(98% 0.02 60);
+  --warning-text:   oklch(38% 0.12 60);
+
+  /* Surfaces */
+  --bg-base:    oklch(98.5% 0.008 75);
+  --bg-surface: oklch(100% 0.004 75);
+  --bg-hover:   oklch(96% 0.008 75);
+  --bg-sidebar: oklch(16% 0.016 50);
+  --bg-sidebar-hover:  oklch(22% 0.016 50);
+  --bg-sidebar-active: oklch(26% 0.018 195);
+
+  /* Text */
+  --fg-1: oklch(14% 0.015 50);
+  --fg-2: oklch(38% 0.013 50);
+  --fg-3: oklch(60% 0.010 50);
+  --fg-4: oklch(70% 0.009 50);
+  --fg-inv: oklch(98% 0.004 75);
+
+  /* Borders */
+  --border-subtle:  oklch(90% 0.008 60);
+  --border-default: oklch(84% 0.010 60);
+
+  /* Shadows — warm-tinted */
+  --shadow-xs: 0 1px 2px rgba(30,22,12,0.05);
+  --shadow-sm: 0 1px 3px rgba(30,22,12,0.07), 0 1px 2px rgba(30,22,12,0.04);
+  --shadow-md: 0 4px 12px rgba(30,22,12,0.09), 0 1px 3px rgba(30,22,12,0.05);
+  --shadow-lg: 0 8px 24px rgba(30,22,12,0.11), 0 2px 6px rgba(30,22,12,0.06);
+
+  /* Radius */
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 14px;
+  --r-xl: 20px;
+  --r-full: 9999px;
+
+  /* Sidebar width */
+  --sidebar-w: 220px;
+  --sidebar-collapsed-w: 56px;
+
+  /* Easing */
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+html, body, #root { height: 100%; }
+body {
+  font-family: var(--font-sans);
+  background: var(--bg-base);
+  color: var(--fg-1);
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+/* Scrollbars — subtle */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-default); border-radius: 99px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel" src="dashboard-components.jsx"></script>
+<script type="text/babel" src="dashboard-data.jsx"></script>
+<script type="text/babel" src="dashboard-app.jsx"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+</body>
+</html>

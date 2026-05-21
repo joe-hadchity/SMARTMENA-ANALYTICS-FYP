@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  body { margin: 0; padding: 20px; background: var(--bg-base); font-family: var(--font-sans); }
+  .section-label { font-size: 11px; font-weight: 600; color: var(--fg-secondary); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 10px; margin-top: 18px; }
+  .section-label:first-child { margin-top: 0; }
+  .divider { height: 1px; background: var(--border-subtle); margin: 14px 0; }
+
+  .principle-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 4px; }
+  .principle-card {
+    background: var(--bg-surface); border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg); padding: 12px 14px;
+    box-shadow: var(--shadow-xs);
+  }
+  .p-name { font-size: 12px; font-weight: 600; color: var(--fg-primary); margin-bottom: 3px; }
+  .p-val  { font-family: var(--font-mono); font-size: 12px; color: var(--color-primary-600); margin-bottom: 3px; }
+  .p-desc { font-size: 11px; color: var(--fg-tertiary); line-height: 1.5; }
+
+  /* Live demo elements */
+  .demo-area { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 16px; display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+
+  .btn-demo {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-family: var(--font-sans); font-size: 14px; font-weight: 600;
+    padding: 9px 16px; border-radius: var(--radius-md); border: none; cursor: pointer;
+    background: var(--color-primary-500); color: white;
+    transition: background 150ms cubic-bezier(0.4,0,0.2,1),
+                transform 150ms cubic-bezier(0.4,0,0.2,1),
+                box-shadow 150ms cubic-bezier(0.4,0,0.2,1);
+  }
+  .btn-demo:hover { background: var(--color-primary-600); }
+  .btn-demo:active { background: var(--color-primary-700); transform: scale(0.98); }
+
+  .fade-demo {
+    padding: 10px 14px; background: var(--color-primary-50);
+    border: 1px solid var(--color-primary-200); border-radius: var(--radius-md);
+    font-size: 13px; color: var(--color-primary-700);
+    transition: opacity 250ms cubic-bezier(0.0,0,0.2,1),
+                transform 250ms cubic-bezier(0.0,0,0.2,1);
+  }
+  .fade-demo.hidden { opacity: 0; transform: translateY(4px); pointer-events: none; }
+
+  .slide-demo {
+    overflow: hidden;
+    transition: max-height 350ms cubic-bezier(0.4,0,0.2,1),
+                opacity 350ms cubic-bezier(0.4,0,0.2,1);
+    max-height: 80px;
+  }
+  .slide-demo.collapsed { max-height: 0; opacity: 0; }
+  .slide-inner { padding: 10px 14px; background: var(--bg-base); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); font-size: 13px; color: var(--fg-secondary); }
+
+  .easing-track { height: 40px; background: var(--color-neutral-50); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); position: relative; overflow: hidden; margin-bottom: 4px; }
+  .easing-ball  { width: 20px; height: 20px; border-radius: 50%; position: absolute; top: 50%; transform: translateY(-50%); left: 4px; }
+  .easing-label { font-size: 10px; color: var(--fg-tertiary); font-family: var(--font-mono); }
+
+  .dur-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .dur-chip {
+    display: flex; flex-direction: column; align-items: center;
+    background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md);
+    padding: 8px 12px; min-width: 64px;
+  }
+  .dur-ms   { font-family: var(--font-mono); font-size: 13px; font-weight: 600; color: var(--fg-primary); }
+  .dur-name { font-size: 10px; color: var(--fg-tertiary); margin-top: 2px; }
+  .dur-use  { font-size: 10px; color: var(--fg-tertiary); text-align: center; margin-top: 3px; }
+
+  .do-dont { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .do-card { background: var(--color-success-subtle); border: 1px solid var(--color-success); border-radius: var(--radius-md); padding: 10px 12px; }
+  .dont-card { background: var(--color-danger-subtle); border: 1px solid var(--color-danger); border-radius: var(--radius-md); padding: 10px 12px; }
+  .do-label { font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 5px; }
+  .do-label.yes { color: var(--color-success-text); }
+  .do-label.no  { color: var(--color-danger-text); }
+  .rule { font-size: 12px; color: var(--fg-secondary); line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<div class="section-label">Duration Scale</div>
+<div class="dur-row">
+  <div class="dur-chip"><div class="dur-ms">50ms</div><div class="dur-name">Instant</div><div class="dur-use">Tooltip appear</div></div>
+  <div class="dur-chip"><div class="dur-ms">150ms</div><div class="dur-name">Micro</div><div class="dur-use">Hover, focus states</div></div>
+  <div class="dur-chip" style="border-color: var(--color-primary-300); background: var(--color-primary-50);"><div class="dur-ms" style="color:var(--color-primary-600);">250ms</div><div class="dur-name" style="color:var(--color-primary-500);">Standard</div><div class="dur-use">Most transitions</div></div>
+  <div class="dur-chip"><div class="dur-ms">350ms</div><div class="dur-name">Moderate</div><div class="dur-use">Panel open/close</div></div>
+  <div class="dur-chip"><div class="dur-ms">500ms</div><div class="dur-name">Slow</div><div class="dur-use">Page transitions</div></div>
+</div>
+
+<div class="divider"></div>
+<div class="section-label">Easing Curves</div>
+<div class="principle-grid">
+  <div class="principle-card">
+    <div class="p-name">Standard</div>
+    <div class="p-val">cubic-bezier(0.4, 0, 0.2, 1)</div>
+    <div class="p-desc">Default for most UI transitions. Smooth deceleration into final state.</div>
+  </div>
+  <div class="principle-card">
+    <div class="p-name">Enter</div>
+    <div class="p-val">cubic-bezier(0.0, 0, 0.2, 1)</div>
+    <div class="p-desc">Elements entering the screen. Fast start, gentle landing.</div>
+  </div>
+  <div class="principle-card">
+    <div class="p-name">Exit</div>
+    <div class="p-val">cubic-bezier(0.4, 0, 1, 1)</div>
+    <div class="p-desc">Elements leaving. Accelerates out — feels like it's moving away.</div>
+  </div>
+  <div class="principle-card">
+    <div class="p-name">Emphasis</div>
+    <div class="p-val">cubic-bezier(0.2, 0, 0, 1)</div>
+    <div class="p-desc">Attention-drawing transitions. Snappy start with very soft settle.</div>
+  </div>
+</div>
+
+<div class="divider"></div>
+<div class="section-label">Live Demos — Hover &amp; Click to Test</div>
+<div class="demo-area">
+  <button class="btn-demo" id="toggleFade">Toggle panel</button>
+  <div class="fade-demo" id="fadeEl">Report summary ready — 14 items exported successfully.</div>
+  <button class="btn-demo" id="toggleSlide" style="background: var(--color-neutral-800);">Toggle expand</button>
+</div>
+<div class="slide-demo collapsed" id="slideEl" style="margin-top: 8px;">
+  <div class="slide-inner">Q3 detail: Operating expenses were SAR 1.08M, a 6.2% reduction driven by logistics optimization and renegotiated supplier contracts across 3 regions.</div>
+</div>
+
+<div class="divider"></div>
+<div class="section-label">Do / Don't</div>
+<div class="do-dont">
+  <div class="do-card">
+    <div class="do-label yes">✓ Do</div>
+    <div class="rule">Use 150ms for hover/focus micro-interactions. Fast enough to feel responsive.</div>
+  </div>
+  <div class="dont-card">
+    <div class="do-label no">✕ Don't</div>
+    <div class="rule">Never use bounce or spring easing on data tables or financial figures — it undermines trust.</div>
+  </div>
+  <div class="do-card">
+    <div class="do-label yes">✓ Do</div>
+    <div class="rule">Animate opacity + translate together for entering elements (fade-up pattern).</div>
+  </div>
+  <div class="dont-card">
+    <div class="do-label no">✕ Don't</div>
+    <div class="rule">Don't animate layout properties (width, height, padding) — use max-height or transform instead.</div>
+  </div>
+  <div class="do-card">
+    <div class="do-label yes">✓ Do</div>
+    <div class="rule">Use exit animations (250ms, ease-exit) to help users understand where elements went.</div>
+  </div>
+  <div class="dont-card">
+    <div class="do-label no">✕ Don't</div>
+    <div class="rule">Never use gradient animations, shimmer effects, or pulsing on data-dense screens.</div>
+  </div>
+</div>
+
+<script>
+  const fadeEl = document.getElementById('fadeEl');
+  document.getElementById('toggleFade').addEventListener('click', () => {
+    fadeEl.classList.toggle('hidden');
+  });
+  const slideEl = document.getElementById('slideEl');
+  document.getElementById('toggleSlide').addEventListener('click', () => {
+    slideEl.classList.toggle('collapsed');
+  });
+</script>
+</body>
+</html>

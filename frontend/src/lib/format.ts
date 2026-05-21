@@ -1,11 +1,15 @@
 import type { Locale } from "./types";
 
-export function formatNumber(value: number | null | undefined, locale: Locale = "en") {
+export function formatNumber(
+  value: number | null | undefined,
+  locale: Locale = "en",
+  notation: "standard" | "compact" = "standard"
+) {
   if (value == null) return "—";
   try {
-    return new Intl.NumberFormat(locale === "ar" ? "ar-EG" : "en-US").format(
-      value,
-    );
+    return new Intl.NumberFormat(locale === "ar" ? "ar-EG" : "en-US", {
+      notation,
+    }).format(value);
   } catch {
     return String(value);
   }

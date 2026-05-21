@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<style>
+  body { margin: 0; padding: 20px; background: var(--bg-base); font-family: var(--font-sans); }
+  .section-label { font-size: 11px; font-weight: 600; color: var(--fg-secondary); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 10px; margin-top: 18px; }
+  .section-label:first-child { margin-top: 0; }
+  .divider { height: 1px; background: var(--border-subtle); margin: 14px 0; }
+  .wrap { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+  /* Badge */
+  .badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 11px; font-weight: 600;
+    padding: 3px 9px; border-radius: 99px;
+    white-space: nowrap;
+  }
+  .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: 0.7; flex-shrink: 0; }
+
+  /* Status pill (with icon) */
+  .status {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 12px; font-weight: 600;
+    padding: 4px 10px; border-radius: var(--radius-md);
+  }
+
+  /* Tag (removable) */
+  .tag {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 12px; font-weight: 500;
+    padding: 4px 10px; border-radius: var(--radius-md);
+    background: var(--color-neutral-100); color: var(--fg-secondary);
+    border: 1px solid var(--border-default);
+  }
+  .tag-x { font-size: 14px; color: var(--fg-tertiary); cursor: pointer; line-height: 1; }
+  .tag-x:hover { color: var(--fg-primary); }
+
+  /* Avatar */
+  .avatar {
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 50%; font-weight: 600; color: white; flex-shrink: 0;
+    font-size: 13px;
+  }
+  .avatar-sm { width: 28px; height: 28px; font-size: 11px; }
+  .avatar-md { width: 36px; height: 36px; font-size: 13px; }
+  .avatar-lg { width: 48px; height: 48px; font-size: 16px; }
+
+  /* Notification dot */
+  .notif-wrap { position: relative; display: inline-flex; }
+  .notif-dot { position: absolute; top: -2px; right: -2px; width: 9px; height: 9px; border-radius: 50%; background: var(--color-danger); border: 2px solid var(--bg-base); }
+  .notif-count { position: absolute; top: -5px; right: -5px; min-width: 16px; height: 16px; border-radius: 99px; background: var(--color-danger); color: white; font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center; padding: 0 3px; border: 2px solid var(--bg-base); }
+
+  /* Progress bar */
+  .progress-track { height: 6px; background: var(--color-neutral-100); border-radius: 99px; overflow: hidden; }
+  .progress-fill  { height: 100%; border-radius: 99px; }
+
+  /* Chip / segmented */
+  .chip-group { display: inline-flex; border: 1px solid var(--border-default); border-radius: var(--radius-md); overflow: hidden; background: var(--bg-surface); }
+  .chip-opt { padding: 6px 12px; font-size: 12px; font-weight: 500; color: var(--fg-secondary); cursor: pointer; border-right: 1px solid var(--border-default); white-space: nowrap; }
+  .chip-opt:last-child { border-right: none; }
+  .chip-opt.active { background: var(--color-primary-500); color: white; font-weight: 600; }
+  .chip-opt:hover:not(.active) { background: var(--bg-hover); color: var(--fg-primary); }
+
+  /* Tooltip */
+  .tooltip-demo { position: relative; display: inline-block; }
+  .tooltip-box { position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); background: var(--color-neutral-950); color: var(--fg-inverse); font-size: 11px; padding: 5px 9px; border-radius: var(--radius-md); white-space: nowrap; pointer-events: none; box-shadow: var(--shadow-md); }
+  .tooltip-box::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 5px solid transparent; border-top-color: var(--color-neutral-950); }
+</style>
+</head>
+<body>
+
+<div class="section-label">Status Badges</div>
+<div class="wrap">
+  <span class="badge" style="background: var(--color-success-subtle); color: var(--color-success-text);"><span class="badge-dot"></span>Paid</span>
+  <span class="badge" style="background: var(--color-warning-subtle); color: var(--color-warning-text);"><span class="badge-dot"></span>Pending</span>
+  <span class="badge" style="background: var(--color-danger-subtle);  color: var(--color-danger-text); "><span class="badge-dot"></span>Overdue</span>
+  <span class="badge" style="background: var(--color-info-subtle);    color: var(--color-info-text);   "><span class="badge-dot"></span>In Review</span>
+  <span class="badge" style="background: var(--color-neutral-100);    color: var(--fg-secondary);       "><span class="badge-dot"></span>Draft</span>
+  <span class="badge" style="background: var(--color-primary-50);     color: var(--color-primary-700);  "><span class="badge-dot"></span>Active</span>
+  <span class="badge" style="background: var(--color-terra-100);      color: var(--color-terra-800);    "><span class="badge-dot"></span>Flagged</span>
+</div>
+
+<div class="divider"></div>
+<div class="section-label">Status Pills (with icon)</div>
+<div class="wrap">
+  <span class="status" style="background: var(--color-success-subtle); color: var(--color-success-text);"><i class="ph ph-check-circle"></i> Verified</span>
+  <span class="status" style="background: var(--color-warning-subtle); color: var(--color-warning-text);"><i class="ph ph-clock"></i> Awaiting</span>
+  <span class="status" style="background: var(--color-danger-subtle);  color: var(--color-danger-text); "><i class="ph ph-x-circle"></i> Rejected</span>
+  <span class="status" style="background: var(--color-primary-50);     color: var(--color-primary-700); "><i class="ph ph-arrow-clockwise"></i> Syncing</span>
+</div>
+
+<div class="divider"></div>
+<div class="section-label">Removable Tags</div>
+<div class="wrap">
+  <span class="tag">Retail <span class="tag-x">×</span></span>
+  <span class="tag">SAR Currency <span class="tag-x">×</span></span>
+  <span class="tag">Q2 2026 <span class="tag-x">×</span></span>
+  <span class="tag" style="background: var(--color-primary-50); color: var(--color-primary-700); border-color: var(--color-primary-200);">ERP Connected <span class="tag-x" style="color: var(--color-primary-400);">×</span></span>
+</div>
+
+<div class="divider"></div>
+<div class="section-label">Avatars</div>
+<div class="wrap">
+  <div class="avatar avatar-sm" style="background: var(--color-primary-500);">AM</div>
+  <div class="avatar avatar-md" style="background: var(--color-terra-500);">KA</div>
+  <div class="avatar avatar-lg" style="background: var(--color-amber-600);">SR</div>
+  <div class="avatar avatar-md" style="background: var(--chart-5);">FH</div>
+  <div class="notif-wrap"><div class="avatar avatar-md" style="background: var(--color-neutral-700);">MQ</div><div class="notif-dot"></div></div>
+  <div class="notif-wrap"><div class="avatar avatar-md" style="background: var(--chart-4);">YB</div><div class="notif-count">4</div></div>
+</div>
+
+<div class="divider"></div>
+<div class="section-label">Progress Bars</div>
+<div style="display: flex; flex-direction: column; gap: 10px; max-width: 400px;">
+  <div><div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span style="font-size:12px; color:var(--fg-secondary);">Revenue target</span><span style="font-family:var(--font-mono); font-size:12px; color:var(--fg-primary); font-weight:600;">72%</span></div><div class="progress-track"><div class="progress-fill" style="width:72%; background: var(--chart-1);"></div></div></div>
+  <div><div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span style="font-size:12px; color:var(--fg-secondary);">Expense budget</span><span style="font-family:var(--font-mono); font-size:12px; color:var(--color-warning-text); font-weight:600;">91%</span></div><div class="progress-track"><div class="progress-fill" style="width:91%; background: var(--color-warning);"></div></div></div>
+  <div><div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span style="font-size:12px; color:var(--fg-secondary);">Invoice collection</span><span style="font-family:var(--font-mono); font-size:12px; color:var(--color-success-text); font-weight:600;">100%</span></div><div class="progress-track"><div class="progress-fill" style="width:100%; background: var(--color-success);"></div></div></div>
+</div>
+
+<div class="divider"></div>
+<div class="section-label">Segmented Control / Time Filter</div>
+<div class="chip-group">
+  <div class="chip-opt">7D</div>
+  <div class="chip-opt active">30D</div>
+  <div class="chip-opt">90D</div>
+  <div class="chip-opt">YTD</div>
+  <div class="chip-opt">Custom</div>
+</div>
+
+<div class="divider"></div>
+<div class="section-label">Tooltip</div>
+<div class="wrap">
+  <div class="tooltip-demo">
+    <span style="font-size: 13px; color: var(--color-primary-600); font-weight: 500; text-decoration: underline dotted; cursor: help;">Gross margin</span>
+    <div class="tooltip-box">Revenue minus cost of goods sold, before operating expenses</div>
+  </div>
+</div>
+
+</body>
+</html>

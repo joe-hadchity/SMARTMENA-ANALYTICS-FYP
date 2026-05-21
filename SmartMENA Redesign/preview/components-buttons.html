@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=IBM+Plex+Mono:wght@400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<style>
+  body { margin: 0; padding: 20px; background: var(--bg-base); font-family: var(--font-sans); }
+  .section-label { font-size: 11px; font-weight: 600; color: var(--fg-secondary); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 10px; margin-top: 18px; }
+  .section-label:first-child { margin-top: 0; }
+  .btn-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 4px; }
+
+  /* Base button */
+  .btn {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-family: var(--font-sans); font-weight: var(--weight-semibold);
+    border: none; cursor: pointer;
+    transition: background var(--duration-micro) var(--ease-standard),
+                box-shadow var(--duration-micro) var(--ease-standard),
+                opacity var(--duration-micro) var(--ease-standard);
+    white-space: nowrap;
+  }
+
+  /* Sizes */
+  .btn-xs  { font-size: 12px; padding: 4px  10px; border-radius: var(--radius-md); }
+  .btn-sm  { font-size: 13px; padding: 7px  12px; border-radius: var(--radius-md); }
+  .btn-md  { font-size: 14px; padding: 9px  16px; border-radius: var(--radius-md); }
+  .btn-lg  { font-size: 15px; padding: 11px 20px; border-radius: var(--radius-lg); }
+
+  /* Variants */
+  .btn-primary   { background: var(--color-primary-500); color: #fff; }
+  .btn-primary:hover   { background: var(--color-primary-600); }
+  .btn-primary:active  { background: var(--color-primary-700); }
+
+  .btn-secondary { background: var(--color-primary-50); color: var(--color-primary-700); border: 1px solid var(--color-primary-200); }
+  .btn-secondary:hover  { background: var(--color-primary-100); }
+
+  .btn-outline { background: transparent; color: var(--fg-primary); border: 1px solid var(--border-default); }
+  .btn-outline:hover { background: var(--bg-hover); }
+
+  .btn-ghost  { background: transparent; color: var(--fg-secondary); border: none; }
+  .btn-ghost:hover { background: var(--bg-hover); color: var(--fg-primary); }
+
+  .btn-danger { background: var(--color-danger); color: #fff; }
+  .btn-danger:hover { background: oklch(46% 0.18 20); }
+
+  .btn-amber  { background: var(--color-amber-500); color: var(--color-amber-950); }
+  .btn-amber:hover { background: var(--color-amber-400); }
+
+  .btn-dark   { background: var(--color-neutral-950); color: var(--fg-inverse); }
+  .btn-dark:hover { background: var(--color-neutral-800); }
+
+  /* States */
+  .btn-disabled { opacity: 0.42; cursor: not-allowed; pointer-events: none; }
+  .btn-loading  { opacity: 0.75; cursor: wait; }
+
+  /* Icon only */
+  .btn-icon { padding: 9px; border-radius: var(--radius-md); }
+  .btn-icon.btn-lg { padding: 11px; border-radius: var(--radius-lg); }
+
+  /* Pills */
+  .btn-pill { border-radius: var(--radius-full); }
+
+  .divider { height: 1px; background: var(--border-subtle); margin: 16px 0; }
+
+  /* Arabic row */
+  .btn-ar { font-family: var(--font-arabic); direction: rtl; }
+
+  .spinner {
+    width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: white; border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    flex-shrink: 0;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div class="section-label">Primary & Key Variants</div>
+<div class="btn-row">
+  <button class="btn btn-md btn-primary"><i class="ph ph-plus"></i> Add Report</button>
+  <button class="btn btn-md btn-secondary"><i class="ph ph-download-simple"></i> Export</button>
+  <button class="btn btn-md btn-outline"><i class="ph ph-funnel"></i> Filter</button>
+  <button class="btn btn-md btn-ghost"><i class="ph ph-dots-three"></i> More</button>
+  <button class="btn btn-md btn-danger"><i class="ph ph-trash"></i> Delete</button>
+  <button class="btn btn-md btn-amber"><i class="ph ph-star"></i> Featured</button>
+  <button class="btn btn-md btn-dark"><i class="ph ph-rocket-launch"></i> Upgrade</button>
+</div>
+
+<div class="divider"></div>
+<div class="section-label">Size Scale</div>
+<div class="btn-row">
+  <button class="btn btn-xs btn-primary">Extra Small</button>
+  <button class="btn btn-sm btn-primary">Small</button>
+  <button class="btn btn-md btn-primary">Medium</button>
+  <button class="btn btn-lg btn-primary">Large</button>
+</div>
+
+<div class="divider"></div>
+<div class="section-label">States — Primary</div>
+<div class="btn-row">
+  <button class="btn btn-md btn-primary">Default</button>
+  <button class="btn btn-md btn-primary" style="background: var(--color-primary-600);">Hover</button>
+  <button class="btn btn-md btn-primary" style="background: var(--color-primary-700); box-shadow: var(--shadow-inset);">Active</button>
+  <button class="btn btn-md btn-primary" style="outline: 2px solid var(--color-primary-300); outline-offset: 2px;">Focus</button>
+  <button class="btn btn-md btn-primary btn-disabled">Disabled</button>
+  <button class="btn btn-md btn-primary btn-loading"><div class="spinner"></div> Loading…</button>
+</div>
+
+<div class="divider"></div>
+<div class="section-label">Icon Buttons</div>
+<div class="btn-row">
+  <button class="btn btn-md btn-icon btn-primary"><i class="ph ph-plus" style="font-size:16px"></i></button>
+  <button class="btn btn-md btn-icon btn-secondary"><i class="ph ph-pencil-simple" style="font-size:16px"></i></button>
+  <button class="btn btn-md btn-icon btn-outline"><i class="ph ph-arrow-clockwise" style="font-size:16px"></i></button>
+  <button class="btn btn-md btn-icon btn-ghost"><i class="ph ph-dots-three-vertical" style="font-size:16px"></i></button>
+  <button class="btn btn-lg btn-icon btn-danger"><i class="ph ph-trash" style="font-size:18px"></i></button>
+</div>
+
+<div class="divider"></div>
+<div class="section-label">Pills</div>
+<div class="btn-row">
+  <button class="btn btn-sm btn-pill btn-primary">View Summary</button>
+  <button class="btn btn-sm btn-pill btn-secondary">This Month</button>
+  <button class="btn btn-sm btn-pill btn-outline">Last 30 Days</button>
+  <button class="btn btn-sm btn-pill btn-ghost">Custom Range</button>
+</div>
+
+<div class="divider"></div>
+<div class="section-label">Arabic (RTL) — Same components</div>
+<div class="btn-row" style="direction: rtl;">
+  <button class="btn btn-md btn-primary btn-ar"><i class="ph ph-plus"></i> إضافة تقرير</button>
+  <button class="btn btn-md btn-secondary btn-ar"><i class="ph ph-download-simple"></i> تصدير</button>
+  <button class="btn btn-md btn-outline btn-ar"><i class="ph ph-funnel"></i> تصفية</button>
+  <button class="btn btn-md btn-danger btn-ar"><i class="ph ph-trash"></i> حذف</button>
+</div>
+
+</body>
+</html>

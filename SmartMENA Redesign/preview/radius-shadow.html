@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  body { margin: 0; padding: 20px; background: var(--bg-base); font-family: var(--font-sans); }
+  .section-label { font-size: 11px; font-weight: 600; color: var(--fg-secondary); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 12px; margin-top: 16px; }
+  .radius-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
+  .radius-item { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .radius-box { width: 56px; height: 56px; background: var(--color-primary-100); border: 2px solid var(--color-primary-300); }
+  .rl { font-family: var(--font-mono); font-size: 9px; color: var(--fg-tertiary); text-align: center; }
+  .rn { font-family: var(--font-mono); font-size: 9px; color: var(--fg-secondary); font-weight: 500; text-align: center; }
+  .shadow-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 8px; }
+  .shadow-card { background: var(--bg-surface); border-radius: var(--radius-lg); padding: 16px 14px; display: flex; flex-direction: column; gap: 4px; }
+  .shadow-name { font-family: var(--font-mono); font-size: 10px; color: var(--fg-secondary); font-weight: 500; }
+  .shadow-use { font-size: 10px; color: var(--fg-tertiary); }
+  .elev-row { display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap; }
+  .elev-item { text-align: center; }
+  .elev-chip { border-radius: var(--radius-lg); padding: 10px 14px; background: var(--bg-surface); font-size: 11px; color: var(--fg-secondary); white-space: nowrap; }
+  .elev-label { font-family: var(--font-mono); font-size: 9px; color: var(--fg-tertiary); margin-top: 6px; }
+</style>
+</head>
+<body>
+
+<div class="section-label">Border Radius Scale</div>
+<div class="radius-row">
+  <div class="radius-item"><div class="radius-box" style="border-radius: 0px;"></div><div class="rl">none</div><div class="rn">0px</div></div>
+  <div class="radius-item"><div class="radius-box" style="border-radius: 4px;"></div><div class="rl">sm</div><div class="rn">4px</div></div>
+  <div class="radius-item"><div class="radius-box" style="border-radius: 6px;"></div><div class="rl">md</div><div class="rn">6px</div></div>
+  <div class="radius-item"><div class="radius-box" style="border-radius: 10px;"></div><div class="rl">lg</div><div class="rn">10px</div></div>
+  <div class="radius-item"><div class="radius-box" style="border-radius: 16px;"></div><div class="rl">xl</div><div class="rn">16px</div></div>
+  <div class="radius-item"><div class="radius-box" style="border-radius: 24px;"></div><div class="rl">2xl</div><div class="rn">24px</div></div>
+  <div class="radius-item"><div class="radius-box" style="border-radius: 9999px; width: 56px; height: 56px;"></div><div class="rl">full</div><div class="rn">∞</div></div>
+</div>
+
+<div class="section-label">Shadow Elevation System</div>
+<div class="shadow-grid">
+  <div class="shadow-card" style="box-shadow: var(--shadow-xs);">
+    <div class="shadow-name">--shadow-xs</div>
+    <div class="shadow-use">Subtle lift, ghost elements</div>
+  </div>
+  <div class="shadow-card" style="box-shadow: var(--shadow-sm);">
+    <div class="shadow-name">--shadow-sm</div>
+    <div class="shadow-use">Default card, input focus</div>
+  </div>
+  <div class="shadow-card" style="box-shadow: var(--shadow-md);">
+    <div class="shadow-name">--shadow-md</div>
+    <div class="shadow-use">Dropdowns, popovers</div>
+  </div>
+  <div class="shadow-card" style="box-shadow: var(--shadow-lg);">
+    <div class="shadow-name">--shadow-lg</div>
+    <div class="shadow-use">Modals, floating panels</div>
+  </div>
+  <div class="shadow-card" style="box-shadow: var(--shadow-xl);">
+    <div class="shadow-name">--shadow-xl</div>
+    <div class="shadow-use">Large modal dialogs</div>
+  </div>
+  <div class="shadow-card" style="box-shadow: var(--shadow-inset);">
+    <div class="shadow-name">--shadow-inset</div>
+    <div class="shadow-use">Pressed states, inputs</div>
+  </div>
+</div>
+
+<div class="section-label">Elevation Layers</div>
+<div class="elev-row">
+  <div class="elev-item"><div class="elev-chip" style="background: var(--bg-base); border: 1px solid var(--border-subtle);">Base canvas</div><div class="elev-label">z: 0</div></div>
+  <div class="elev-item"><div class="elev-chip" style="box-shadow: var(--shadow-xs);">Raised card</div><div class="elev-label">z: 10</div></div>
+  <div class="elev-item"><div class="elev-chip" style="box-shadow: var(--shadow-md);">Dropdown</div><div class="elev-label">z: 100</div></div>
+  <div class="elev-item"><div class="elev-chip" style="box-shadow: var(--shadow-lg);">Sticky bar</div><div class="elev-label">z: 200</div></div>
+  <div class="elev-item"><div class="elev-chip" style="box-shadow: var(--shadow-xl);">Modal</div><div class="elev-label">z: 400</div></div>
+  <div class="elev-item"><div class="elev-chip" style="box-shadow: var(--shadow-xl); background: var(--color-neutral-950); color: white;">Toast</div><div class="elev-label">z: 500</div></div>
+</div>
+
+</body>
+</html>

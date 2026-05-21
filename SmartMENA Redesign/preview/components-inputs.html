@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500&family=IBM+Plex+Mono:wght@400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<style>
+  body { margin: 0; padding: 20px; background: var(--bg-base); font-family: var(--font-sans); }
+  .section-label { font-size: 11px; font-weight: 600; color: var(--fg-secondary); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 10px; margin-top: 18px; }
+  .section-label:first-child { margin-top: 0; }
+  .divider { height: 1px; background: var(--border-subtle); margin: 16px 0; }
+  .fields-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 4px; }
+
+  .field-wrap { display: flex; flex-direction: column; gap: 5px; }
+  .field-label { font-size: 13px; font-weight: 600; color: var(--fg-primary); }
+  .field-hint  { font-size: 12px; color: var(--fg-tertiary); }
+  .field-error-msg { font-size: 12px; color: var(--color-danger-text); display: flex; align-items: center; gap: 4px; }
+
+  .input {
+    width: 100%; box-sizing: border-box;
+    font-family: var(--font-sans); font-size: 14px;
+    color: var(--fg-primary);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    padding: 9px 12px;
+    outline: none;
+    transition: border-color var(--duration-micro) var(--ease-standard),
+                box-shadow var(--duration-micro) var(--ease-standard);
+  }
+  .input::placeholder { color: var(--fg-tertiary); }
+  .input:focus { border-color: var(--border-focus); box-shadow: 0 0 0 3px var(--color-primary-100); }
+  .input.error  { border-color: var(--border-error); box-shadow: 0 0 0 3px var(--color-danger-subtle); }
+  .input.success { border-color: var(--color-success); box-shadow: 0 0 0 3px var(--color-success-subtle); }
+  .input:disabled { background: var(--bg-hover); color: var(--fg-disabled); cursor: not-allowed; }
+
+  .input-with-icon { position: relative; }
+  .input-with-icon .input { padding-left: 36px; }
+  .input-with-icon .input-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--fg-tertiary); font-size: 16px; pointer-events: none; }
+  .input-with-icon .input-icon-right { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--fg-tertiary); font-size: 16px; }
+
+  .select-wrap { position: relative; }
+  .select-wrap .input { appearance: none; padding-right: 32px; cursor: pointer; }
+  .select-wrap::after { content: ''; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent; border-top: 5px solid var(--fg-tertiary); pointer-events: none; }
+
+  textarea.input { resize: vertical; min-height: 80px; }
+
+  .toggle-row { display: flex; align-items: center; gap: 10px; }
+  .toggle { width: 36px; height: 20px; background: var(--border-default); border-radius: 99px; position: relative; cursor: pointer; transition: background var(--duration-micro) var(--ease-standard); flex-shrink: 0; }
+  .toggle.on { background: var(--color-primary-500); }
+  .toggle::after { content: ''; position: absolute; top: 3px; left: 3px; width: 14px; height: 14px; background: white; border-radius: 50%; transition: left var(--duration-micro) var(--ease-standard); box-shadow: var(--shadow-xs); }
+  .toggle.on::after { left: 19px; }
+  .toggle-label { font-size: 13px; color: var(--fg-primary); font-weight: 500; }
+  .toggle-desc  { font-size: 12px; color: var(--fg-tertiary); }
+
+  .checkbox-row { display: flex; align-items: center; gap: 8px; }
+  .checkbox { width: 16px; height: 16px; border: 1.5px solid var(--border-strong); border-radius: 4px; background: var(--bg-surface); flex-shrink: 0; position: relative; cursor: pointer; transition: all var(--duration-micro) var(--ease-standard); }
+  .checkbox.checked { background: var(--color-primary-500); border-color: var(--color-primary-500); }
+  .checkbox.checked::after { content: ''; position: absolute; left: 3px; top: 1px; width: 5px; height: 9px; border: 2px solid white; border-top: none; border-left: none; transform: rotate(40deg); }
+  .checkbox.indeterminate { background: var(--color-primary-500); border-color: var(--color-primary-500); }
+  .checkbox.indeterminate::after { content: ''; position: absolute; left: 2px; top: 6px; width: 10px; height: 2px; background: white; border-radius: 1px; }
+  .checkbox-label { font-size: 13px; color: var(--fg-primary); }
+
+  .radio-row { display: flex; align-items: center; gap: 8px; }
+  .radio { width: 16px; height: 16px; border: 1.5px solid var(--border-strong); border-radius: 50%; background: var(--bg-surface); flex-shrink: 0; position: relative; cursor: pointer; }
+  .radio.checked { border-color: var(--color-primary-500); }
+  .radio.checked::after { content: ''; position: absolute; top: 3px; left: 3px; width: 8px; height: 8px; background: var(--color-primary-500); border-radius: 50%; }
+
+  .search-bar { position: relative; }
+  .search-bar .input { padding-left: 36px; background: var(--bg-surface); }
+  .search-bar .input-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--fg-tertiary); font-size: 16px; }
+
+  .field-group-label { font-size: 11px; font-weight: 600; color: var(--fg-tertiary); letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 6px; }
+</style>
+</head>
+<body>
+
+<div class="section-label">Text Inputs</div>
+<div class="fields-grid">
+  <div class="field-wrap">
+    <div class="field-label">Company Name</div>
+    <input class="input" type="text" placeholder="Enter company name">
+  </div>
+  <div class="field-wrap">
+    <div class="field-label">Email Address</div>
+    <div class="input-with-icon">
+      <i class="ph ph-envelope input-icon"></i>
+      <input class="input" type="email" placeholder="name@company.com">
+    </div>
+  </div>
+  <div class="field-wrap">
+    <div class="field-label">Revenue Amount</div>
+    <div class="input-with-icon">
+      <i class="ph ph-currency-circle-dollar input-icon"></i>
+      <input class="input" type="text" value="4,217,840" style="font-family: var(--font-mono);">
+      <i class="ph ph-check-circle input-icon-right" style="color: var(--color-success)"></i>
+    </div>
+    <div class="field-hint">Enter value in SAR</div>
+  </div>
+  <div class="field-wrap">
+    <div class="field-label">Tax Registration No.</div>
+    <input class="input error" type="text" value="310-00-42">
+    <div class="field-error-msg"><i class="ph ph-warning-circle"></i> Invalid format. Must be 15 digits.</div>
+  </div>
+</div>
+
+<div class="divider"></div>
+<div class="section-label">States</div>
+<div class="fields-grid">
+  <div class="field-wrap"><div class="field-label">Default</div><input class="input" placeholder="Placeholder text"></div>
+  <div class="field-wrap"><div class="field-label">Focus</div><input class="input" placeholder="Focused input" style="border-color: var(--border-focus); box-shadow: 0 0 0 3px var(--color-primary-100);"></div>
+  <div class="field-wrap"><div class="field-label">Error</div><input class="input error" value="bad-value@"></div>
+  <div class="field-wrap"><div class="field-label">Disabled</div><input class="input" disabled value="Cannot edit this field"></div>
+</div>
+
+<div class="divider"></div>
+<div class="section-label">Select & Textarea</div>
+<div class="fields-grid">
+  <div class="field-wrap">
+    <div class="field-label">Reporting Period</div>
+    <div class="select-wrap"><select class="input"><option>Q1 2026 (Jan–Mar)</option><option>Q2 2026 (Apr–Jun)</option><option>Q3 2025</option></select></div>
+  </div>
+  <div class="field-wrap">
+    <div class="field-label">Currency</div>
+    <div class="select-wrap"><select class="input"><option>SAR — Saudi Riyal</option><option>AED — UAE Dirham</option><option>USD — US Dollar</option></select></div>
+  </div>
+  <div class="field-wrap" style="grid-column: span 2;">
+    <div class="field-label">Notes</div>
+    <textarea class="input" placeholder="Add any relevant notes about this reporting period…"></textarea>
+  </div>
+</div>
+
+<div class="divider"></div>
+<div class="section-label">Selection Controls</div>
+<div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px;">
+  <div style="display: flex; flex-direction: column; gap: 10px;">
+    <div class="field-group-label">Toggles</div>
+    <div class="toggle-row"><div class="toggle on"></div><div><div class="toggle-label">Auto-sync</div><div class="toggle-desc">Sync data every hour</div></div></div>
+    <div class="toggle-row"><div class="toggle"></div><div><div class="toggle-label">Email alerts</div><div class="toggle-desc">Notify on anomalies</div></div></div>
+  </div>
+  <div style="display: flex; flex-direction: column; gap: 10px;">
+    <div class="field-group-label">Checkboxes</div>
+    <div class="checkbox-row"><div class="checkbox checked"></div><span class="checkbox-label">Include VAT</span></div>
+    <div class="checkbox-row"><div class="checkbox indeterminate"></div><span class="checkbox-label">All categories</span></div>
+    <div class="checkbox-row"><div class="checkbox"></div><span class="checkbox-label">Export metadata</span></div>
+  </div>
+  <div style="display: flex; flex-direction: column; gap: 10px;">
+    <div class="field-group-label">Radio</div>
+    <div class="radio-row"><div class="radio checked"></div><span class="checkbox-label">Monthly view</span></div>
+    <div class="radio-row"><div class="radio"></div><span class="checkbox-label">Quarterly view</span></div>
+    <div class="radio-row"><div class="radio"></div><span class="checkbox-label">Annual view</span></div>
+  </div>
+</div>
+
+<div class="divider"></div>
+<div class="section-label">Search</div>
+<div class="search-bar" style="max-width: 360px;">
+  <i class="ph ph-magnifying-glass input-icon"></i>
+  <input class="input" type="search" placeholder="Search reports, invoices, clients…">
+</div>
+
+</body>
+</html>

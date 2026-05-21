@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  body { margin: 0; padding: 24px; background: var(--bg-base); }
+  .section-label { font-family: var(--font-sans); font-size: 11px; font-weight: 600; color: var(--fg-secondary); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 12px; }
+  .biling-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin-bottom: 12px;
+    box-shadow: var(--shadow-sm);
+  }
+  .ltr-row { padding: 14px 16px; border-bottom: 1px solid var(--border-subtle); font-family: var(--font-sans); }
+  .rtl-row { padding: 14px 16px; font-family: var(--font-arabic); direction: rtl; text-align: right; }
+  .lang-tag { font-family: var(--font-sans); font-size: 9px; font-weight: 600; color: var(--fg-tertiary); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 4px; }
+  .divider-row { height: 1px; background: var(--border-subtle); }
+  .stat-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: 14px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 12px;
+  }
+  .stat-en { font-family: var(--font-sans); }
+  .stat-ar { font-family: var(--font-arabic); direction: rtl; text-align: right; }
+</style>
+</head>
+<body>
+
+<div class="section-label">Dashboard Header — Side by Side</div>
+
+<div class="biling-card">
+  <div class="ltr-row">
+    <div class="lang-tag">English · LTR</div>
+    <div style="font-size: var(--text-xl); font-weight: var(--weight-semibold); color: var(--fg-primary);">Revenue Dashboard</div>
+    <div style="font-size: var(--text-sm); color: var(--fg-secondary); margin-top: 3px;">April 2026 · Last synced 2 minutes ago</div>
+  </div>
+  <div class="rtl-row">
+    <div class="lang-tag" style="font-family: var(--font-sans); direction: ltr; text-align: right;">Arabic · RTL</div>
+    <div style="font-size: var(--text-xl); font-weight: var(--weight-semibold); color: var(--fg-primary);">لوحة تحكم الإيرادات</div>
+    <div style="font-size: var(--text-sm); color: var(--fg-secondary); margin-top: 3px;">أبريل ٢٠٢٦ · آخر مزامنة منذ دقيقتين</div>
+  </div>
+</div>
+
+<div class="section-label">KPI Card — Bilingual Label + Mono Value</div>
+<div class="stat-card">
+  <div class="stat-en">
+    <div style="font-size: var(--text-xs); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-tertiary);">Net Revenue</div>
+    <div style="font-family: var(--font-mono); font-size: var(--text-2xl); font-weight: 700; color: var(--fg-primary); margin-top: 2px;">SAR 4,217,840</div>
+    <div style="font-size: var(--text-sm); color: var(--color-success); margin-top: 3px;">↑ 14.3% vs last quarter</div>
+  </div>
+  <div class="stat-ar">
+    <div style="font-family: var(--font-sans); font-size: var(--text-xs); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-tertiary);">صافي الإيرادات</div>
+    <div style="font-family: var(--font-mono); font-size: var(--text-2xl); font-weight: 700; color: var(--fg-primary); margin-top: 2px; direction: ltr;">٤٬٢١٧٬٨٤٠ ر.س</div>
+    <div style="font-size: var(--text-sm); color: var(--color-success); margin-top: 3px;">↑ ١٤٫٣٪ مقارنة بالربع السابق</div>
+  </div>
+</div>
+
+<div class="section-label">Navigation Labels</div>
+<div class="biling-card">
+  <div class="ltr-row" style="display: flex; gap: 24px; align-items: center;">
+    <div style="font-family: var(--font-sans);">
+      <div class="lang-tag">EN</div>
+      <div style="display: flex; gap: 20px; font-size: var(--text-sm); font-weight: 500; color: var(--fg-secondary);">
+        <span style="color: var(--color-primary-600); font-weight: 600; border-bottom: 2px solid var(--color-primary-500); padding-bottom: 2px;">Dashboard</span>
+        <span>Reports</span>
+        <span>Invoices</span>
+        <span>Settings</span>
+      </div>
+    </div>
+  </div>
+  <div class="rtl-row" style="display: flex; gap: 24px; align-items: center; justify-content: flex-end;">
+    <div style="font-family: var(--font-arabic);">
+      <div class="lang-tag" style="font-family: var(--font-sans); text-align: right; direction: ltr;">AR</div>
+      <div style="display: flex; gap: 20px; font-size: var(--text-sm); font-weight: 500; color: var(--fg-secondary); flex-direction: row-reverse;">
+        <span style="color: var(--color-primary-600); font-weight: 600; border-bottom: 2px solid var(--color-primary-500); padding-bottom: 2px;">لوحة التحكم</span>
+        <span>التقارير</span>
+        <span>الفواتير</span>
+        <span>الإعدادات</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

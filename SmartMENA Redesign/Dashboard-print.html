@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SmartMENA — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --font-sans:  'IBM Plex Sans', sans-serif;
+  --font-mono:  'IBM Plex Mono', monospace;
+
+  --teal-50:  oklch(96% 0.015 195);
+  --teal-500: oklch(52% 0.13 195);
+  --teal-400: oklch(60% 0.11 195);
+  --teal-700: oklch(40% 0.10 195);
+  --amber-500: oklch(70% 0.18 60);
+  --amber-400: oklch(60% 0.17 60);
+  --terra-500: oklch(60% 0.14 30);
+
+  --bg-base:    oklch(97.8% 0.007 72);
+  --bg-surface: oklch(99.8% 0.003 72);
+  --border-subtle:  oklch(90% 0.008 60);
+  --border-default: oklch(84% 0.010 60);
+
+  --fg-1: oklch(14% 0.015 50);
+  --fg-2: oklch(38% 0.013 50);
+  --fg-3: oklch(50% 0.010 50);
+  --fg-4: oklch(65% 0.009 50);
+
+  --success: oklch(54% 0.13 148);
+  --danger:  oklch(54% 0.18 20);
+
+  --r-md: 10px;
+  --r-lg: 14px;
+}
+
+html, body { background: var(--bg-base); font-family: var(--font-sans); color: var(--fg-1); font-size: 13px; -webkit-font-smoothing: antialiased; }
+
+/* ── PRINT ──────────────────────────────────────────────────── */
+@page { size: A4 landscape; margin: 1cm 1.2cm; }
+
+@media print {
+  html, body { background: white !important; }
+  .no-print  { display: none !important; }
+  .page-break { break-before: page; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+
+/* ── LAYOUT ─────────────────────────────────────────────────── */
+.page {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 28px 32px 40px;
+  background: var(--bg-base);
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.header-logo {
+  display: flex; align-items: center; gap: 10px;
+}
+.logo-mark {
+  width: 28px; height: 28px; border-radius: 7px;
+  background: oklch(52% 0.13 195);
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-size: 14px;
+}
+.logo-name {
+  font-size: 15px; font-weight: 700; letter-spacing: -0.02em; color: var(--fg-1);
+}
+.header-meta {
+  display: flex; align-items: center; gap: 20px;
+}
+.header-period {
+  font-family: var(--font-mono); font-size: 11px; font-weight: 600;
+  color: var(--teal-500);
+  background: var(--teal-50); padding: 3px 10px; border-radius: 99px;
+}
+.header-date {
+  font-size: 11px; color: var(--fg-4); font-family: var(--font-mono);
+}
+
+/* Section label */
+.section-label {
+  font-size: 9px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.09em; color: var(--fg-4);
+  font-family: var(--font-sans); margin-bottom: 10px;
+}
+
+/* ── KPI STRIP ───────────────────────────────────────────────── */
+.kpi-strip {
+  display: flex;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+.kpi-hero {
+  padding: 18px 24px;
+  border-right: 1px solid var(--border-subtle);
+  min-width: 170px;
+  display: flex; flex-direction: column; gap: 5px; justify-content: center;
+}
+.kpi-hero-label {
+  font-size: 9px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.09em; color: var(--fg-4); font-family: var(--font-sans);
+}
+.kpi-hero-value {
+  font-family: var(--font-mono); font-size: 34px; font-weight: 700;
+  color: var(--fg-1); letter-spacing: -0.03em; line-height: 1;
+}
+.kpi-hero-sub {
+  display: flex; align-items: center; gap: 8px; margin-top: 2px;
+}
+.kpi-secondaries {
+  flex: 1; display: grid; grid-template-columns: repeat(3, 1fr);
+}
+.kpi-cell {
+  padding: 18px 22px;
+  border-right: 1px solid var(--border-subtle);
+  display: flex; flex-direction: column; gap: 10;
+}
+.kpi-cell:last-child { border-right: none; }
+.kpi-cell-top {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 8px;
+}
+.kpi-cell-label {
+  font-size: 9px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.09em; color: var(--fg-4); font-family: var(--font-sans);
+}
+.kpi-cell-value {
+  font-family: var(--font-mono); font-size: 22px; font-weight: 700;
+  color: var(--fg-1); letter-spacing: -0.02em; line-height: 1;
+}
+
+/* delta */
+.delta-up   { font-family: var(--font-mono); font-size: 11px; font-weight: 600; color: var(--success); }
+.delta-down { font-family: var(--font-mono); font-size: 11px; font-weight: 600; color: var(--danger); }
+.vs-label   { font-size: 10px; color: var(--fg-4); }
+
+/* ── CHART ───────────────────────────────────────────────────── */
+.chart-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-lg);
+  padding: 20px 24px;
+  margin-bottom: 16px;
+  break-inside: avoid;
+}
+.chart-header {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;
+}
+.chart-title {
+  font-size: 10px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--fg-4); font-family: var(--font-sans);
+}
+.chart-legend { display: flex; gap: 14px; }
+.legend-item  { display: flex; align-items: center; gap: 5px; }
+.legend-line  { width: 18px; height: 2px; border-radius: 1px; }
+.legend-label { font-size: 10px; color: var(--fg-4); font-family: var(--font-sans); }
+
+/* ── CHANNEL SUMMARY ─────────────────────────────────────────── */
+.channels { display: flex; flex-direction: column; gap: 10px; break-inside: avoid; }
+.channel-card {
+  background: var(--bg-base);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-md);
+  padding: 14px 16px;
+}
+.channel-header {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 12px;
+}
+.channel-icon {
+  width: 26px; height: 26px; border-radius: 6px;
+  background: oklch(96% 0.005 60);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.channel-name {
+  font-size: 13px; font-weight: 600; color: var(--fg-1);
+}
+.channel-rule { flex: 1; height: 2px; border-radius: 99px; opacity: 0.2; }
+.channel-metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.metric-item { display: flex; flex-direction: column; gap: 3px; }
+.metric-label {
+  font-size: 9px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.07em; color: var(--fg-4); font-family: var(--font-sans);
+}
+.metric-value {
+  font-family: var(--font-mono); font-size: 15px; font-weight: 700;
+  color: var(--fg-1); letter-spacing: -0.01em;
+}
+
+/* ── FOOTER ──────────────────────────────────────────────────── */
+.footer {
+  margin-top: 28px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-subtle);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.footer-brand { font-size: 10px; color: var(--fg-4); font-family: var(--font-mono); }
+.footer-note  { font-size: 10px; color: var(--fg-4); }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useEffect } = React;
+
+// ── Data (inline, no external dependency) ───────────────────
+
+const KPIS = [
+  { id: 'reach',       label: 'Reach',        value: 284700,  format: 'compact',     delta: +18.4, color: 'oklch(52% 0.13 195)', spark: [180,195,210,205,220,235,248,260,255,270,278,285] },
+  { id: 'impressions', label: 'Impressions',   value: 1240000, format: 'compact',     delta: +22.1, color: 'oklch(60% 0.11 195)', spark: [720,780,810,840,880,920,980,1040,1080,1150,1200,1240] },
+  { id: 'engagements', label: 'Engagements',   value: 18340,   format: 'compact',     delta: +9.7,  color: 'oklch(70% 0.18 60)',  spark: [120,128,134,140,148,152,158,162,170,175,180,183] },
+  { id: 'eng_rate',    label: 'Eng. Rate',     value: 6.44,    format: 'percent',     delta: -0.8,  color: 'oklch(60% 0.17 60)',  spark: [6.1,6.3,6.5,6.2,6.4,6.8,6.6,6.3,6.5,6.7,6.4,6.4] },
+];
+
+const ENGAGEMENT_TIMELINE = [
+  { date: 'Apr 1',  instagram: 420, facebook: 280 },
+  { date: 'Apr 5',  instagram: 480, facebook: 310 },
+  { date: 'Apr 10', instagram: 390, facebook: 260 },
+  { date: 'Apr 15', instagram: 560, facebook: 340 },
+  { date: 'Apr 20', instagram: 620, facebook: 380 },
+  { date: 'Apr 25', instagram: 580, facebook: 360 },
+  { date: 'Apr 30', instagram: 710, facebook: 420 },
+];
+
+const CHANNEL_STATS = [
+  { id: 'instagram', label: 'Instagram', color: '#E1306C', icon: 'ph-instagram-logo', reach: 142000, eng: 9200, posts: 31, engRate: 6.47 },
+  { id: 'facebook',  label: 'Facebook',  color: '#1877F2', icon: 'ph-facebook-logo',  reach: 42000,  eng: 2400, posts: 16, engRate: 5.71 },
+];
+
+// ── Utils ────────────────────────────────────────────────────
+
+function fmt(v, f) {
+  if (f === 'compact') { if (v >= 1e6) return (v/1e6).toFixed(1)+'M'; if (v >= 1e3) return (v/1e3).toFixed(0)+'K'; return v.toLocaleString(); }
+  if (f === 'percent') return v.toFixed(1)+'%';
+  if (f === 'integer') return v.toLocaleString();
+  return String(v);
+}
+
+// ── Sparkline ────────────────────────────────────────────────
+
+function Spark({ data, color, w = 52, h = 22 }) {
+  const min = Math.min(...data), max = Math.max(...data), rng = max - min || 1;
+  const pts = data.map((v, i) => [
+    (i / (data.length - 1)) * w,
+    h - 2 - ((v - min) / rng) * (h - 4),
+  ]);
+  const line = pts.map((p, i) => `${i ? 'L' : 'M'} ${p[0]} ${p[1]}`).join(' ');
+  return (
+    <svg width={w} height={h} style={{ display: 'block', overflow: 'visible' }}>
+      <path d={line} fill="none" stroke={color} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx={pts[pts.length-1][0]} cy={pts[pts.length-1][1]} r={2.5} fill={color} />
+    </svg>
+  );
+}
+
+// ── Engagement Chart ─────────────────────────────────────────
+
+function Chart({ data }) {
+  const LINES = [
+    { key: 'instagram', color: '#E1306C', label: 'Instagram' },
+    { key: 'facebook',  color: '#1877F2', label: 'Facebook'  },
+  ];
+  const W = 900, H = 140, padL = 36, padR = 12, padT = 8, padB = 24;
+  const allVals = data.flatMap(d => LINES.map(l => d[l.key]));
+  const maxV = Math.max(...allVals);
+  const toX = i => padL + (i / (data.length - 1)) * (W - padL - padR);
+  const toY = v => padT + (1 - v / maxV) * (H - padT - padB);
+  const yTicks = [0, Math.round(maxV * 0.5), maxV];
+  const gridC = 'var(--border-subtle)';
+  const labelC = 'var(--fg-4)';
+
+  return (
+    <div className="chart-card">
+      <div className="chart-header">
+        <span className="chart-title">Engagement Over Time</span>
+        <div className="chart-legend">
+          {LINES.map(l => (
+            <div key={l.key} className="legend-item">
+              <div className="legend-line" style={{ background: l.color }} />
+              <span className="legend-label">{l.label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+      <svg width="100%" viewBox={`0 0 ${W} ${H}`} style={{ display: 'block', overflow: 'visible' }}>
+        {yTicks.map(t => (
+          <g key={t}>
+            <line x1={padL} y1={toY(t)} x2={W - padR} y2={toY(t)} stroke={gridC} strokeWidth={1} />
+            <text x={padL - 4} y={toY(t) + 4} textAnchor="end" fontSize={9} fill={labelC} fontFamily="IBM Plex Mono, monospace">
+              {t >= 1000 ? (t/1000).toFixed(0)+'K' : t}
+            </text>
+          </g>
+        ))}
+        {data.map((d, i) => (
+          <text key={i} x={toX(i)} y={H - 4} textAnchor="middle" fontSize={9} fill={labelC} fontFamily="IBM Plex Mono, monospace">{d.date}</text>
+        ))}
+        {LINES.map(l => {
+          const pts = data.map((d, i) => [toX(i), toY(d[l.key])]);
+          const area = `M ${padL} ${H-padB} ${pts.map(p => `L ${p[0]} ${p[1]}`).join(' ')} L ${W-padR} ${H-padB} Z`;
+          const path = pts.map((p, i) => `${i ? 'L' : 'M'} ${p[0]} ${p[1]}`).join(' ');
+          return (
+            <g key={l.key}>
+              <path d={area} fill={l.color} opacity={0.06} />
+              <path d={path} fill="none" stroke={l.color} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" />
+            </g>
+          );
+        })}
+      </svg>
+    </div>
+  );
+}
+
+// ── Print App ────────────────────────────────────────────────
+
+function PrintApp() {
+  const hero = KPIS[0];
+  const secondaries = KPIS.slice(1);
+  const today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+
+  useEffect(() => {
+    // Wait for fonts + Babel render to settle, then print
+    document.fonts.ready.then(() => {
+      setTimeout(() => window.print(), 500);
+    });
+  }, []);
+
+  return (
+    <div className="page">
+
+      {/* Header */}
+      <header className="header">
+        <div className="header-logo">
+          <div className="logo-mark">
+            <i className="ph ph-chart-line"></i>
+          </div>
+          <span className="logo-name">SmartMENA</span>
+        </div>
+        <div className="header-meta">
+          <span className="header-period">Last 30 days</span>
+          <span className="header-date">Generated {today}</span>
+        </div>
+      </header>
+
+      {/* KPI Strip */}
+      <div className="kpi-strip">
+        {/* Hero */}
+        <div className="kpi-hero">
+          <div className="kpi-hero-label">{hero.label}</div>
+          <div className="kpi-hero-value">{fmt(hero.value, hero.format)}</div>
+          <div className="kpi-hero-sub">
+            <span className={hero.delta > 0 ? 'delta-up' : 'delta-down'}>
+              {hero.delta > 0 ? '+' : ''}{hero.delta}%
+            </span>
+            <span className="vs-label">vs. last period</span>
+          </div>
+        </div>
+        {/* Secondaries */}
+        <div className="kpi-secondaries">
+          {secondaries.map(k => (
+            <div key={k.id} className="kpi-cell">
+              <div className="kpi-cell-top">
+                <span className="kpi-cell-label">{k.label}</span>
+                <span className={k.delta > 0 ? 'delta-up' : 'delta-down'}>
+                  {k.delta > 0 ? '+' : ''}{k.delta}%
+                </span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                <span className="kpi-cell-value">{fmt(k.value, k.format)}</span>
+                <Spark data={k.spark} color={k.color} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Engagement Chart */}
+      <Chart data={ENGAGEMENT_TIMELINE} />
+
+      {/* Channel Summary */}
+      <div className="section-label">Channel Summary</div>
+      <div className="channels">
+        {CHANNEL_STATS.map(ch => (
+          <div key={ch.id} className="channel-card">
+            <div className="channel-header">
+              <div className="channel-icon">
+                <i className={`ph ${ch.icon}`} style={{ fontSize: 14, color: ch.color }}></i>
+              </div>
+              <span className="channel-name">{ch.label}</span>
+              <div className="channel-rule" style={{ background: ch.color }}></div>
+            </div>
+            <div className="channel-metrics">
+              {[
+                { label: 'Reach',      value: fmt(ch.reach,   'compact') },
+                { label: 'Engagements',value: fmt(ch.eng,     'compact') },
+                { label: 'Posts',      value: fmt(ch.posts,   'integer') },
+                { label: 'Eng. Rate',  value: ch.engRate.toFixed(2) + '%' },
+              ].map(m => (
+                <div key={m.label} className="metric-item">
+                  <span className="metric-label">{m.label}</span>
+                  <span className="metric-value">{m.value}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Footer */}
+      <footer className="footer">
+        <span className="footer-brand">SmartMENA · Overview Report</span>
+        <span className="footer-note">Apr 1 – Apr 30, 2026 · Instagram + Facebook</span>
+      </footer>
+
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<PrintApp />);
+</script>
+</body>
+</html>
