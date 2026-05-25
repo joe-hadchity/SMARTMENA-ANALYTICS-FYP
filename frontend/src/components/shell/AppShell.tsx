@@ -10,12 +10,14 @@ import { Button } from "@/components/ui/Button";
 import Sidebar from "./Sidebar";
 
 const BARE_ROUTES = ["/login", "/register", "/r/", "/onboarding"];
+const FULL_SCREEN_ROUTES = ["/advisor"];
 
 export default function AppShell({ children }: { children: ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname() || "";
   const isBareRoute = BARE_ROUTES.some((prefix) => pathname.startsWith(prefix));
+  const isFullScreenRoute = FULL_SCREEN_ROUTES.some((prefix) => pathname.startsWith(prefix));
 
   if (isBareRoute) {
     return <>{children}</>;
@@ -98,8 +100,15 @@ export default function AppShell({ children }: { children: ReactNode }) {
           </Button>
         </div>
 
-        <main className="flex-1 px-4 md:px-6 lg:px-8 py-6 pb-8">
-          <div className="mx-auto max-w-[1400px]">{children}</div>
+        <main className={cn(
+          "flex-1",
+          !isFullScreenRoute && "px-4 md:px-6 lg:px-8 py-6 pb-8"
+        )}>
+          {isFullScreenRoute ? (
+            children
+          ) : (
+            <div className="mx-auto max-w-[1400px]">{children}</div>
+          )}
         </main>
       </div>
     </div>
