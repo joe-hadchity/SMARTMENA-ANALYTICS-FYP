@@ -1,0 +1,55 @@
+<svg width="960" height="560" viewBox="0 0 960 560" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="960" height="560" rx="28" fill="#F6F1E8"/>
+  <rect x="46" y="46" width="868" height="468" rx="26" fill="#FFFFFF" stroke="#E7DDCE"/>
+  <text x="82" y="103" fill="#124B47" font-family="Inter, Arial, sans-serif" font-size="28" font-weight="750">Evidence-first decision layer</text>
+  <text x="82" y="132" fill="#65706A" font-family="Inter, Arial, sans-serif" font-size="15">Signals are collected first. AI explains only what the evidence supports.</text>
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#124B47"/>
+    </marker>
+  </defs>
+
+  <g font-family="Inter, Arial, sans-serif">
+    <g transform="translate(82 184)">
+      <rect width="184" height="74" rx="16" fill="#F9F6F0" stroke="#E7DDCE"/>
+      <text x="18" y="31" fill="#102522" font-size="15" font-weight="700">Meta Graph</text>
+      <text x="18" y="53" fill="#65706A" font-size="12">Posts, reach, comments</text>
+    </g>
+    <g transform="translate(82 302)">
+      <rect width="184" height="74" rx="16" fill="#F9F6F0" stroke="#E7DDCE"/>
+      <text x="18" y="31" fill="#102522" font-size="15" font-weight="700">Competitors</text>
+      <text x="18" y="53" fill="#65706A" font-size="12">Approved public peers</text>
+    </g>
+    <g transform="translate(82 420)">
+      <rect width="184" height="74" rx="16" fill="#F9F6F0" stroke="#E7DDCE"/>
+      <text x="18" y="31" fill="#102522" font-size="15" font-weight="700">Trends</text>
+      <text x="18" y="53" fill="#65706A" font-size="12">Hashtags and topics</text>
+    </g>
+
+    <path d="M280 221H398" stroke="#124B47" stroke-width="3" marker-end="url(#arrow)"/>
+    <path d="M280 339H398" stroke="#124B47" stroke-width="3" marker-end="url(#arrow)"/>
+    <path d="M280 457H398" stroke="#124B47" stroke-width="3" marker-end="url(#arrow)"/>
+
+    <g transform="translate(414 238)">
+      <rect width="178" height="202" rx="22" fill="#124B47"/>
+      <text x="28" y="48" fill="#FFFFFF" font-size="17" font-weight="750">Normalize</text>
+      <text x="28" y="82" fill="#B8D7D3" font-size="13">Clean captions</text>
+      <text x="28" y="110" fill="#B8D7D3" font-size="13">Score engagement</text>
+      <text x="28" y="138" fill="#B8D7D3" font-size="13">Cluster topics</text>
+      <text x="28" y="166" fill="#B8D7D3" font-size="13">Attach evidence</text>
+    </g>
+
+    <path d="M612 339H712" stroke="#124B47" stroke-width="3" marker-end="url(#arrow)"/>
+
+    <g transform="translate(728 218)">
+      <rect width="154" height="242" rx="24" fill="#F9F6F0" stroke="#E7DDCE"/>
+      <text x="24" y="44" fill="#102522" font-size="16" font-weight="750">Decision brief</text>
+      <rect x="24" y="70" width="106" height="10" rx="5" fill="#124B47"/>
+      <rect x="24" y="98" width="74" height="10" rx="5" fill="#D6CEC1"/>
+      <rect x="24" y="126" width="88" height="10" rx="5" fill="#D6CEC1"/>
+      <rect x="24" y="166" width="104" height="36" rx="18" fill="#EAB84F" fill-opacity=".30"/>
+      <text x="45" y="189" fill="#102522" font-size="13" font-weight="700">Next move</text>
+    </g>
+  </g>
+</svg>

@@ -8,6 +8,7 @@ const en: Dict = {
 
   "nav.overview": "Overview",
   "nav.connections": "Connections",
+  "nav.content": "Content",
   "nav.posts": "Posts",
   "nav.inbox": "Inbox",
   "nav.campaigns": "Campaigns",
@@ -397,6 +398,7 @@ const ar: Dict = {
 
   "nav.overview": "نظرة عامة",
   "nav.connections": "الحسابات المتصلة",
+  "nav.content": "\u0627\u0644\u0645\u062d\u062a\u0648\u0649",
   "nav.posts": "المنشورات",
   "nav.inbox": "صندوق الوارد",
   "nav.campaigns": "الحملات",

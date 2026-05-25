@@ -4,24 +4,17 @@ import { useQuery } from "@tanstack/react-query";
 import {
   AlertTriangle,
   CheckCircle2,
-  ChevronDown,
-  ChevronUp,
-  Info,
   MessageCircle,
-  Radio,
   ShieldAlert,
-  Sparkles,
 } from "lucide-react";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 
-import { Badge } from "@/components/ui/Badge";
 import { inboxApi, insightsApi } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import type { InboxItem, Insight } from "@/lib/types";
 
 type SignalTone = "positive" | "warning" | "risk" | "info";
-type SignalFilter = "all" | SignalTone;
 
 type LiveSignal = {
   id: string;
@@ -32,10 +25,13 @@ type LiveSignal = {
   time?: string | null;
 };
 
-export default function LiveSignalsRibbon({ collapsed }: { collapsed: boolean }) {
-  const [hidden, setHidden] = useState(false);
-  const [filter, setFilter] = useState<SignalFilter>("all");
-
+export default function LiveSignalsRibbon({
+  collapsed,
+  rightCollapsed,
+}: {
+  collapsed: boolean;
+  rightCollapsed: boolean;
+}) {
   const inboxQ = useQuery({
     queryKey: ["live-signals", "inbox"],
     queryFn: () => inboxApi.list({ limit: 12, status: "all", type: "all" }),
@@ -62,81 +58,34 @@ export default function LiveSignalsRibbon({ collapsed }: { collapsed: boolean })
   const isLoading = inboxQ.isLoading || insightsQ.isLoading;
   const hasError = inboxQ.isError && insightsQ.isError;
   const visibleSignals = signals.length ? signals : fallbackSignals(hasError, isLoading);
-  const filteredSignals =
-    filter === "all"
-      ? visibleSignals
-      : visibleSignals.filter((signal) => signal.tone === filter);
-  const displaySignals = filteredSignals.length ? filteredSignals : [emptyFilterSignal(filter)];
+  const displaySignals = visibleSignals.slice(0, 8);
   const timeline = [...displaySignals, ...displaySignals];
-  const counts = countSignals(visibleSignals);
-
-  if (hidden) {
-    return (
-      <div
-        className={cn(
-          "fixed bottom-4 z-30",
-          collapsed ? "left-4 lg:left-[88px]" : "left-4 lg:left-[272px]",
-        )}
-      >
-        <button
-        type="button"
-        onClick={() => setHidden(false)}
-          className="flex items-center gap-2 rounded-md border border-border bg-bg-elevated px-3 py-2 text-xs font-semibold text-fg shadow-md backdrop-blur-xl transition-colors hover:border-primary/40 hover:bg-primary/5"
-        >
-          <Radio className="h-3.5 w-3.5 text-primary" />
-          Live Signals
-          <Badge tone="brand" size="sm">
-            {visibleSignals.length}
-          </Badge>
-          <ChevronUp className="h-3.5 w-3.5 text-fg-muted" />
-        </button>
-      </div>
-    );
-  }
 
   return (
     <div
       className={cn(
-        "fixed bottom-0 right-0 z-30 border-t border-border bg-bg-elevated/96 shadow-[0_-10px_28px_rgba(15,23,42,0.08)] backdrop-blur-xl xl:right-[384px]",
+        "fixed bottom-0 right-0 z-30 border-t border-border bg-bg-elevated/95 backdrop-blur-xl",
         collapsed ? "lg:left-[72px]" : "lg:left-64",
+        rightCollapsed ? "xl:right-[72px]" : "xl:right-[344px]",
       )}
     >
-      <div className="flex min-h-[86px] flex-col gap-2 px-4 py-2.5 md:px-5">
-        <div className="flex flex-wrap items-center gap-2">
+      <div className="flex h-12 items-center gap-3 px-3 md:px-4">
         <Link
           href="/inbox"
-            className="group flex shrink-0 items-center gap-2 rounded-md border border-border bg-surface px-2.5 py-1.5 transition-colors hover:border-primary/40 hover:bg-primary/5"
+          className="group flex shrink-0 items-center gap-2 text-xs font-medium text-fg-muted transition-colors hover:text-fg"
         >
-          <span className="relative grid h-7 w-7 place-items-center rounded-md bg-primary-soft text-primary">
-            <Radio className="h-3.5 w-3.5" />
-            <span className="absolute right-0.5 top-0.5 h-1.5 w-1.5 rounded-full bg-success" />
+          <span className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-60" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-success" />
           </span>
-          <span>
-            <span className="block text-xs font-semibold text-fg">Live Signals</span>
-            <span className="hidden text-[10px] text-fg-muted md:block">Inbox and decision pulses</span>
+          <span className="hidden sm:inline">Live Signals</span>
+          <span className="rounded bg-surface-muted px-1.5 py-0.5 text-[10px] text-fg-subtle">
+            {visibleSignals.length}
           </span>
         </Link>
 
-          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1.5">
-            <FilterButton active={filter === "all"} onClick={() => setFilter("all")} label="All" count={visibleSignals.length} />
-            <FilterButton active={filter === "positive"} onClick={() => setFilter("positive")} label="Positive" count={counts.positive} tone="positive" />
-            <FilterButton active={filter === "warning"} onClick={() => setFilter("warning")} label="Warn" count={counts.warning} tone="warning" />
-            <FilterButton active={filter === "risk"} onClick={() => setFilter("risk")} label="Risk" count={counts.risk} tone="risk" />
-            <FilterButton active={filter === "info"} onClick={() => setFilter("info")} label="Info" count={counts.info} tone="info" />
-          </div>
-
-          <button
-            type="button"
-            onClick={() => setHidden(true)}
-            className="ms-auto inline-flex h-8 items-center gap-1.5 rounded-md border border-border bg-surface px-2.5 text-xs font-medium text-fg-muted transition-colors hover:border-primary/40 hover:text-fg"
-          >
-            Hide
-            <ChevronDown className="h-3.5 w-3.5" />
-          </button>
-        </div>
-
         <div className="min-w-0 flex-1 overflow-hidden">
-          <div className="live-signals-track flex w-max items-center gap-2">
+          <div className="live-signals-track flex w-max items-center gap-1.5">
             {timeline.map((signal, index) => (
               <SignalPill key={`${signal.id}-${index}`} signal={signal} />
             ))}
@@ -153,22 +102,22 @@ function SignalPill({ signal }: { signal: LiveSignal }) {
   return (
     <Link
       href={signal.href}
-      className="group flex h-10 w-[315px] max-w-[78vw] items-center gap-2 rounded-md border border-border bg-surface px-2.5 text-sm shadow-sm transition-colors hover:border-primary/40 hover:bg-primary/5"
+      className="group flex h-8 w-[295px] max-w-[76vw] items-center gap-2 rounded-md px-2 text-xs transition-colors hover:bg-surface-muted"
     >
       <span
         className={cn(
-          "grid h-6 w-6 shrink-0 place-items-center rounded-md",
-          signal.tone === "info" && "bg-info-soft text-info",
-          signal.tone === "positive" && "bg-success-soft text-success",
-          signal.tone === "warning" && "bg-warning-soft text-warning",
-          signal.tone === "risk" && "bg-danger-soft text-danger",
+          "grid h-5 w-5 shrink-0 place-items-center rounded",
+          signal.tone === "info" && "text-info",
+          signal.tone === "positive" && "text-success",
+          signal.tone === "warning" && "text-warning",
+          signal.tone === "risk" && "text-danger",
         )}
       >
         <Icon className="h-3.5 w-3.5" />
       </span>
       <span className="min-w-0">
         <span className="flex items-center gap-2">
-          <span className="truncate text-xs font-semibold text-fg">{signal.label}</span>
+          <span className="truncate font-medium text-fg">{signal.label}</span>
           <span className={cn("h-1.5 w-1.5 shrink-0 rounded-full", toneDot(signal.tone))} />
           {signal.time ? (
             <span className="shrink-0 text-[10px] text-fg-subtle">{signal.time}</span>
@@ -177,45 +126,6 @@ function SignalPill({ signal }: { signal: LiveSignal }) {
         <span className="block truncate text-[11px] text-fg-muted">{signal.detail}</span>
       </span>
     </Link>
-  );
-}
-
-function FilterButton({
-  active,
-  onClick,
-  label,
-  count,
-  tone = "info",
-}: {
-  active: boolean;
-  onClick: () => void;
-  label: string;
-  count: number;
-  tone?: SignalTone;
-}) {
-  const Icon = tone === "positive" ? CheckCircle2 : tone === "warning" ? AlertTriangle : tone === "risk" ? ShieldAlert : Info;
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        "inline-flex h-8 items-center gap-1.5 rounded-md border px-2 text-[11px] font-semibold transition-colors",
-        active
-          ? "border-primary bg-primary text-primary-fg"
-          : "border-border bg-surface text-fg-muted hover:border-primary/40 hover:text-fg",
-      )}
-    >
-      <Icon className="h-3 w-3" />
-      {label}
-      <span
-        className={cn(
-          "rounded px-1 py-0.5 text-[10px]",
-          active ? "bg-primary-fg/15 text-primary-fg" : "bg-surface-muted text-fg-subtle",
-        )}
-      >
-        {count}
-      </span>
-    </button>
   );
 }
 
@@ -301,38 +211,11 @@ function fallbackSignals(hasError: boolean, isLoading: boolean): LiveSignal[] {
   ];
 }
 
-function emptyFilterSignal(filter: SignalFilter): LiveSignal {
-  return {
-    id: `empty-${filter}`,
-    label: `No ${filter} signals`,
-    detail: "Try another filter or wait for the next workspace update.",
-    href: "/inbox",
-    tone: filter === "all" ? "info" : filter,
-  };
-}
-
-function countSignals(signals: LiveSignal[]) {
-  return signals.reduce(
-    (acc, signal) => {
-      acc[signal.tone] += 1;
-      return acc;
-    },
-    { positive: 0, warning: 0, risk: 0, info: 0 } as Record<SignalTone, number>,
-  );
-}
-
 function toneIcon(tone: SignalTone) {
   if (tone === "positive") return CheckCircle2;
   if (tone === "warning") return AlertTriangle;
   if (tone === "risk") return ShieldAlert;
-  return tone === "info" ? MessageCircle : Sparkles;
-}
-
-function toneLabel(tone: SignalTone) {
-  if (tone === "positive") return "Positive";
-  if (tone === "warning") return "Warn";
-  if (tone === "risk") return "Risk";
-  return "Info";
+  return MessageCircle;
 }
 
 function toneDot(tone: SignalTone) {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   BarChart3,
   Building2,
@@ -9,7 +9,6 @@ import {
   ChevronsLeft,
   ChevronsRight,
   Activity,
-  FileText,
   Inbox,
   LineChart,
   LogOut,
@@ -55,14 +54,13 @@ const SECTIONS: NavSection[] = [
     titleKey: "nav.section.today",
     items: [
       { href: "/", labelKey: "nav.overview", icon: BarChart3, shortcut: "G O" },
-      { href: "/calendar", labelKey: "nav.calendar", icon: CalendarDays, shortcut: "G K" },
       { href: "/inbox", labelKey: "nav.inbox", icon: Inbox, shortcut: "G I" },
     ],
   },
   {
     titleKey: "nav.section.publish",
     items: [
-      { href: "/posts", labelKey: "nav.posts", icon: FileText, shortcut: "G P" },
+      { href: "/content", labelKey: "nav.content", icon: CalendarDays, shortcut: "G P" },
       { href: "/campaigns", labelKey: "nav.campaigns", icon: Megaphone },
     ],
   },
@@ -241,6 +239,7 @@ export default function Sidebar({
 
 function WorkspaceSwitcher({ collapsed }: { collapsed: boolean }) {
   const { t } = useI18n();
+  const qc = useQueryClient();
   const listQ = useQuery({
     queryKey: ["workspaces", "list"],
     queryFn: workspacesApi.list,
@@ -251,6 +250,14 @@ function WorkspaceSwitcher({ collapsed }: { collapsed: boolean }) {
   });
 
   const current = currentQ.data;
+  const switchWorkspace = (workspace: NonNullable<typeof listQ.data>[number]) => {
+    if (workspace.id === current?.id) return;
+    setStoredWorkspaceId(workspace.id);
+    clearBorn2HikeReturnTarget();
+    qc.setQueryData(["workspace", "current"], workspace);
+    qc.invalidateQueries();
+  };
+
   const trigger = (
     <button
       type="button"
@@ -296,10 +303,7 @@ function WorkspaceSwitcher({ collapsed }: { collapsed: boolean }) {
         {(listQ.data ?? []).map((ws) => (
           <DropdownMenuItem
             key={ws.id}
-            onSelect={() => {
-              setStoredWorkspaceId(ws.id);
-              if (typeof window !== "undefined") window.location.reload();
-            }}
+            onSelect={() => switchWorkspace(ws)}
           >
             <div className="h-5 w-5 rounded-md gradient-tile grid place-items-center text-white text-[10px] font-semibold">
               {ws.name?.charAt(0).toUpperCase() || "W"}
@@ -312,7 +316,7 @@ function WorkspaceSwitcher({ collapsed }: { collapsed: boolean }) {
         ))}
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link href="/settings">
+          <Link href="/workspaces/new">
             <Plus className="h-4 w-4" />
             {t("settings.create")}
           </Link>
@@ -320,7 +324,8 @@ function WorkspaceSwitcher({ collapsed }: { collapsed: boolean }) {
         <DropdownMenuItem
           onSelect={() => {
             setStoredWorkspaceId(null);
-            if (typeof window !== "undefined") window.location.reload();
+            clearBorn2HikeReturnTarget();
+            qc.invalidateQueries();
           }}
         >
           <Building2 className="h-4 w-4" />
@@ -329,6 +334,15 @@ function WorkspaceSwitcher({ collapsed }: { collapsed: boolean }) {
       </DropdownMenuContent>
     </DropdownMenu>
   );
+}
+
+function clearBorn2HikeReturnTarget() {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.removeItem("smartmena.previousWorkspaceIdBeforeBorn2Hike");
+  } catch {
+    // ignore storage errors
+  }
 }
 
 function UserMenu({ collapsed }: { collapsed: boolean }) {

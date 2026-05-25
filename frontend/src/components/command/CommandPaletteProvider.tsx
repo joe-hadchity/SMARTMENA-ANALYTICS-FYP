@@ -6,7 +6,6 @@ import {
   BarChart3,
   Cable,
   CalendarDays,
-  FileText,
   LineChart,
   Megaphone,
   Moon,
@@ -53,8 +52,7 @@ type NavCmd = { href: string; labelKey: string; icon: LucideIcon; shortcut?: str
 const NAV_COMMANDS: NavCmd[] = [
   { href: "/", labelKey: "nav.overview", icon: BarChart3, shortcut: "G O" },
   { href: "/connections", labelKey: "nav.connections", icon: Cable, shortcut: "G C" },
-  { href: "/posts", labelKey: "nav.posts", icon: FileText, shortcut: "G P" },
-  { href: "/calendar", labelKey: "nav.calendar", icon: CalendarDays, shortcut: "G K" },
+  { href: "/content", labelKey: "nav.content", icon: CalendarDays, shortcut: "G P" },
   { href: "/campaigns", labelKey: "nav.campaigns", icon: Megaphone },
   { href: "/reports/growth", labelKey: "nav.reports", icon: LineChart, shortcut: "G R" },
   { href: "/audience", labelKey: "nav.audience", icon: Users, shortcut: "G A" },

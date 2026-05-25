@@ -1,0 +1,45 @@
+<svg width="960" height="560" viewBox="0 0 960 560" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="960" height="560" rx="28" fill="#F6F1E8"/>
+  <rect x="52" y="52" width="856" height="456" rx="26" fill="#FFFFFF" stroke="#E7DDCE"/>
+  <path d="M134 356C206 292 275 270 346 298C423 329 477 249 559 261C637 272 678 346 767 308" stroke="#D8E6E1" stroke-width="84" stroke-linecap="round"/>
+  <path d="M142 358C216 296 279 280 347 304C424 332 478 257 558 268C636 279 679 349 762 313" stroke="#124B47" stroke-width="3" stroke-dasharray="10 12" stroke-linecap="round"/>
+
+  <g font-family="Inter, Arial, sans-serif">
+    <text x="86" y="104" fill="#124B47" font-size="28" font-weight="750">Audience geography</text>
+    <text x="86" y="132" fill="#65706A" font-size="15">Local market plus diaspora signals for campaign timing.</text>
+  </g>
+
+  <g>
+    <circle cx="442" cy="312" r="35" fill="#124B47" fill-opacity=".16"/>
+    <circle cx="442" cy="312" r="15" fill="#124B47"/>
+    <text x="470" y="306" fill="#102522" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="700">Lebanon</text>
+    <text x="470" y="328" fill="#65706A" font-family="Inter, Arial, sans-serif" font-size="13">Core audience</text>
+  </g>
+
+  <g>
+    <circle cx="572" cy="275" r="26" fill="#EAB84F" fill-opacity=".28"/>
+    <circle cx="572" cy="275" r="10" fill="#D8981A"/>
+    <text x="596" y="269" fill="#102522" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="700">GCC</text>
+    <text x="596" y="289" fill="#65706A" font-family="Inter, Arial, sans-serif" font-size="12">Travel interest</text>
+  </g>
+
+  <g>
+    <circle cx="305" cy="286" r="23" fill="#C46D4B" fill-opacity=".20"/>
+    <circle cx="305" cy="286" r="9" fill="#C46D4B"/>
+    <text x="210" y="255" fill="#102522" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="700">France</text>
+    <text x="210" y="275" fill="#65706A" font-family="Inter, Arial, sans-serif" font-size="12">Diaspora</text>
+  </g>
+
+  <g>
+    <circle cx="186" cy="344" r="20" fill="#477D8E" fill-opacity=".20"/>
+    <circle cx="186" cy="344" r="8" fill="#477D8E"/>
+    <text x="110" y="321" fill="#102522" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="700">Canada / US</text>
+    <text x="110" y="341" fill="#65706A" font-family="Inter, Arial, sans-serif" font-size="12">High-value reach</text>
+  </g>
+
+  <g transform="translate(658 370)">
+    <rect width="174" height="72" rx="16" fill="#F9F6F0" stroke="#E7DDCE"/>
+    <text x="18" y="30" fill="#102522" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="700">Best window</text>
+    <text x="18" y="53" fill="#124B47" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="750">7-9 PM</text>
+  </g>
+</svg>

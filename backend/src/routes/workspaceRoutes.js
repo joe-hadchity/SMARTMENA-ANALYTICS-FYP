@@ -37,6 +37,9 @@ const {
 const {
   getTrendIntelligence,
 } = require("../controllers/trendInsightController");
+const {
+  getIntelligenceProfile,
+} = require("../controllers/intelligenceProfileController");
 
 const router = express.Router();
 
@@ -83,6 +86,12 @@ router.get(
   "/:workspaceId/trend-intelligence",
   validate(trendIntelligenceQuerySchema, "query"),
   asyncHandler(getTrendIntelligence),
+);
+
+// GET /api/workspaces/:workspaceId/intelligence-profile
+router.get(
+  "/:workspaceId/intelligence-profile",
+  asyncHandler(getIntelligenceProfile),
 );
 
 // GET/PATCH /api/workspaces/:id/business-profile -- settings used by trend and competitor intelligence.

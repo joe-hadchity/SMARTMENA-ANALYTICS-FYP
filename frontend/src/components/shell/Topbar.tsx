@@ -39,7 +39,9 @@ import { ThemeToggle } from "./ThemeToggle";
 const PATH_LABEL_KEYS: Record<string, string> = {
   "": "nav.overview",
   connections: "nav.connections",
+  content: "nav.content",
   posts: "nav.posts",
+  calendar: "nav.content",
   campaigns: "nav.campaigns",
   insights: "nav.insights",
   recommendations: "nav.recommendations",

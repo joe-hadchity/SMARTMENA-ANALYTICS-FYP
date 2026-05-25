@@ -4,6 +4,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import {
+  AlertTriangle,
+  CheckCircle2,
   Facebook,
   Instagram,
   Link2,
@@ -12,7 +14,7 @@ import {
   ShieldOff,
   Trash2,
 } from "lucide-react";
-import { Suspense, useEffect } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import PageHeader from "@/components/ui/PageHeader";
@@ -22,6 +24,8 @@ import { useI18n } from "@/i18n/I18nProvider";
 import { oauthApi, socialAccountsApi } from "@/lib/api";
 import { formatDate, relativeDate } from "@/lib/format";
 import type { SocialAccount } from "@/lib/types";
+
+type MetaScopePack = "core" | "insights" | "inbox" | "full";
 
 function providerIcon(p: SocialAccount["provider"]) {
   if (p === "meta_instagram") return <Instagram className="h-4 w-4" />;
@@ -41,6 +45,7 @@ function ConnectionsPageContent() {
   const { t, locale } = useI18n();
   const qc = useQueryClient();
   const searchParams = useSearchParams();
+  const [scopePack, setScopePack] = useState<MetaScopePack>("full");
 
   const accounts = useQuery({
     queryKey: ["social-accounts"],
@@ -51,6 +56,12 @@ function ConnectionsPageContent() {
     queryKey: ["oauth", "meta", "status"],
     queryFn: oauthApi.metaStatus,
     staleTime: 60_000,
+  });
+  const metaDiagnostics = useQuery({
+    queryKey: ["oauth", "meta", "diagnostics"],
+    queryFn: oauthApi.metaDiagnostics,
+    enabled: oauthStatus.data?.enabled === true,
+    staleTime: 30_000,
   });
   const liveEnabled = oauthStatus.data?.enabled === true;
 
@@ -69,6 +80,7 @@ function ConnectionsPageContent() {
         ),
       );
       qc.invalidateQueries({ queryKey: ["social-accounts"] });
+      qc.invalidateQueries({ queryKey: ["oauth", "meta", "diagnostics"] });
     } else if (status === "error" && message) {
       toast.error(message);
     }
@@ -92,7 +104,7 @@ function ConnectionsPageContent() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["social-accounts"] }),
   });
   const startMetaLive = useMutation({
-    mutationFn: () => oauthApi.metaInit("/connections"),
+    mutationFn: () => oauthApi.metaInit("/connections", scopePack),
     onSuccess: (res) => {
       if (typeof window !== "undefined") {
         window.location.href = res.authorization_url;
@@ -112,6 +124,12 @@ function ConnectionsPageContent() {
         ),
       );
       qc.invalidateQueries({ queryKey: ["social-accounts"] });
+      qc.invalidateQueries({ queryKey: ["oauth", "meta", "diagnostics"] });
+      if (res.sync?.warnings?.length) {
+        toast.warning("Meta synced with notes", {
+          description: res.sync.warnings.slice(0, 2).join(" / "),
+        });
+      }
     },
     onError: (err: unknown) => {
       toast.error(err instanceof Error ? err.message : "Sync failed");
@@ -175,7 +193,8 @@ function ConnectionsPageContent() {
 
       {/* Runtime mode banner */}
       <Card>
-        <div className="flex items-start gap-3">
+        <div className="flex flex-col gap-5">
+          <div className="flex items-start gap-3">
           {liveEnabled ? (
             <div className="h-10 w-10 rounded-lg bg-success-soft text-success grid place-items-center">
               <ShieldCheck className="h-5 w-5" />
@@ -197,6 +216,11 @@ function ConnectionsPageContent() {
               ) : (
                 <Chip tone="amber">mock</Chip>
               )}
+              {metaDiagnostics.data?.connected ? (
+                <Chip tone="green">OAuth connected</Chip>
+              ) : liveEnabled ? (
+                <Chip tone="amber">OAuth not connected</Chip>
+              ) : null}
             </div>
             <p className="mt-1 text-sm text-fg-muted">
               {liveEnabled
@@ -204,7 +228,27 @@ function ConnectionsPageContent() {
                 : t("connections.mockBanner.subtitle")}
             </p>
             {liveEnabled ? (
-              <div className="mt-3 flex flex-wrap gap-2">
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <select
+                  className="h-8 rounded-md border border-border bg-surface px-2 text-xs text-fg"
+                  value={scopePack}
+                  onChange={(event) => setScopePack(event.target.value as MetaScopePack)}
+                  disabled={startMetaLive.isPending}
+                  aria-label="Meta permission pack"
+                >
+                  <option value="core">Core account discovery</option>
+                  <option value="insights">Insights and post analytics</option>
+                  <option value="inbox">Inbox, comments, and replies</option>
+                  <option value="full">Full SmartMENA Graph access</option>
+                </select>
+                <button
+                  className="btn btn-primary text-xs"
+                  onClick={() => startMetaLive.mutate()}
+                  disabled={startMetaLive.isPending}
+                >
+                  <Link2 className="h-3 w-3" />
+                  Connect / re-authorize Meta
+                </button>
                 <button
                   className="btn btn-ghost text-xs"
                   onClick={() => resyncMeta.mutate()}
@@ -220,6 +264,14 @@ function ConnectionsPageContent() {
               </div>
             ) : null}
           </div>
+          </div>
+          {liveEnabled ? (
+            <MetaDiagnosticsPanel
+              loading={metaDiagnostics.isLoading}
+              data={metaDiagnostics.data}
+              scopes={oauthStatus.data?.scope_packs?.[scopePack] ?? oauthStatus.data?.scopes ?? []}
+            />
+          ) : null}
         </div>
       </Card>
 
@@ -303,6 +355,119 @@ function ConnectionsPageContent() {
             ) : null}
           </Card>
         ))}
+      </div>
+    </div>
+  );
+}
+
+function MetaDiagnosticsPanel({
+  loading,
+  data,
+  scopes,
+}: {
+  loading: boolean;
+  data?: Awaited<ReturnType<typeof oauthApi.metaDiagnostics>>;
+  scopes: string[];
+}) {
+  const requested = data?.requested_scopes?.length
+    ? data.requested_scopes
+    : scopes;
+  const granted = new Set(data?.granted_scopes ?? []);
+  const missing = data?.missing_scopes ?? requested.filter((scope) => !granted.has(scope));
+
+  return (
+    <div className="grid grid-cols-1 gap-4 border-t border-border pt-4 lg:grid-cols-[1fr_1.2fr]">
+      <div className="rounded-md border border-border bg-surface-muted/40 p-3">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <div className="text-xs font-semibold text-fg">Graph readiness</div>
+            <p className="mt-1 text-[11px] text-fg-muted">
+              Permissions requested by SmartMENA and what Meta granted.
+            </p>
+          </div>
+          {data?.connected ? (
+            <CheckCircle2 className="h-4 w-4 text-success" />
+          ) : (
+            <AlertTriangle className="h-4 w-4 text-warning" />
+          )}
+        </div>
+        <div className="mt-3 grid grid-cols-3 gap-2 text-center">
+          <MiniStat label="Pages" value={loading ? "-" : String(data?.pages ?? 0)} />
+          <MiniStat
+            label="IG accounts"
+            value={loading ? "-" : String(data?.instagram_accounts ?? 0)}
+          />
+          <MiniStat label="Missing" value={loading ? "-" : String(missing.length)} />
+        </div>
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          {requested.slice(0, 12).map((scope) => (
+            <span
+              key={scope}
+              className={[
+                "rounded-full px-2 py-0.5 text-[10px] font-medium",
+                granted.has(scope)
+                  ? "bg-success-soft text-success"
+                  : "bg-warning-soft text-warning",
+              ].join(" ")}
+            >
+              {scope}
+            </span>
+          ))}
+        </div>
+        {data?.warnings?.length ? (
+          <div className="mt-3 text-[11px] leading-relaxed text-warning">
+            {data.warnings.slice(0, 2).join(" / ")}
+          </div>
+        ) : null}
+      </div>
+
+      <div className="rounded-md border border-border bg-surface-muted/40 p-3">
+        <div className="text-xs font-semibold text-fg">Discovered Meta assets</div>
+        <p className="mt-1 text-[11px] text-fg-muted">
+          Pages with linked Instagram professional accounts will be synced into
+          SmartMENA.
+        </p>
+        <div className="mt-3 max-h-44 space-y-2 overflow-auto pr-1">
+          {data?.accounts?.length ? (
+            data.accounts.map((account) => (
+              <div
+                key={account.page_id}
+                className="flex items-center justify-between gap-3 rounded-md bg-surface px-3 py-2 text-xs"
+              >
+                <div className="min-w-0">
+                  <div className="truncate font-medium text-fg">
+                    {account.page_name || account.page_id}
+                  </div>
+                  <div className="truncate text-[11px] text-fg-muted">
+                    {account.instagram?.username
+                      ? `Instagram @${account.instagram.username}`
+                      : "No linked Instagram professional account"}
+                  </div>
+                </div>
+                <Chip tone={account.instagram ? "green" : "amber"}>
+                  {account.instagram ? "ready" : "page only"}
+                </Chip>
+              </div>
+            ))
+          ) : (
+            <div className="rounded-md border border-dashed border-border px-3 py-6 text-center text-xs text-fg-muted">
+              {loading
+                ? "Checking Meta assets..."
+                : "Connect Meta to discover Pages and linked Instagram accounts."}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MiniStat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-md bg-surface px-2 py-2">
+      <div className="text-sm font-semibold tabular-nums text-fg">{value}</div>
+      <div className="text-[10px] uppercase tracking-wide text-fg-subtle">
+        {label}
       </div>
     </div>
   );
