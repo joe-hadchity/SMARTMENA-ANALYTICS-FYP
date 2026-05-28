@@ -1,23 +1,65 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Menu } from "lucide-react";
 
+import DecisionBriefPanel from "@/components/decision/DecisionBriefPanel";
+import LiveSignalsRibbon from "@/components/signals/LiveSignalsRibbon";
+import {
+  LIVE_SIGNALS_CHANGED_EVENT,
+  readLiveSignalsEnabled,
+} from "@/lib/uiPreferences";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
 
 import Sidebar from "./Sidebar";
+import Topbar from "./Topbar";
 
-const BARE_ROUTES = ["/login", "/register", "/r/", "/onboarding"];
+const BARE_ROUTES = [
+  "/login",
+  "/register",
+  "/r/",
+  "/onboarding",
+  "/landing",
+  "/workspaces/new",
+];
 const FULL_SCREEN_ROUTES = ["/advisor"];
 
 export default function AppShell({ children }: { children: ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
+  const [briefCollapsed, setBriefCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [liveSignalsEnabled, setLiveSignalsEnabled] = useState(true);
   const pathname = usePathname() || "";
   const isBareRoute = BARE_ROUTES.some((prefix) => pathname.startsWith(prefix));
   const isFullScreenRoute = FULL_SCREEN_ROUTES.some((prefix) => pathname.startsWith(prefix));
+
+  useEffect(() => {
+    const syncPreference = () => setLiveSignalsEnabled(readLiveSignalsEnabled());
+
+    syncPreference();
+    window.addEventListener("storage", syncPreference);
+    window.addEventListener(LIVE_SIGNALS_CHANGED_EVENT, syncPreference);
+
+    return () => {
+      window.removeEventListener("storage", syncPreference);
+      window.removeEventListener(LIVE_SIGNALS_CHANGED_EVENT, syncPreference);
+    };
+  }, []);
+
+  useEffect(() => {
+    const syncPreference = () => setLiveSignalsEnabled(readLiveSignalsEnabled());
+
+    syncPreference();
+    window.addEventListener("storage", syncPreference);
+    window.addEventListener(LIVE_SIGNALS_CHANGED_EVENT, syncPreference);
+
+    return () => {
+      window.removeEventListener("storage", syncPreference);
+      window.removeEventListener(LIVE_SIGNALS_CHANGED_EVENT, syncPreference);
+    };
+  }, []);
 
   if (isBareRoute) {
     return <>{children}</>;
@@ -99,10 +141,11 @@ export default function AppShell({ children }: { children: ReactNode }) {
             <Menu className="h-5 w-5" />
           </Button>
         </div>
-
+        <Topbar onOpenMobileNav={() => setMobileOpen(true)} />
         <main className={cn(
           "flex-1",
-          !isFullScreenRoute && "px-4 md:px-6 lg:px-8 py-6 pb-8"
+          !isFullScreenRoute && "px-4 md:px-6 lg:px-8 py-6",
+          liveSignalsEnabled ? "pb-24" : "pb-8"
         )}>
           {isFullScreenRoute ? (
             children
@@ -111,6 +154,22 @@ export default function AppShell({ children }: { children: ReactNode }) {
           )}
         </main>
       </div>
+
+      <div
+        className={cn(
+          "hidden shrink-0 transition-[width] duration-200 ease-out-soft xl:flex",
+          briefCollapsed ? "w-[72px]" : "w-[344px]",
+        )}
+      >
+        <DecisionBriefPanel
+          collapsed={briefCollapsed}
+          onToggleCollapse={() => setBriefCollapsed((value) => !value)}
+        />
+      </div>
+
+      {liveSignalsEnabled ? (
+        <LiveSignalsRibbon collapsed={collapsed} rightCollapsed={briefCollapsed} />
+      ) : null}
     </div>
   );
 }

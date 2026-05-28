@@ -32,6 +32,7 @@ async function status(req, res) {
     graph_version: env.META_GRAPH_VERSION,
     redirect_uri: env.META_REDIRECT_URI,
     scopes: metaOAuthService.SCOPES,
+    scope_packs: metaOAuthService.SCOPE_PACKS,
     missing: env.META_OAUTH_ENABLED
       ? []
       : [
@@ -62,11 +63,37 @@ async function initMeta(req, res) {
     redirectAfter: typeof req.query.redirect_after === "string"
       ? req.query.redirect_after
       : "/connections",
+    scopePack:
+      typeof req.query.scope_pack === "string"
+        ? req.query.scope_pack
+        : "full",
   });
   if (String(req.query.format).toLowerCase() === "json") {
     return res.status(200).json({ authorization_url: url });
   }
   res.redirect(302, url);
+}
+
+async function diagnostics(req, res) {
+  if (!env.META_OAUTH_ENABLED) {
+    return res.status(200).json({
+      connected: false,
+      enabled: false,
+      requested_scopes: metaOAuthService.SCOPES,
+      granted_scopes: [],
+      missing_scopes: metaOAuthService.SCOPES,
+      pages: 0,
+      instagram_accounts: 0,
+      accounts: [],
+      warnings: [
+        "meta_oauth_disabled:set_META_APP_ID_META_APP_SECRET_TOKEN_ENCRYPTION_KEY",
+      ],
+    });
+  }
+  const result = await metaOAuthService.getDiagnostics({
+    workspaceId: req.workspaceId,
+  });
+  res.status(200).json({ enabled: true, ...result });
 }
 
 /**
@@ -151,6 +178,7 @@ async function revokeMeta(req, res) {
 
 module.exports = {
   status,
+  diagnostics,
   initMeta,
   callbackMeta,
   syncMeta,

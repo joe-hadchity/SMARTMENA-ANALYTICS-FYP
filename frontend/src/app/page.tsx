@@ -13,6 +13,15 @@ import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import EngagementChart from "@/components/overview/EngagementChart";
+import EngagementLineChart from "@/components/charts/EngagementLineChart";
+import PlatformDonut from "@/components/charts/PlatformDonut";
+import SentimentDonut from "@/components/charts/SentimentDonut";
+import ConnectionsStrip from "@/components/overview/ConnectionsStrip";
+import DashboardFilters, {
+  type LangFilter,
+  type Range,
+} from "@/components/overview/DashboardFilters";
+import IntelligenceProfilePanel from "@/components/overview/IntelligenceProfilePanel";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import {
@@ -45,11 +54,12 @@ import {
 } from "@/lib/api";
 import { formatNumber, formatPercent } from "@/lib/format";
 import type { Provider } from "@/lib/types";
-import { cn } from "@/lib/utils";
 
 export default function OverviewPage() {
   const { t, locale } = useI18n();
   const [range, setRange] = useState<"7d" | "30d" | "90d">("30d");
+  const [selectedPlatforms, setSelectedPlatforms] = useState<Provider[]>([]);
+  const [lang, setLang] = useState<LangFilter>("all");
 
   const qc = useQueryClient();
   const workspaceQ = useQuery({
@@ -89,6 +99,62 @@ export default function OverviewPage() {
     queryKey: ["analytics", "platform"],
     queryFn: analyticsApi.platformBreakdown,
   });
+  const sentiment = useQuery({
+    queryKey: ["analytics", "sentiment"],
+    queryFn: analyticsApi.sentimentBreakdown,
+  });
+  const topPosts = useQuery({
+    queryKey: ["analytics", "top", { limit: 10, sortBy: "engagement" }],
+    queryFn: () => analyticsApi.topPosts({ limit: 10, sortBy: "engagement" }),
+  });
+  const intelligenceProfile = useQuery({
+    queryKey: ["workspace", workspaceQ.data?.id, "intelligence-profile"],
+    queryFn: () => workspacesApi.intelligenceProfile(workspaceQ.data!.id),
+    enabled: Boolean(workspaceQ.data?.id),
+  });
+  // --- derived state ------------------------------------------------------
+
+  const togglePlatform = (p: Provider) =>
+    setSelectedPlatforms((prev) =>
+      prev.includes(p) ? prev.filter((x) => x !== p) : [...prev, p],
+    );
+  const clearFilters = () => {
+    setSelectedPlatforms([]);
+    setLang("all");
+    setRange("30d");
+  };
+
+  const accountProviderMap = useMemo(() => {
+    const m = new Map<string, Provider>();
+    for (const a of accountsQ.data ?? []) m.set(a.id, a.provider);
+    return m;
+  }, [accountsQ.data]);
+
+  const platformFilterActive = selectedPlatforms.length > 0;
+
+  const filteredPlatformBreakdown = useMemo(() => {
+    const list = platform.data ?? [];
+    if (!platformFilterActive) return list;
+    return list.filter((p) => selectedPlatforms.includes(p.provider));
+  }, [platform.data, selectedPlatforms, platformFilterActive]);
+
+  const filteredTopPosts = useMemo(() => {
+    const list = topPosts.data ?? [];
+    return list.filter((p) => {
+      if (platformFilterActive) {
+        const prov = accountProviderMap.get(p.social_account_id);
+        if (!prov || !selectedPlatforms.includes(prov)) return false;
+      }
+      if (lang !== "all" && p.caption_lang !== lang) return false;
+      return true;
+    });
+  }, [
+    topPosts.data,
+    platformFilterActive,
+    selectedPlatforms,
+    accountProviderMap,
+    lang,
+  ]);
 
   const rangedSeries = useMemo(() => {
     const pts = timeseries.data?.points ?? [];
@@ -135,7 +201,99 @@ export default function OverviewPage() {
   const primary = "oklch(46% 0.108 320)"; // Deep teal from Claude Design
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      <PageHeader
+        eyebrow={t("overview.eyebrow", "Workspace dashboard")}
+        title={t("overview.title")}
+        subtitle={t("overview.subtitle")}
+        breadcrumbs={[{ label: workspaceQ.data?.name ?? "SmartMENA", href: "/" }]}
+        actions={
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              asChild
+              leftIcon={<LineChart className="h-4 w-4" />}
+            >
+              <Link href="/reports/growth">
+                {t("reports.growth.title", "Growth Report")}
+              </Link>
+            </Button>
+            <Button
+              size="sm"
+              onClick={async () => {
+                try {
+                  const share = await reportsApi.share({ locale });
+                  const url =
+                    typeof window !== "undefined"
+                      ? `${window.location.origin}/r/${share.token}`
+                      : `/r/${share.token}`;
+                  await navigator.clipboard.writeText(url);
+                  toast.success(
+                    t("reports.growth.copied", "Share link copied."),
+                  );
+                } catch (err) {
+                  const msg =
+                    err instanceof Error ? err.message : "Share failed";
+                  toast.error(msg);
+                }
+              }}
+              leftIcon={<Share2 className="h-4 w-4" />}
+            >
+              {t("reports.growth.share", "Share link")}
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              leftIcon={<Download className="h-4 w-4" />}
+            >
+              {t("common.export", "Export")}
+            </Button>
+          </div>
+        }
+      />
+
+      <IntelligenceProfilePanel
+        data={intelligenceProfile.data}
+        loading={intelligenceProfile.isLoading}
+      />
+
+      {/* Platform connections / digital marketing hub */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-sm font-semibold text-fg">
+              {t("hub.connections.title", "Connected platforms")}
+            </h2>
+            <p className="text-xs text-fg-muted">
+              {t(
+                "hub.connections.subtitle",
+                "Live and planned sources feeding the workspace signal.",
+              )}
+            </p>
+          </div>
+          <Button variant="ghost" size="sm" asChild>
+            <Link href="/connections">
+              {t("hub.connections.manage", "Manage connections")}
+              <ArrowRight className="h-3.5 w-3.5 rtl:rotate-180" />
+            </Link>
+          </Button>
+        </div>
+        <ConnectionsStrip
+          selected={selectedPlatforms}
+          onToggle={togglePlatform}
+        />
+      </div>
+
+      <DashboardFilters
+        platforms={selectedPlatforms}
+        onPlatformsChange={setSelectedPlatforms}
+        lang={lang}
+        onLangChange={setLang}
+        range={range}
+        onRangeChange={setRange}
+        onClear={clearFilters}
+      />
 
       {noData ? (
         <EmptyState
@@ -284,4 +442,17 @@ export default function OverviewPage() {
 
     </div>
   );
+}
+
+/**
+ * Big faded label that sits behind the hero — current month for 30/90 day
+ * windows, or a "7 DAYS" / "90 DAYS" label otherwise.
+ */
+function periodLabel(range: Range): string {
+  if (range === "7d") return "7 DAYS";
+  if (range === "90d") return "90 DAYS";
+  const now = new Date();
+  return now
+    .toLocaleString("en-US", { month: "short", year: "numeric" })
+    .toUpperCase();
 }

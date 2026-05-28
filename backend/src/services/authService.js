@@ -184,11 +184,16 @@ async function register({
   }));
 }
 
-async function me(token) {
+async function me(token, { workspaceId } = {}) {
   const user = await getUserFromAccessToken(token);
   const appUser = await ensurePublicUser(user);
   const memberships = await listMemberships(appUser.id);
-  const activeMembership = memberships[0] || null;
+  const activeMembership =
+    (workspaceId
+      ? memberships.find((membership) => membership.workspace?.id === workspaceId)
+      : null) ||
+    memberships[0] ||
+    null;
 
   return {
     user: publicUser(user),

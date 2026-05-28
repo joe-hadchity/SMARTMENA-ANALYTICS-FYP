@@ -15,7 +15,9 @@ async function me(req, res) {
   if (!token) {
     return res.status(401).json({ message: "Missing bearer token" });
   }
-  const payload = await authService.me(token);
+  const payload = await authService.me(token, {
+    workspaceId: req.get("x-workspace-id") || null,
+  });
   res.json(payload);
 }
 

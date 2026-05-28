@@ -13,6 +13,7 @@ const asyncHandler = require("../utils/asyncHandler");
 const workspaceContext = require("../middleware/workspaceContext");
 const {
   status,
+  diagnostics,
   initMeta,
   callbackMeta,
   syncMeta,
@@ -31,6 +32,7 @@ router.get("/meta/callback", asyncHandler(callbackMeta));
 // Workspace-scoped endpoints.
 router.use(workspaceContext());
 
+router.get("/meta/diagnostics", asyncHandler(diagnostics));
 router.get("/meta/init", asyncHandler(initMeta));
 router.post("/meta/sync", asyncHandler(syncMeta));
 router.delete("/meta/connection/:id", asyncHandler(revokeMeta));

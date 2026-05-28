@@ -5,23 +5,32 @@ import {
   ArrowUp,
   Bot,
   Brain,
-  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
   Clock3,
-  Gauge,
   MessageSquare,
   ShieldAlert,
   Sparkles,
   Target,
   Users,
+  type LucideIcon,
 } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
 
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
-import { analyticsApi, assistantApi, insightsApi, inboxApi } from "@/lib/api";
+import {
+  assistantApi,
+  audienceInsightsApi,
+  competitorsApi,
+  inboxApi,
+  trendIntelligenceApi,
+  workspacesApi,
+  type AudienceInsightsPayload,
+} from "@/lib/api";
 import { formatPercent } from "@/lib/format";
 import { cn } from "@/lib/utils";
-import type { Insight } from "@/lib/types";
+import type { CompetitorComparisonResponse, Insight, TrendIntelligenceResponse } from "@/lib/types";
 
 type ChatMsg = {
   id: string;
@@ -30,41 +39,41 @@ type ChatMsg = {
   streaming?: boolean;
 };
 
-type DecisionBriefPanelProps = {
-  onOpenChange?: (open: boolean) => void;
-};
-
-export default function DecisionBriefPanel({ onOpenChange }: DecisionBriefPanelProps) {
-  const [open, setOpen] = useState(true);
-
-  const handleOpenChange = (newOpen: boolean) => {
-    setOpen(newOpen);
-    onOpenChange?.(newOpen);
-  };
+export default function DecisionBriefPanel({
+  collapsed,
+  onToggleCollapse,
+}: {
+  collapsed: boolean;
+  onToggleCollapse: () => void;
+}) {
   const [draft, setDraft] = useState("");
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMsg[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
   const streamRef = useRef<{ abort: () => void } | null>(null);
 
-  const overviewQ = useQuery({
-    queryKey: ["decision-brief", "overview"],
-    queryFn: analyticsApi.overview,
+  const workspaceQ = useQuery({
+    queryKey: ["workspace", "current"],
+    queryFn: workspacesApi.current,
+  });
+  const competitorQ = useQuery({
+    queryKey: ["decision-brief", "competitors", 30],
+    queryFn: () => competitorsApi.comparison(30),
     refetchInterval: 60_000,
   });
-  const sentimentQ = useQuery({
-    queryKey: ["decision-brief", "sentiment"],
-    queryFn: analyticsApi.sentimentBreakdown,
+  const trendQ = useQuery({
+    queryKey: ["decision-brief", "trends", workspaceQ.data?.id],
+    queryFn: () =>
+      trendIntelligenceApi.get(workspaceQ.data!.id, {
+        scope: "all",
+        limit: 8,
+      }),
+    enabled: !!workspaceQ.data?.id,
     refetchInterval: 60_000,
   });
-  const topQ = useQuery({
-    queryKey: ["decision-brief", "top-posts"],
-    queryFn: () => analyticsApi.topPosts({ limit: 5, sortBy: "engagement" }),
-    refetchInterval: 60_000,
-  });
-  const insightsQ = useQuery({
-    queryKey: ["decision-brief", "insights"],
-    queryFn: () => insightsApi.list({ limit: 12 }),
+  const audienceQ = useQuery({
+    queryKey: ["decision-brief", "audience", 30],
+    queryFn: () => audienceInsightsApi.get({ days: 30 }),
     refetchInterval: 60_000,
   });
   const inboxSummaryQ = useQuery({
@@ -76,28 +85,101 @@ export default function DecisionBriefPanel({ onOpenChange }: DecisionBriefPanelP
   const brief = useMemo(
     () =>
       buildBrief({
-        overview: overviewQ.data,
-        sentiment: sentimentQ.data,
-        topPosts: topQ.data ?? [],
-        insights: insightsQ.data ?? [],
+        competitors: competitorQ.data,
+        trends: trendQ.data,
+        audience: audienceQ.data,
         unread: inboxSummaryQ.data?.unread ?? 0,
       }),
-    [overviewQ.data, sentimentQ.data, topQ.data, insightsQ.data, inboxSummaryQ.data?.unread],
+    [competitorQ.data, trendQ.data, audienceQ.data, inboxSummaryQ.data?.unread],
   );
 
-  if (!open) {
+  if (collapsed) {
     return (
-      <button
-        type="button"
-        onClick={() => handleOpenChange(true)}
-        className="fixed right-4 top-24 z-30 flex items-center gap-2 rounded-full border border-border bg-bg-elevated px-3 py-2 text-xs font-semibold text-fg shadow-lg backdrop-blur-xl transition-colors hover:border-primary/40 hover:bg-primary/5"
-      >
-        <Brain className="h-4 w-4 text-primary" />
-        AI Decision Brief
-        <Badge tone={brief.tone} size="sm">
-          {brief.score}
-        </Badge>
-      </button>
+      <aside className="sticky top-0 h-screen w-full border-s border-border bg-bg-elevated/95 backdrop-blur-xl">
+        <div className="flex h-full flex-col items-center overflow-hidden px-2">
+          <div className="flex w-full justify-center border-b border-border py-3">
+            <button
+              type="button"
+              onClick={onToggleCollapse}
+              className="grid h-9 w-9 place-items-center rounded-md text-fg-muted transition-colors hover:bg-surface-muted hover:text-fg"
+              aria-label="Expand AI Decision Brief"
+              title="Expand AI Decision Brief"
+            >
+              <ChevronsLeft className="h-4 w-4" />
+            </button>
+          </div>
+
+          <div className="flex w-full flex-1 flex-col items-center py-4">
+            <button
+              type="button"
+              onClick={onToggleCollapse}
+              className="group flex w-full flex-col items-center rounded-md py-2 transition-colors hover:bg-surface-muted"
+              title={`AI Decision Brief: ${brief.score}/100`}
+            >
+              <span className="relative grid h-10 w-10 place-items-center rounded-md bg-primary/10 text-primary">
+                <Brain className="h-4 w-4" />
+                <span
+                  className={cn(
+                    "absolute -end-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border-2 border-bg-elevated",
+                    brief.tone === "success" && "bg-success",
+                    brief.tone === "warning" && "bg-warning",
+                    brief.tone === "danger" && "bg-danger",
+                    brief.tone === "info" && "bg-info",
+                  )}
+                />
+              </span>
+              <span className="mt-2 text-[10px] font-semibold uppercase tracking-wide text-fg-subtle">
+                Brief
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={onToggleCollapse}
+              className="mt-3 flex h-14 w-full flex-col items-center justify-center rounded-md border border-border bg-surface-muted/45 transition-colors hover:bg-surface-muted"
+              title={`Readiness: ${brief.score}/100`}
+            >
+              <span className="text-base font-semibold leading-none text-fg">{brief.score}</span>
+              <span className="mt-1 text-[9px] uppercase tracking-wide text-fg-subtle">
+                /100
+              </span>
+            </button>
+
+            <div className="my-4 h-px w-8 bg-border" />
+
+            <div className="flex w-full flex-col items-center gap-2">
+              <CollapsedMetric
+                icon={Target}
+                value={brief.opportunity}
+                label="Opportunity"
+                tone="success"
+                onClick={onToggleCollapse}
+              />
+              <CollapsedMetric
+                icon={ShieldAlert}
+                value={brief.risk}
+                label="Main risk"
+                tone="danger"
+                onClick={onToggleCollapse}
+              />
+              <CollapsedMetric
+                icon={Clock3}
+                value={brief.bestWindow}
+                label="Best window"
+                tone="warning"
+                onClick={onToggleCollapse}
+              />
+              <CollapsedMetric
+                icon={Users}
+                value={brief.audience}
+                label="Audience"
+                tone="info"
+                onClick={onToggleCollapse}
+              />
+            </div>
+          </div>
+        </div>
+      </aside>
     );
   }
 
@@ -164,29 +246,29 @@ export default function DecisionBriefPanel({ onOpenChange }: DecisionBriefPanelP
   };
 
   return (
-    <aside className="fixed bottom-[132px] right-3 top-20 z-30 hidden w-[360px] flex-col overflow-hidden rounded-lg border border-border bg-bg-elevated shadow-xl backdrop-blur-xl xl:flex">
-      <div className="border-b border-border bg-surface px-3 py-3">
+    <aside className="sticky top-0 flex h-screen w-full flex-col overflow-hidden border-s border-border bg-bg-elevated/95 backdrop-blur-xl">
+      <div className="border-b border-border px-4 py-3">
         <div className="flex items-center gap-3">
-          <div className="grid h-8 w-8 place-items-center rounded-md bg-primary-soft text-primary">
+          <div className="grid h-7 w-7 place-items-center rounded-md text-primary">
             <Brain className="h-4 w-4" />
           </div>
           <div className="min-w-0 flex-1">
             <h2 className="text-sm font-semibold text-fg">AI Decision Brief</h2>
-            <p className="text-[11px] text-fg-muted">Score, risk, window, next move.</p>
+            <p className="text-[11px] text-fg-muted">Score, risk, timing, next move.</p>
           </div>
           <button
             type="button"
-            onClick={() => handleOpenChange(false)}
+            onClick={onToggleCollapse}
             className="grid h-8 w-8 place-items-center rounded-md text-fg-muted transition-colors hover:bg-surface-muted hover:text-fg"
-            aria-label="Hide AI Decision Brief"
+            aria-label="Collapse AI Decision Brief"
           >
-            <ChevronRight className="h-4 w-4" />
+            <ChevronsRight className="h-4 w-4" />
           </button>
         </div>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto px-3 py-3">
-        <section className="border-b border-border pb-3">
+      <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
+        <section className="border-b border-border/70 pb-4">
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0">
               <div className="text-[11px] font-medium uppercase tracking-wide text-fg-subtle">
@@ -202,10 +284,10 @@ export default function DecisionBriefPanel({ onOpenChange }: DecisionBriefPanelP
             </div>
             <div className="text-right">
               <div className="text-[11px] text-fg-subtle">Confidence</div>
-              <div className="text-lg font-semibold text-fg">{brief.confidence}%</div>
+              <div className="text-base font-semibold text-fg">{brief.confidence}%</div>
             </div>
           </div>
-          <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-surface-muted">
+          <div className="mt-3 h-1 overflow-hidden rounded-full bg-surface-muted">
             <div
               className={cn(
                 "h-full rounded-full",
@@ -220,13 +302,13 @@ export default function DecisionBriefPanel({ onOpenChange }: DecisionBriefPanelP
         </section>
 
         <div className="mt-3 grid grid-cols-2 gap-2">
-          <BriefTile icon={Gauge} label="Confidence" value={`${brief.confidence}%`} />
-          <BriefTile icon={Clock3} label="Best window" value={brief.bestWindow} />
           <BriefTile icon={Target} label="Opportunity" value={brief.opportunity} />
           <BriefTile icon={ShieldAlert} label="Main risk" value={brief.risk} />
+          <BriefTile icon={Clock3} label="Best Window" value={brief.bestWindow} />
+          <BriefTile icon={Users} label="Audience" value={brief.audience} />
         </div>
 
-        <section className="mt-3 space-y-3 border-t border-border pt-3">
+        <section className="mt-4 space-y-3 border-t border-border/70 pt-4">
           <div>
             <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-fg-subtle">
               <Sparkles className="h-3.5 w-3.5 text-primary" />
@@ -252,9 +334,9 @@ export default function DecisionBriefPanel({ onOpenChange }: DecisionBriefPanelP
           </div>
         </section>
 
-        <div className="mt-4 space-y-2 border-t border-border pt-3">
+        <div className="mt-4 space-y-2 border-t border-border/70 pt-4">
           {messages.length === 0 ? (
-            <div className="rounded-md border border-dashed border-border bg-surface-muted/50 p-3 text-xs leading-relaxed text-fg-muted">
+            <div className="rounded-md border border-dashed border-border bg-surface-muted/40 p-3 text-xs leading-relaxed text-fg-muted">
               Ask why the score changed, what to publish next, or how to reduce risk.
             </div>
           ) : (
@@ -265,7 +347,7 @@ export default function DecisionBriefPanel({ onOpenChange }: DecisionBriefPanelP
                   "rounded-md border p-2.5 text-xs leading-relaxed",
                   message.role === "user"
                     ? "ms-6 border-primary/20 bg-primary/5 text-fg"
-                    : "me-6 border-border bg-surface text-fg-muted",
+                    : "me-6 border-border bg-surface-muted/45 text-fg-muted",
                 )}
               >
                 <div className="mb-1 flex items-center gap-2 text-xs font-semibold text-fg">
@@ -284,7 +366,7 @@ export default function DecisionBriefPanel({ onOpenChange }: DecisionBriefPanelP
         </div>
       </div>
 
-      <div className="border-t border-border bg-surface p-2.5">
+      <div className="border-t border-border bg-bg-elevated/95 p-3">
         <div className="flex gap-2">
           <textarea
             value={draft}
@@ -317,12 +399,12 @@ function BriefTile({
   label,
   value,
 }: {
-  icon: typeof Gauge;
+  icon: LucideIcon;
   label: string;
   value: string;
 }) {
   return (
-    <div className="rounded-md border border-border bg-surface px-2.5 py-2">
+    <div className="rounded-md border border-border/80 bg-surface-muted/35 px-2.5 py-2">
       <div className="flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-wide text-fg-subtle">
         <Icon className="h-3.5 w-3.5" />
         {label}
@@ -332,64 +414,98 @@ function BriefTile({
   );
 }
 
+function CollapsedMetric({
+  icon: Icon,
+  value,
+  label,
+  tone,
+  onClick,
+}: {
+  icon: LucideIcon;
+  value: string;
+  label: string;
+  tone: "success" | "warning" | "danger" | "info";
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="group relative grid h-10 w-full place-items-center rounded-md text-fg-muted transition-colors hover:bg-surface-muted hover:text-fg"
+      title={`${label}: ${value}`}
+    >
+      <span
+        className={cn(
+          "absolute start-1 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-full opacity-70",
+          tone === "success" && "bg-success",
+          tone === "warning" && "bg-warning",
+          tone === "danger" && "bg-danger",
+          tone === "info" && "bg-info",
+        )}
+      />
+      <Icon className="h-4 w-4 transition-transform group-hover:scale-105" />
+      <span className="sr-only">{`${label}: ${value}`}</span>
+    </button>
+  );
+}
+
 function buildBrief({
-  overview,
-  sentiment,
-  topPosts,
-  insights,
+  competitors,
+  trends,
+  audience,
   unread,
 }: {
-  overview: Awaited<ReturnType<typeof analyticsApi.overview>> | undefined;
-  sentiment: Awaited<ReturnType<typeof analyticsApi.sentimentBreakdown>> | undefined;
-  topPosts: Awaited<ReturnType<typeof analyticsApi.topPosts>>;
-  insights: Insight[];
+  competitors: CompetitorComparisonResponse | undefined;
+  trends: TrendIntelligenceResponse | undefined;
+  audience: AudienceInsightsPayload | undefined;
   unread: number;
 }) {
-  const engagement = overview?.averages.engagementRate ?? 0;
-  const roi = overview?.averages.predictedRoi ?? 0;
-  const positiveShare = sentiment?.shares.positive ?? 0;
-  const warningCount = insights.filter((item) => item.severity === "warning").length;
-  const opportunityCount = insights.filter((item) => item.severity === "opportunity").length;
+  const topTrend = [...(trends?.local_trends ?? []), ...(trends?.global_trends ?? [])].sort(
+    (a, b) => b.trend_score - a.trend_score,
+  )[0];
+  const trendRecommendation = [...(trends?.recommendations ?? [])].sort(
+    (a, b) => b.priority_score - a.priority_score,
+  )[0];
+  const sentiment = pickAudienceSentiment(audience);
+  const positiveShare = sentiment?.total ? sentiment.positive / sentiment.total : 0;
+  const negativeShare = sentiment?.total ? sentiment.negative / sentiment.total : 0;
+  const competitorCoverage = competitors?.benchmark?.data_quality_score ?? 0;
+  const trendStrength = topTrend?.trend_score ?? 0;
+  const audienceCoverage = sentiment?.coverage ?? 0;
+  const competitorAdvantage =
+    competitors?.benchmark?.engagement_winner === "you"
+      ? 12
+      : competitors?.benchmark?.engagement_winner === "competitors"
+        ? -10
+        : 0;
 
   const baseScore =
-    42 +
-    Math.min(22, engagement * 240) +
-    Math.min(16, Math.max(0, roi) * 6) +
-    positiveShare * 16 +
-    opportunityCount * 2 -
-    warningCount * 4 -
-    Math.min(12, unread * 2);
+    44 +
+    competitorAdvantage +
+    Math.min(16, competitorCoverage * 0.16) +
+    Math.min(18, trendStrength * 0.18) +
+    Math.min(12, audienceCoverage * 12) +
+    positiveShare * 12 -
+    negativeShare * 16 -
+    Math.min(10, unread * 2);
   const score = clamp(Math.round(baseScore), 18, 94);
   const confidence = clamp(
-    Math.round(48 + Math.min(22, (overview?.totals.syncedPosts ?? 0) * 2) + insights.length * 2),
+    Math.round(
+      42 +
+        Math.min(24, competitorCoverage * 0.24) +
+        Math.min(22, (topTrend?.evidence_count ?? 0) * 2) +
+        Math.min(18, audienceCoverage * 18),
+    ),
     42,
     91,
   );
 
-  const warning = insights.find((item) => item.severity === "warning");
-  const opportunity = insights.find((item) => item.severity === "opportunity");
-  const bestTime = insights.find((item) => item.insight_type === "best_posting_time");
-  const topPost = topPosts[0];
-
+  const opportunity = buildOpportunity(competitors, trends);
+  const risk = buildRisk(competitors, trends, audience, unread);
+  const bestWindow = buildBestWindow(audience);
+  const audienceSignal = buildAudienceSignal(audience);
   const verdict = score >= 72 ? "Strong opportunity" : score >= 52 ? "Needs focus" : "Risky move";
   const tone = score >= 72 ? "success" : score >= 52 ? "warning" : "danger";
-  const bestWindow =
-    extractWindow(bestTime) || (topPost?.posted_at ? "Repeat the top post window" : "Evening 19:00-22:00");
-  const audience =
-    sentiment && sentiment.total > 0
-      ? `${formatPercent(positiveShare, 0, "en")} positive audience mood across ${sentiment.total} analyzed items.`
-      : "Audience mood needs more comments or captions before the model can be confident.";
-  const risk =
-    unread > 0
-      ? `${unread} unread audience ${unread === 1 ? "message" : "messages"}`
-      : warning
-        ? insightTitle(warning)
-        : "Low recent risk";
-  const mainOpportunity = opportunity
-    ? insightTitle(opportunity)
-    : topPost
-      ? `${topPost.post_type || "Post"} content is leading engagement`
-      : "Sync more posts to reveal the strongest opportunity";
 
   return {
     score,
@@ -397,28 +513,127 @@ function buildBrief({
     verdict,
     tone: tone as "success" | "warning" | "danger" | "info",
     bestWindow,
-    audience,
+    audience: audienceSignal,
     risk,
-    opportunity: mainOpportunity,
+    opportunity,
     recommendation:
       score >= 72
-        ? "Move forward with a focused campaign variation and keep the strongest audience angle visible."
+        ? "Move forward with the competitor gap, active trend, and audience timing aligned."
         : score >= 52
-          ? "Revise the campaign before publishing: tighten the hook, reduce risk, and post in the strongest window."
-          : "Do not publish as-is. Resolve the main risk and gather more audience signal first.",
-    why:
-      opportunity || warning
-        ? [opportunity ? insightBody(opportunity) : null, warning ? insightBody(warning) : null]
-            .filter(Boolean)
-            .join(" ")
-        : topPost
-          ? `Your strongest recent post generated ${topPost.engagement} engagements, so the brief favors similar structure and timing.`
-          : "The brief is using current workspace coverage, sentiment, ROI, inbox pressure, and recent AI insights.",
+          ? "Tighten the campaign around the strongest trend, then reduce the competitor or audience risk before publishing."
+          : "Hold the campaign until competitor evidence, trend strength, or audience response improves.",
+    why: [
+      competitors?.benchmark?.format_gap?.message,
+      trendRecommendation?.recommendation_text,
+      audienceSignal,
+    ]
+      .filter(Boolean)
+      .join(" "),
   };
 }
 
-function insightTitle(insight: Insight) {
-  return insight.title_en || insight.title_ar || insight.insight_type.replace(/_/g, " ");
+function buildOpportunity(
+  competitors?: CompetitorComparisonResponse,
+  trends?: TrendIntelligenceResponse,
+) {
+  const competitorOpportunity = competitors?.opportunities?.find(
+    (item) => item.priority === "high" || item.priority === "medium",
+  );
+  if (competitorOpportunity) return competitorOpportunity.title;
+
+  const trendRecommendation = [...(trends?.recommendations ?? [])].sort(
+    (a, b) => b.priority_score - a.priority_score,
+  )[0];
+  if (trendRecommendation) return trendRecommendation.recommendation_text;
+
+  const topTheme = [...(trends?.campaign_theme_trends ?? [])].sort(
+    (a, b) => b.trend_score - a.trend_score,
+  )[0];
+  if (topTheme) return topTheme.suggested_angle;
+
+  const competitorFormat = competitors?.competitors_summary?.top_format;
+  if (competitorFormat) return `Test competitor-leading ${formatLabel(competitorFormat)} content.`;
+
+  return "Refresh competitors and trends to reveal the strongest opportunity.";
+}
+
+function buildRisk(
+  competitors?: CompetitorComparisonResponse,
+  trends?: TrendIntelligenceResponse,
+  audience?: AudienceInsightsPayload,
+  unread = 0,
+) {
+  if (unread > 0) {
+    return `${unread} unread audience ${unread === 1 ? "message" : "messages"}`;
+  }
+
+  const sentiment = pickAudienceSentiment(audience);
+  if (sentiment?.total) {
+    const negativeShare = sentiment.negative / sentiment.total;
+    if (negativeShare >= 0.3) {
+      return `${formatPercent(negativeShare, 0, "en")} negative audience response`;
+    }
+  }
+
+  if (competitors?.benchmark?.engagement_winner === "competitors") {
+    return competitors.benchmark.best_benchmark
+      ? `Competitor @${competitors.benchmark.best_benchmark.handle} is ahead`
+      : "Competitors are ahead on engagement";
+  }
+
+  if (competitors?.benchmark?.data_quality_label === "thin") {
+    return "Competitor evidence is still thin";
+  }
+
+  if (trends?.warnings?.length) {
+    return "Trend evidence needs refresh";
+  }
+
+  return "Low current risk";
+}
+
+function buildBestWindow(audience?: AudienceInsightsPayload) {
+  const topHour = [...(audience?.active_times?.by_hour ?? [])].sort((a, b) => b.score - a.score)[0];
+  const topDay = [...(audience?.active_times?.by_day ?? [])].sort((a, b) => b.score - a.score)[0];
+  if (topHour) {
+    const start = String(topHour.hour).padStart(2, "0");
+    const end = String((topHour.hour + 1) % 24).padStart(2, "0");
+    return topDay?.day ? `${topDay.day} ${start}:00-${end}:00` : `${start}:00-${end}:00`;
+  }
+  return "Refresh audience activity";
+}
+
+function buildAudienceSignal(audience?: AudienceInsightsPayload) {
+  const topCity = [...(audience?.top_cities ?? [])].sort((a, b) => b.value - a.value)[0];
+  const topAge = [...(audience?.age_ranges ?? [])].sort((a, b) => b.value - a.value)[0];
+  const sentiment = pickAudienceSentiment(audience);
+
+  if (sentiment?.total) {
+    const positive = sentiment.positive / sentiment.total;
+    const place = topCity ? ` in ${topCity.name}` : "";
+    const age = topAge ? `, strongest age ${topAge.range}` : "";
+    return `${formatPercent(positive, 0, "en")} positive audience mood${place}${age}.`;
+  }
+
+  if (topCity || topAge) {
+    return `${topCity ? `Top city: ${topCity.name}` : "Audience geography ready"}${
+      topAge ? `, strongest age ${topAge.range}` : ""
+    }.`;
+  }
+
+  return "Refresh audience insights to identify the active segment.";
+}
+
+function pickAudienceSentiment(audience?: AudienceInsightsPayload) {
+  return (
+    audience?.comment_sentiment_distribution ??
+    audience?.sentiment_distribution ??
+    audience?.caption_sentiment_distribution
+  );
+}
+
+function formatLabel(value: string) {
+  return value.replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
 function insightBody(insight: Insight) {
