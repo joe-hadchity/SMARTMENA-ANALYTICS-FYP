@@ -3,17 +3,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowRight,
-  BarChart3,
-  Cable,
   Download,
-  FileText,
   LineChart,
   ListFilter,
   Share2,
-  Smile,
   Sparkles,
-  TrendingUp,
-  Zap,
 } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
@@ -27,6 +21,7 @@ import DashboardFilters, {
   type LangFilter,
   type Range,
 } from "@/components/overview/DashboardFilters";
+import IntelligenceProfilePanel from "@/components/overview/IntelligenceProfilePanel";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import {
@@ -53,7 +48,6 @@ import {
 } from "@/lib/api";
 import { formatNumber, formatPercent } from "@/lib/format";
 import type { Provider } from "@/lib/types";
-import { cn } from "@/lib/utils";
 
 export default function OverviewPage() {
   const { t, locale } = useI18n();
@@ -106,6 +100,11 @@ export default function OverviewPage() {
   const topPosts = useQuery({
     queryKey: ["analytics", "top", { limit: 10, sortBy: "engagement" }],
     queryFn: () => analyticsApi.topPosts({ limit: 10, sortBy: "engagement" }),
+  });
+  const intelligenceProfile = useQuery({
+    queryKey: ["workspace", workspaceQ.data?.id, "intelligence-profile"],
+    queryFn: () => workspacesApi.intelligenceProfile(workspaceQ.data!.id),
+    enabled: Boolean(workspaceQ.data?.id),
   });
   // --- derived state ------------------------------------------------------
 
@@ -192,13 +191,6 @@ export default function OverviewPage() {
     overview.data &&
     totals?.connectedAccounts === 0 &&
     totals?.syncedPosts === 0;
-  const workspaceRead = buildWorkspaceRead({
-    connectedAccounts: totals?.connectedAccounts ?? 0,
-    predictedRoi: averages?.predictedRoi,
-    sentimentScore: averages?.sentimentScore,
-    syncedPosts: totals?.syncedPosts ?? 0,
-    deltaEngagement,
-  });
 
   return (
     <div className="space-y-8">
@@ -253,10 +245,9 @@ export default function OverviewPage() {
         }
       />
 
-      <WorkspaceDecisionStrip
-        workspaceName={workspaceQ.data?.name ?? "SmartMENA"}
-        signals={workspaceRead}
-        loading={overview.isLoading}
+      <IntelligenceProfilePanel
+        data={intelligenceProfile.data}
+        loading={intelligenceProfile.isLoading}
       />
 
       {/* Platform connections / digital marketing hub */}
@@ -674,13 +665,6 @@ export default function OverviewPage() {
   );
 }
 
-type WorkspaceSignal = {
-  label: string;
-  value: string;
-  detail: string;
-  tone: "good" | "watch" | "risk" | "neutral";
-};
-
 /**
  * Big faded label that sits behind the hero — current month for 30/90 day
  * windows, or a "7 DAYS" / "90 DAYS" label otherwise.
@@ -694,178 +678,3 @@ function periodLabel(range: Range): string {
     .toUpperCase();
 }
 
-function buildWorkspaceRead({
-  connectedAccounts,
-  predictedRoi,
-  sentimentScore,
-  syncedPosts,
-  deltaEngagement,
-}: {
-  connectedAccounts: number;
-  predictedRoi?: number | null;
-  sentimentScore?: number | null;
-  syncedPosts: number;
-  deltaEngagement: number | null;
-}): WorkspaceSignal[] {
-  const audience =
-    sentimentScore == null
-      ? {
-          value: "Mood signal pending",
-          detail: "No sentiment baseline yet.",
-          tone: "neutral" as const,
-        }
-      : sentimentScore >= 0.25
-        ? {
-            value: "Positive momentum",
-            detail: "Audience reactions are leaning favorable.",
-            tone: "good" as const,
-          }
-        : sentimentScore <= -0.15
-          ? {
-              value: "Audience caution",
-              detail: "Recent language needs closer review.",
-              tone: "risk" as const,
-            }
-          : {
-              value: "Mixed but stable",
-              detail: "The current audience mood is not strongly polarized.",
-              tone: "watch" as const,
-            };
-
-  const opportunity =
-    predictedRoi == null
-      ? {
-          value: "Return model pending",
-          detail: "More campaign evidence will strengthen the forecast.",
-          tone: "neutral" as const,
-        }
-      : predictedRoi >= 1.6
-        ? {
-            value: "Strong return signal",
-            detail: `Average predicted return is ${predictedRoi.toFixed(2)}x.`,
-            tone: "good" as const,
-          }
-        : predictedRoi >= 1.05
-          ? {
-              value: "Testable opportunity",
-              detail: `Expected return is ${predictedRoi.toFixed(2)}x.`,
-              tone: "watch" as const,
-            }
-          : {
-              value: "Needs revision",
-              detail: `Expected return is ${predictedRoi.toFixed(2)}x.`,
-              tone: "risk" as const,
-            };
-
-  const risk =
-    connectedAccounts === 0
-      ? {
-          value: "Source gap",
-          detail: "No live source is connected to this workspace.",
-          tone: "risk" as const,
-        }
-      : syncedPosts < 5
-        ? {
-            value: "Thin evidence",
-            detail: "The system has only a small content sample.",
-            tone: "watch" as const,
-          }
-        : deltaEngagement != null && deltaEngagement < -0.15
-          ? {
-              value: "Engagement cooling",
-              detail: "Recent engagement is below the previous window.",
-              tone: "risk" as const,
-            }
-          : {
-              value: "No major blocker",
-              detail: "Workspace signals look steady enough to review.",
-              tone: "good" as const,
-            };
-
-  const nextMove =
-    connectedAccounts === 0
-      ? "Connect the first marketing source."
-      : syncedPosts < 5
-        ? "Sync more recent content before making a campaign call."
-        : opportunity.tone === "good" && audience.tone === "good"
-          ? "Turn the strongest content angle into the next campaign."
-          : risk.tone === "risk"
-            ? "Review the weak signal before scaling content."
-            : "Compare top posts and plan the next campaign test.";
-
-  return [
-    { label: "Audience mood", ...audience },
-    { label: "Expected campaign return", ...opportunity },
-    { label: "Decision risk", ...risk },
-    {
-      label: "Suggested next move",
-      value: nextMove,
-      detail: "Based on source coverage, mood and return signals.",
-      tone:
-        risk.tone === "risk"
-          ? "risk"
-          : opportunity.tone === "good" && audience.tone === "good"
-            ? "good"
-            : "watch",
-    },
-  ];
-}
-
-function WorkspaceDecisionStrip({
-  workspaceName,
-  signals,
-  loading,
-}: {
-  workspaceName: string;
-  signals: WorkspaceSignal[];
-  loading: boolean;
-}) {
-  return (
-    <section className="rounded-md border border-border bg-surface shadow-xs">
-      <div className="border-b border-border/70 px-5 py-4">
-        <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-fg-subtle">
-          Workspace read
-        </div>
-        <div className="mt-1 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-          <h2 className="text-base font-semibold text-fg">
-            {workspaceName} campaign decision signals
-          </h2>
-          <span className="text-xs text-fg-muted">
-            What is happening, why it matters, and what to do next.
-          </span>
-        </div>
-      </div>
-      <div className="grid grid-cols-1 divide-y divide-border/70 md:grid-cols-2 md:divide-x md:divide-y-0 xl:grid-cols-4">
-        {signals.map((signal) => (
-          <div key={signal.label} className="p-4">
-            <div className="flex items-center justify-between gap-2">
-              <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-fg-muted">
-                {signal.label}
-              </div>
-              <span
-                className={cn("h-2 w-2 rounded-full", toneDot(signal.tone))}
-              />
-            </div>
-            {loading ? (
-              <Skeleton className="mt-3 h-6 w-32" />
-            ) : (
-              <div className="mt-2 text-sm font-semibold leading-snug text-fg">
-                {signal.value}
-              </div>
-            )}
-            <p className="mt-1.5 text-xs leading-relaxed text-fg-muted">
-              {signal.detail}
-            </p>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function toneDot(tone: WorkspaceSignal["tone"]) {
-  if (tone === "good") return "bg-success";
-  if (tone === "risk") return "bg-danger";
-  if (tone === "watch") return "bg-warning";
-  return "bg-fg-subtle";
-}

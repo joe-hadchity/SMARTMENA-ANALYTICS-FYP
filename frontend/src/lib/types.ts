@@ -498,6 +498,34 @@ export type SentimentBreakdown = {
 
 export type TopPost = SyncedPost & { score: number; engagement: number };
 
+export type IntelligenceProfileMicroDriver = {
+  label: string;
+  componentScore: number;
+  weight: number;
+  impact: number;
+  direction: "positive" | "negative" | "neutral";
+  unavailableReason?: string;
+};
+
+export type IntelligenceProfileScore = {
+  score: number;
+  status: string;
+  confidence: number;
+  explanation: string;
+  suggestedNextMove: string;
+  microDrivers: IntelligenceProfileMicroDriver[];
+};
+
+export type IntelligenceProfileResponse = {
+  workspaceId: string;
+  generatedAt: string;
+  scores: {
+    brandHealth: IntelligenceProfileScore;
+    campaignReadiness: IntelligenceProfileScore;
+    marketMomentum: IntelligenceProfileScore;
+  };
+};
+
 export type Insight = {
   id: string;
   workspace_id: string;
@@ -625,7 +653,43 @@ export type OAuthStatus = {
   graph_version?: string;
   redirect_uri?: string;
   scopes?: string[];
+  scope_packs?: Record<string, string[]>;
   missing?: string[];
+};
+
+export type MetaOAuthDiagnostics = {
+  enabled: boolean;
+  connected: boolean;
+  connection: null | {
+    id: string;
+    status: string;
+    scope: string | null;
+    expires_at: string | null;
+    last_verified_at: string | null;
+    last_error_message: string | null;
+    metadata?: Record<string, unknown>;
+  };
+  requested_scopes: string[];
+  granted_scopes: string[];
+  missing_scopes: string[];
+  pages: number;
+  instagram_accounts: number;
+  accounts: Array<{
+    page_id: string;
+    page_name: string | null;
+    page_category: string | null;
+    tasks: string[];
+    has_page_token: boolean;
+    instagram: {
+      id: string;
+      username?: string;
+      name?: string;
+      profile_picture_url?: string;
+      followers_count?: number;
+      media_count?: number;
+    } | null;
+  }>;
+  warnings: string[];
 };
 
 export type TrendScope = "micro" | "macro";

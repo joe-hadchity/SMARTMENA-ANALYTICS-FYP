@@ -13,12 +13,14 @@ import type {
   HealthCheck,
   HashtagSearchResponse,
   HashtagTrendResponse,
+  IntelligenceProfileResponse,
   TrackedHashtag,
   Insight,
   InboxItem,
   InboxSummary,
   TrendIntelligenceResponse,
   MenaRecommendation,
+  MetaOAuthDiagnostics,
   OAuthStatus,
   Provider,
   PlatformBreakdown,
@@ -248,6 +250,10 @@ export const workspacesApi = {
     (await http.patch(`/workspaces/${id}/business-profile`, input)).data,
   applyBorn2HikeProfile: async (id: string): Promise<BusinessProfile> =>
     (await http.post(`/workspaces/${id}/business-profile/born2hike`, {})).data,
+  intelligenceProfile: async (
+    id: string,
+  ): Promise<IntelligenceProfileResponse> =>
+    (await http.get(`/workspaces/${id}/intelligence-profile`)).data,
   demoBootstrap: async (
     id?: string,
   ): Promise<{
@@ -884,20 +890,29 @@ export const integrationsApi = {
 export const oauthApi = {
   metaStatus: async (): Promise<OAuthStatus> =>
     (await http.get("/oauth/meta/status")).data,
+  metaDiagnostics: async (): Promise<MetaOAuthDiagnostics> =>
+    (await http.get("/oauth/meta/diagnostics")).data,
   metaInit: async (
     redirectAfter?: string,
+    scopePack: "core" | "insights" | "inbox" | "full" = "full",
   ): Promise<{ authorization_url: string }> =>
     (
       await http.get("/oauth/meta/init", {
         params: {
           format: "json",
           redirect_after: redirectAfter,
+          scope_pack: scopePack,
         },
       })
     ).data,
   metaSync: async (): Promise<{
     connection: { id: string; status: string };
-    sync: { accounts_synced: number; pages: number };
+    sync: {
+      accounts_synced: number;
+      pages: number;
+      instagram_accounts?: number;
+      warnings?: string[];
+    };
   }> => (await http.post("/oauth/meta/sync")).data,
 };
 

@@ -22,20 +22,43 @@ const env = require("../../config/env");
 const logger = require("../../utils/logger");
 const db = require("../dbService");
 const oauthConnectionService = require("./oauthConnectionService");
+const { encryptToken } = require("./tokenCrypto");
 
-const SCOPES = [
+const CORE_SCOPES = [
   "public_profile",
-  "email",
   "pages_show_list",
   "pages_read_engagement",
-  "pages_read_user_content",
   "instagram_basic",
-  "instagram_manage_insights",
-  "business_management",
 ];
+
+const INSIGHTS_SCOPES = [
+  ...CORE_SCOPES,
+  "instagram_manage_insights",
+];
+
+const INBOX_SCOPES = [
+  ...INSIGHTS_SCOPES,
+  "instagram_manage_comments",
+  "instagram_manage_messages",
+  "pages_manage_metadata",
+];
+
+const FULL_SCOPES = [
+  ...INBOX_SCOPES,
+  "business_management",
+  "instagram_content_publish",
+];
+
+const SCOPE_PACKS = {
+  core: CORE_SCOPES,
+  insights: INSIGHTS_SCOPES,
+  inbox: INBOX_SCOPES,
+  full: FULL_SCOPES,
+};
+
 const ACTIVE_SCOPES = env.META_OAUTH_SCOPES.length
   ? env.META_OAUTH_SCOPES
-  : SCOPES;
+  : SCOPE_PACKS.full;
 
 const GRAPH_BASE = () =>
   `https://graph.facebook.com/${env.META_GRAPH_VERSION}`;
@@ -57,6 +80,15 @@ function assertEnabled() {
  * `state` must come from oauthConnectionService.createState() so the callback
  * can verify it.
  */
+function uniqueScopes(scopes) {
+  return Array.from(new Set((scopes || []).filter(Boolean)));
+}
+
+function resolveScopes(scopePack) {
+  if (env.META_OAUTH_SCOPES.length) return uniqueScopes(env.META_OAUTH_SCOPES);
+  return uniqueScopes(SCOPE_PACKS[scopePack] || ACTIVE_SCOPES);
+}
+
 function buildAuthorizationUrl({ state, scopes = ACTIVE_SCOPES }) {
   assertEnabled();
   const params = new URLSearchParams({
@@ -64,7 +96,8 @@ function buildAuthorizationUrl({ state, scopes = ACTIVE_SCOPES }) {
     redirect_uri: env.META_REDIRECT_URI,
     response_type: "code",
     state,
-    scope: scopes.join(","),
+    scope: uniqueScopes(scopes).join(","),
+    auth_type: "rerequest",
   });
   return `${OAUTH_BASE()}?${params.toString()}`;
 }
@@ -122,10 +155,39 @@ async function exchangeCodeForToken(code) {
  */
 async function fetchMe(accessToken) {
   const res = await axios.get(`${GRAPH_BASE()}/me`, {
-    params: { fields: "id,name,email", access_token: accessToken },
+    params: { fields: "id,name", access_token: accessToken },
     timeout: 10_000,
   });
   return res.data;
+}
+
+async function debugToken(accessToken) {
+  assertEnabled();
+  const appAccessToken = `${env.META_APP_ID}|${env.META_APP_SECRET}`;
+  const res = await axios.get(`${GRAPH_BASE()}/debug_token`, {
+    params: {
+      input_token: accessToken,
+      access_token: appAccessToken,
+    },
+    timeout: 10_000,
+  });
+  return res.data?.data || {};
+}
+
+async function fetchGrantedPermissions(accessToken) {
+  try {
+    const res = await axios.get(`${GRAPH_BASE()}/me/permissions`, {
+      params: { access_token: accessToken },
+      timeout: 10_000,
+    });
+    const rows = Array.isArray(res.data?.data) ? res.data.data : [];
+    return rows
+      .filter((row) => row.status === "granted")
+      .map((row) => row.permission);
+  } catch (err) {
+    logger.warn?.("[metaOAuth] /me/permissions failed:", err.message);
+    return [];
+  }
 }
 
 /**
@@ -136,7 +198,7 @@ async function fetchAccountsPayload(accessToken) {
   const res = await axios.get(`${GRAPH_BASE()}/me/accounts`, {
     params: {
       fields:
-        "id,name,username,category,picture{url},link,access_token,instagram_business_account{id,username,name,profile_picture_url,followers_count,media_count}",
+        "id,name,username,category,tasks,picture{url},link,access_token,instagram_business_account{id,username,name,profile_picture_url,followers_count,media_count,biography,website},connected_instagram_account{id,username,name,profile_picture_url}",
       access_token: accessToken,
     },
     timeout: 15_000,
@@ -156,6 +218,7 @@ async function syncMetaConnection({ connection }) {
   }
 
   let pages;
+  const warnings = [];
   try {
     pages = await fetchAccountsPayload(plaintext.accessToken);
   } catch (err) {
@@ -170,6 +233,9 @@ async function syncMetaConnection({ connection }) {
   const createdOrUpdated = [];
 
   for (const page of pages) {
+    const pageTokenCiphertext = page.access_token
+      ? encryptToken(page.access_token)
+      : null;
     // Facebook Page row.
     const fbRow = await upsertSocialAccount({
       workspaceId: connection.workspace_id,
@@ -182,12 +248,15 @@ async function syncMetaConnection({ connection }) {
       profileUrl: page.link || null,
       metadata: {
         category: page.category || null,
+        tasks: page.tasks || [],
         page_access_token_present: Boolean(page.access_token),
+        page_access_token_ciphertext: pageTokenCiphertext,
+        graph_source: "facebook_login",
       },
     });
     createdOrUpdated.push(fbRow);
 
-    const ig = page.instagram_business_account;
+    const ig = page.instagram_business_account || page.connected_instagram_account;
     if (ig?.id) {
       const igRow = await upsertSocialAccount({
         workspaceId: connection.workspace_id,
@@ -201,18 +270,32 @@ async function syncMetaConnection({ connection }) {
         metadata: {
           followers_count: ig.followers_count ?? null,
           media_count: ig.media_count ?? null,
+          biography: ig.biography || null,
+          website: ig.website || null,
           linked_page_id: page.id,
+          linked_page_name: page.name || null,
+          page_access_token_present: Boolean(page.access_token),
+          page_access_token_ciphertext: pageTokenCiphertext,
+          graph_source: page.instagram_business_account
+            ? "instagram_business_account"
+            : "connected_instagram_account",
         },
       });
       createdOrUpdated.push(igRow);
+    } else {
+      warnings.push(`page_without_linked_instagram:${page.name || page.id}`);
     }
   }
 
   return {
     connection_id: connection.id,
     pages: pages.length,
+    instagram_accounts: createdOrUpdated.filter(
+      (account) => account.provider === "meta_instagram",
+    ).length,
     accounts_synced: createdOrUpdated.length,
     accounts: createdOrUpdated,
+    warnings,
   };
 }
 
@@ -269,16 +352,20 @@ async function upsertSocialAccount({
  * Full init flow: caller passes workspaceId + redirectAfter, we persist an
  * oauth_states row and return the URL the browser should jump to.
  */
-async function startAuthorization({ workspaceId, redirectAfter }) {
+async function startAuthorization({ workspaceId, redirectAfter, scopePack = "full" }) {
   assertEnabled();
+  const scopes = resolveScopes(scopePack);
   const state = await oauthConnectionService.createState({
     workspaceId,
     provider: "meta",
     redirectAfter,
+    metadata: { scope_pack: scopePack, requested_scopes: scopes },
   });
   return {
-    url: buildAuthorizationUrl({ state }),
+    url: buildAuthorizationUrl({ state, scopes }),
     state,
+    scopes,
+    scope_pack: scopePack,
   };
 }
 
@@ -300,12 +387,15 @@ async function handleCallback({ code, state }) {
   } catch (err) {
     logger.warn?.("[metaOAuth] /me failed:", err.message);
   }
+  const tokenDebug = await safeGraph(() => debugToken(token.accessToken), {});
+  const grantedScopes = await fetchGrantedPermissions(token.accessToken);
+  const requestedScopes = stateRow.metadata?.requested_scopes || ACTIVE_SCOPES;
 
   const connection = await oauthConnectionService.upsertConnection({
     workspaceId: stateRow.workspace_id,
     provider: "meta",
     externalUserId: me.id,
-    scope: ACTIVE_SCOPES.join(" "),
+    scope: uniqueScopes(grantedScopes.length ? grantedScopes : requestedScopes).join(" "),
     accessToken: token.accessToken,
     refreshToken: null,
     tokenType: token.tokenType,
@@ -314,6 +404,13 @@ async function handleCallback({ code, state }) {
       user_name: me.name || null,
       user_email: me.email || null,
       graph_version: env.META_GRAPH_VERSION,
+      scope_pack: stateRow.metadata?.scope_pack || "full",
+      requested_scopes: requestedScopes,
+      granted_scopes: grantedScopes,
+      declined_scopes: requestedScopes.filter(
+        (scope) => !grantedScopes.includes(scope),
+      ),
+      token_debug: sanitizeTokenDebug(tokenDebug),
     },
   });
 
@@ -326,14 +423,111 @@ async function handleCallback({ code, state }) {
   };
 }
 
+async function getDiagnostics({ workspaceId }) {
+  const connection = await oauthConnectionService.getConnectionByProvider({
+    workspaceId,
+    provider: "meta",
+  });
+  if (!connection) {
+    return {
+      connected: false,
+      connection: null,
+      requested_scopes: ACTIVE_SCOPES,
+      granted_scopes: [],
+      missing_scopes: ACTIVE_SCOPES,
+      pages: 0,
+      instagram_accounts: 0,
+      accounts: [],
+      warnings: ["no_active_meta_oauth_connection"],
+    };
+  }
+
+  const plaintext = oauthConnectionService.extractPlaintext(connection);
+  const tokenDebug = await safeGraph(
+    () => debugToken(plaintext.accessToken),
+    connection.metadata?.token_debug || {},
+  );
+  const grantedScopes = await fetchGrantedPermissions(plaintext.accessToken);
+  const requestedScopes = connection.metadata?.requested_scopes || ACTIVE_SCOPES;
+  let syncPreview = null;
+  const warnings = [];
+  try {
+    const pages = await fetchAccountsPayload(plaintext.accessToken);
+    syncPreview = {
+      pages: pages.length,
+      instagram_accounts: pages.filter(
+        (page) => page.instagram_business_account || page.connected_instagram_account,
+      ).length,
+      accounts: pages.map((page) => ({
+        page_id: page.id,
+        page_name: page.name || null,
+        page_category: page.category || null,
+        tasks: page.tasks || [],
+        has_page_token: Boolean(page.access_token),
+        instagram:
+          page.instagram_business_account || page.connected_instagram_account || null,
+      })),
+    };
+  } catch (err) {
+    warnings.push(
+      `graph_discovery_failed:${err.response?.data?.error?.message || err.message}`,
+    );
+  }
+
+  return {
+    connected: connection.status === "active",
+    connection: oauthConnectionService.sanitizeConnection({
+      ...connection,
+      metadata: {
+        ...(connection.metadata || {}),
+        token_debug: sanitizeTokenDebug(tokenDebug),
+      },
+    }),
+    requested_scopes: requestedScopes,
+    granted_scopes: grantedScopes,
+    missing_scopes: requestedScopes.filter((scope) => !grantedScopes.includes(scope)),
+    pages: syncPreview?.pages || 0,
+    instagram_accounts: syncPreview?.instagram_accounts || 0,
+    accounts: syncPreview?.accounts || [],
+    warnings,
+  };
+}
+
+async function safeGraph(fn, fallback) {
+  try {
+    return await fn();
+  } catch (err) {
+    logger.warn?.("[metaOAuth] graph probe failed:", err.message);
+    return fallback;
+  }
+}
+
+function sanitizeTokenDebug(debug = {}) {
+  return {
+    app_id: debug.app_id || null,
+    type: debug.type || null,
+    application: debug.application || null,
+    data_access_expires_at: debug.data_access_expires_at || null,
+    expires_at: debug.expires_at || null,
+    is_valid: debug.is_valid ?? null,
+    issued_at: debug.issued_at || null,
+    scopes: debug.scopes || [],
+    user_id: debug.user_id || null,
+  };
+}
+
 module.exports = {
   SCOPES: ACTIVE_SCOPES,
+  SCOPE_PACKS,
   GRAPH_VERSION: env.META_GRAPH_VERSION,
   buildAuthorizationUrl,
   exchangeCodeForToken,
   fetchMe,
+  debugToken,
+  fetchGrantedPermissions,
   fetchAccountsPayload,
   syncMetaConnection,
   startAuthorization,
   handleCallback,
+  getDiagnostics,
 };
