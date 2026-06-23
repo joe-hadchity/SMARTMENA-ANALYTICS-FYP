@@ -1,0 +1,389 @@
+- generic:
+  - generic:
+    - generic:
+      - complementary:
+        - generic:
+          - link:
+            - /url: /
+            - generic:
+              - img
+              - generic: S
+            - generic:
+              - generic: SmartMENA
+              - generic: analytics ✦ MENA
+          - button:
+            - img
+        - generic:
+          - button:
+            - generic: B
+            - generic:
+              - generic: Born2Hike
+              - generic: LB
+        - navigation:
+          - generic:
+            - generic: Today
+            - generic:
+              - link:
+                - /url: /
+                - img
+                - generic: Overview
+                - generic: G O
+          - generic:
+            - generic: Publish
+            - generic:
+              - link:
+                - /url: /content
+                - img
+                - generic: Content
+                - generic: G P
+              - link:
+                - /url: /campaigns
+                - img
+                - generic: Campaigns
+              - link:
+                - /url: /advisor
+                - img
+                - generic: Advisor
+          - generic:
+            - generic: Analyze
+            - generic:
+              - link:
+                - /url: /audience
+                - img
+                - generic: Audience
+                - generic: G A
+              - link:
+                - /url: /trend-intelligence
+                - img
+                - generic: Trend Intelligence
+                - generic: G T
+              - link:
+                - /url: /competitors
+                - img
+                - generic: Competitors
+                - generic: G X
+          - generic:
+            - generic: Connect
+            - generic:
+              - link:
+                - /url: /connections
+                - img
+                - generic: Connections
+                - generic: G C
+        - generic:
+          - button [expanded]:
+            - generic: B
+            - generic:
+              - generic: Born2Hike Demo User
+              - generic: born2hike@smartmena.local
+    - generic:
+      - banner:
+        - navigation:
+          - generic:
+            - link:
+              - /url: /
+              - text: SmartMENA
+            - img
+          - generic:
+            - generic: audience
+        - button:
+          - img
+          - generic: Search or run a command
+          - generic:
+            - generic: ⌘
+            - generic: K
+        - generic: Backend OK
+        - button:
+          - img
+        - button:
+          - img
+        - button:
+          - img
+        - button:
+          - img
+      - main:
+        - generic:
+          - generic:
+            - generic:
+              - generic:
+                - paragraph: Audience intelligence
+                - heading [level=1]: Audience
+                - paragraph:
+                  - text: "@borntohike ·"
+                  - generic: Last sync Jun 19, 2026, 10:57 AM
+              - generic:
+                - generic:
+                  - button: 7d
+                  - button: 30d
+                  - button: 90d
+                - button:
+                  - img
+                  - text: Export
+                - button:
+                  - img
+                  - text: Refresh
+            - generic:
+              - generic:
+                - generic:
+                  - generic:
+                    - img
+                  - paragraph: Audience grew 2.3% over the last 90 days.
+              - generic:
+                - generic:
+                  - generic:
+                    - img
+                  - paragraph: Peak engagement happens at 7PM — schedule key posts in the evening.
+              - generic:
+                - generic:
+                  - generic:
+                    - img
+                  - paragraph: Reels drive your highest engagement (109 per post).
+              - generic:
+                - generic:
+                  - generic:
+                    - img
+                  - paragraph: Captions skew strongly positive (90%) — keep the upbeat, community-led voice.
+            - generic:
+              - generic:
+                - paragraph: Followers
+                - generic:
+                  - generic: 3,384
+                  - generic:
+                    - img
+                    - text: "+111"
+              - generic:
+                - paragraph: Reach
+                - generic:
+                  - generic: 27,921
+                - paragraph: 29 posts
+              - generic:
+                - paragraph: Engaged accounts
+                - generic:
+                  - generic: 1,834
+              - generic:
+                - paragraph: Profile views
+                - generic:
+                  - generic: "0"
+              - generic:
+                - paragraph: Engagement rate
+                - generic:
+                  - generic: 6.57%
+                - paragraph: engaged / reach
+            - generic:
+              - generic:
+                - heading [level=2]: Demographics
+                - paragraph: Who follows you, by share of audience
+              - generic:
+                - generic:
+                  - generic:
+                    - generic:
+                      - img
+                    - heading [level=3]: Gender distribution
+                  - generic:
+                    - generic:
+                      - img
+                      - paragraph: Not enough Meta data yet for this chart.
+                      - paragraph: Refresh after publishing more posts.
+                - generic:
+                  - generic:
+                    - generic:
+                      - img
+                    - heading [level=3]: Age distribution
+                  - generic:
+                    - generic:
+                      - img
+                      - paragraph: Not enough Meta data yet for this chart.
+                      - paragraph: Refresh after publishing more posts.
+            - generic:
+              - generic:
+                - heading [level=2]: Geography
+                - paragraph: Where your reach is concentrated
+              - generic:
+                - generic:
+                  - generic:
+                    - generic:
+                      - img
+                    - heading [level=3]: Top cities
+                  - generic:
+                    - generic:
+                      - img
+                      - paragraph: Not enough Meta data yet for this chart.
+                      - paragraph: Refresh after publishing more posts.
+                - generic:
+                  - generic:
+                    - generic:
+                      - img
+                    - heading [level=3]: Top countries
+                  - generic:
+                    - generic:
+                      - img
+                      - paragraph: Not enough Meta data yet for this chart.
+                      - paragraph: Refresh after publishing more posts.
+            - generic:
+              - generic:
+                - heading [level=2]: Activity & growth
+                - paragraph: When followers engage and how the audience trends
+              - generic:
+                - generic:
+                  - generic:
+                    - generic:
+                      - img
+                    - heading [level=3]: Follower growth
+                  - generic:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img:
+                            - generic:
+                              - generic:
+                                - generic:
+                                  - generic: May 7
+                                - generic:
+                                  - generic: May 7
+                                - generic:
+                                  - generic: May 7
+                                - generic:
+                                  - generic: May 7
+                                - generic:
+                                  - generic: May 11
+                                - generic:
+                                  - generic: May 12
+                                - generic:
+                                  - generic: Jun 18
+                                - generic:
+                                  - generic: Jun 18
+                                - generic:
+                                  - generic: Jun 18
+                                - generic:
+                                  - generic: Jun 19
+                            - generic:
+                              - generic:
+                                - generic:
+                                  - generic: "3270"
+                                - generic:
+                                  - generic: "3300"
+                                - generic:
+                                  - generic: "3330"
+                                - generic:
+                                  - generic: "3360"
+                                - generic:
+                                  - generic: "3390"
+                    - paragraph: Net change of +111 followers (3.4%) in window.
+                - generic:
+                  - generic:
+                    - generic:
+                      - img
+                    - heading [level=3]: Active hours
+                    - generic: Inferred
+                  - generic:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img:
+                            - generic:
+                              - generic:
+                                - generic:
+                                  - generic: 12AM
+                                - generic:
+                                  - generic: 6AM
+                                - generic:
+                                  - generic: 12PM
+                                - generic:
+                                  - generic: 6PM
+                    - paragraph: Peak window is 7PM (evening).
+            - generic:
+              - generic:
+                - heading [level=2]: Content & audience response
+                - paragraph: What you post, how it sounds, and how people react
+              - generic:
+                - generic:
+                  - generic:
+                    - generic:
+                      - img
+                    - heading [level=3]: Format performance
+                  - generic:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img:
+                            - generic:
+                              - generic:
+                                - generic:
+                                  - generic: Reel
+                                - generic:
+                                  - generic: Carousel
+                                - generic:
+                                  - generic: Image
+                            - generic:
+                              - generic:
+                                - generic:
+                                  - generic: "0"
+                                - generic:
+                                  - generic: "30"
+                                - generic:
+                                  - generic: "60"
+                                - generic:
+                                  - generic: "90"
+                                - generic:
+                                  - generic: "120"
+                    - paragraph: Reels drive 109 avg engagement.
+                - generic:
+                  - generic:
+                    - generic:
+                      - img
+                    - heading [level=3]: Audience response sentiment
+                  - generic:
+                    - generic:
+                      - img
+                      - paragraph: Not enough Meta data yet for this chart.
+                      - paragraph: Refresh after publishing more posts.
+                - generic:
+                  - generic:
+                    - generic:
+                      - img
+                    - heading [level=3]: Caption tone
+                    - generic: 29 captions
+                  - generic:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic:
+                            - generic:
+                              - img:
+                                - generic:
+                                  - generic:
+                                    - generic:
+                                      - img
+                                    - generic:
+                                      - img
+                                    - generic:
+                                      - img
+                        - list:
+                          - listitem: Caption fallback
+                          - listitem:
+                            - generic:
+                              - generic: 🏞️ Join us this Sunday for a beautiful mountain adventure crossing the hidden valleys and cedar forests of Tannourine, starting from Chatine and ending inside one of Lebanon’s mos
+                          - listitem:
+                            - generic:
+                              - generic: "Saydet El Habes: Highlights!"
+                          - listitem:
+                            - generic:
+                              - generic: 🏞️ Join us this Sunday for a scenic mountain adventure connecting Wadi Chatine, Baatara Gorge, Saydet El Karn, Laqlouq, and Akoura (Saydet El Hebes) along one of the most beautifu
+                          - listitem:
+                            - generic:
+                              - generic: "Qornayel Lakes: Highlights! FOLLOW US FOR MORE EPIC HIKES🥾 #born2hike #explorelebanon #hiking #born2hiketeam #lebanonhikes"
+                    - paragraph: 90% of captions read as positive - this reflects your brand tone.
+            - group:
+              - generic: Data diagnostics (5)
+  - region "Notifications alt+T"
+  - alert
+  - generic: "0"
+  - menu "B Born2Hike Demo User born2hike@smartmena.local" [active] [ref=e494]:
+    - generic [ref=e495]: Account
+    - separator [ref=e496]
+    - menuitem "Settings" [ref=e497] [cursor=pointer]:
+      - img [ref=e498]
+      - text: Settings
+    - menuitem "Sign out" [ref=e501] [cursor=pointer]:
+      - img [ref=e502]
+      - text: Sign out

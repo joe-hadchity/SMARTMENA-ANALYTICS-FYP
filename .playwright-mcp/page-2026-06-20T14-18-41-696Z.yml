@@ -1,0 +1,293 @@
+- generic [ref=e1]:
+  - generic [ref=e33]:
+    - complementary [ref=e35]:
+      - generic [ref=e36]:
+        - link "S SmartMENA analytics ✦ MENA" [ref=e37] [cursor=pointer]:
+          - /url: /
+          - generic [ref=e38]:
+            - img [ref=e39]
+            - generic [ref=e42]: S
+          - generic [ref=e43]:
+            - generic [ref=e44]: SmartMENA
+            - generic [ref=e45]: analytics ✦ MENA
+        - button "Collapse sidebar" [ref=e46] [cursor=pointer]:
+          - img [ref=e47]
+      - button "B Born2Hike LB" [ref=e51] [cursor=pointer]:
+        - generic [ref=e52]: B
+        - generic [ref=e53]:
+          - generic [ref=e54]: Born2Hike
+          - generic [ref=e55]: LB
+      - navigation [ref=e56]:
+        - generic [ref=e57]:
+          - generic [ref=e58]: Today
+          - link "Overview G O" [ref=e60] [cursor=pointer]:
+            - /url: /
+            - img [ref=e61]
+            - generic [ref=e63]: Overview
+            - generic [ref=e64]: G O
+        - generic [ref=e65]:
+          - generic [ref=e66]: Publish
+          - generic [ref=e67]:
+            - link "Content G P" [ref=e68] [cursor=pointer]:
+              - /url: /content
+              - img [ref=e69]
+              - generic [ref=e71]: Content
+              - generic [ref=e72]: G P
+            - link "Campaigns" [ref=e73] [cursor=pointer]:
+              - /url: /campaigns
+              - img [ref=e74]
+              - generic [ref=e77]: Campaigns
+            - link "Advisor" [ref=e78] [cursor=pointer]:
+              - /url: /advisor
+              - img [ref=e79]
+              - generic [ref=e81]: Advisor
+        - generic [ref=e82]:
+          - generic [ref=e83]: Analyze
+          - generic [ref=e84]:
+            - link "Audience G A" [active] [ref=e85] [cursor=pointer]:
+              - /url: /audience
+              - img [ref=e86]
+              - generic [ref=e91]: Audience
+              - generic [ref=e92]: G A
+            - link "Trend Intelligence G T" [ref=e93] [cursor=pointer]:
+              - /url: /trend-intelligence
+              - img [ref=e94]
+              - generic [ref=e96]: Trend Intelligence
+              - generic [ref=e97]: G T
+            - link "Competitors G X" [ref=e98] [cursor=pointer]:
+              - /url: /competitors
+              - img [ref=e99]
+              - generic [ref=e108]: Competitors
+              - generic [ref=e109]: G X
+        - generic [ref=e110]:
+          - generic [ref=e111]: Connect
+          - link "Connections G C" [ref=e113] [cursor=pointer]:
+            - /url: /connections
+            - img [ref=e114]
+            - generic [ref=e120]: Connections
+            - generic [ref=e121]: G C
+      - button "B Born2Hike Demo User born2hike@smartmena.local" [ref=e123] [cursor=pointer]:
+        - generic [ref=e124]: B
+        - generic [ref=e125]:
+          - generic [ref=e126]: Born2Hike Demo User
+          - generic [ref=e127]: born2hike@smartmena.local
+    - generic [ref=e128]:
+      - banner [ref=e129]:
+        - navigation "Breadcrumb" [ref=e130]:
+          - generic [ref=e131]:
+            - link "SmartMENA" [ref=e396] [cursor=pointer]:
+              - /url: /
+            - img [ref=e397]
+          - generic [ref=e400]: audience
+        - button "Search or run a command ⌘ K" [ref=e137] [cursor=pointer]:
+          - img [ref=e138]
+          - generic [ref=e141]: Search or run a command
+          - generic [ref=e142]:
+            - generic [ref=e143]: ⌘
+            - generic [ref=e144]: K
+        - generic [ref=e145]: Backend OK
+        - button "Language" [ref=e147] [cursor=pointer]:
+          - img [ref=e148]
+        - button "Toggle theme" [ref=e152] [cursor=pointer]:
+          - img [ref=e153]
+        - button "Account" [ref=e159] [cursor=pointer]:
+          - img [ref=e160]
+        - button "Notifications" [ref=e164] [cursor=pointer]:
+          - img [ref=e165]
+      - main [ref=e168]:
+        - generic [ref=e3078]:
+          - generic [ref=e3079]:
+            - generic [ref=e3080]:
+              - paragraph [ref=e3081]: Audience intelligence
+              - heading "Audience" [level=1] [ref=e3082]
+              - paragraph [ref=e3083]:
+                - text: "@borntohike ·"
+                - generic [ref=e3084]: Last sync Jun 19, 2026, 10:57 AM
+            - generic [ref=e3085]:
+              - generic [ref=e3086]:
+                - button "7d" [ref=e3087] [cursor=pointer]
+                - button "30d" [ref=e3088] [cursor=pointer]
+                - button "90d" [ref=e3089] [cursor=pointer]
+              - button "Export" [ref=e3090] [cursor=pointer]:
+                - img [ref=e3091]
+                - text: Export
+              - button "Refresh" [ref=e3094] [cursor=pointer]:
+                - img [ref=e3095]
+                - text: Refresh
+          - generic [ref=e3100]:
+            - generic [ref=e3102]:
+              - img [ref=e3104]
+              - paragraph [ref=e3106]: Audience grew 2.3% over the last 90 days.
+            - generic [ref=e3108]:
+              - img [ref=e3110]
+              - paragraph [ref=e3112]: Peak engagement happens at 7PM — schedule key posts in the evening.
+            - generic [ref=e3114]:
+              - img [ref=e3116]
+              - paragraph [ref=e3118]: Reels drive your highest engagement (109 per post).
+            - generic [ref=e3120]:
+              - img [ref=e3122]
+              - paragraph [ref=e3124]: Captions skew strongly positive (90%) — keep the upbeat, community-led voice.
+          - generic [ref=e3125]:
+            - generic [ref=e3126]:
+              - paragraph [ref=e3127]: Followers
+              - generic [ref=e3128]:
+                - generic [ref=e3129]: 3,384
+                - generic [ref=e3130]:
+                  - img [ref=e3131]
+                  - text: "+111"
+            - generic [ref=e3134]:
+              - paragraph [ref=e3135]: Reach
+              - generic [ref=e3137]: 27,921
+              - paragraph [ref=e3138]: 29 posts
+            - generic [ref=e3139]:
+              - paragraph [ref=e3140]: Engaged accounts
+              - generic [ref=e3142]: 1,834
+            - generic [ref=e3143]:
+              - paragraph [ref=e3144]: Profile views
+              - generic [ref=e3146]: "0"
+            - generic [ref=e3147]:
+              - paragraph [ref=e3148]: Engagement rate
+              - generic [ref=e3150]: 6.57%
+              - paragraph [ref=e3151]: engaged / reach
+          - generic [ref=e3152]:
+            - generic [ref=e3153]:
+              - heading "Demographics" [level=2] [ref=e3154]
+              - paragraph [ref=e3155]: Who follows you, by share of audience
+            - generic [ref=e3156]:
+              - generic [ref=e3157]:
+                - generic [ref=e3158]:
+                  - img [ref=e3160]
+                  - heading "Gender distribution" [level=3] [ref=e3165]
+                - generic [ref=e3167]:
+                  - img [ref=e3168]
+                  - paragraph [ref=e3170]: Not enough Meta data yet for this chart.
+                  - paragraph [ref=e3171]: Refresh after publishing more posts.
+              - generic [ref=e3172]:
+                - generic [ref=e3173]:
+                  - img [ref=e3175]
+                  - heading "Age distribution" [level=3] [ref=e3177]
+                - generic [ref=e3179]:
+                  - img [ref=e3180]
+                  - paragraph [ref=e3182]: Not enough Meta data yet for this chart.
+                  - paragraph [ref=e3183]: Refresh after publishing more posts.
+          - generic [ref=e3184]:
+            - generic [ref=e3185]:
+              - heading "Geography" [level=2] [ref=e3186]
+              - paragraph [ref=e3187]: Where your reach is concentrated
+            - generic [ref=e3188]:
+              - generic [ref=e3189]:
+                - generic [ref=e3190]:
+                  - img [ref=e3192]
+                  - heading "Top cities" [level=3] [ref=e3195]
+                - generic [ref=e3197]:
+                  - img [ref=e3198]
+                  - paragraph [ref=e3200]: Not enough Meta data yet for this chart.
+                  - paragraph [ref=e3201]: Refresh after publishing more posts.
+              - generic [ref=e3202]:
+                - generic [ref=e3203]:
+                  - img [ref=e3205]
+                  - heading "Top countries" [level=3] [ref=e3210]
+                - generic [ref=e3212]:
+                  - img [ref=e3213]
+                  - paragraph [ref=e3215]: Not enough Meta data yet for this chart.
+                  - paragraph [ref=e3216]: Refresh after publishing more posts.
+          - generic [ref=e3217]:
+            - generic [ref=e3218]:
+              - heading "Activity & growth" [level=2] [ref=e3219]
+              - paragraph [ref=e3220]: When followers engage and how the audience trends
+            - generic [ref=e3221]:
+              - generic [ref=e3222]:
+                - generic [ref=e3223]:
+                  - img [ref=e3225]
+                  - heading "Follower growth" [level=3] [ref=e3228]
+                - generic [ref=e3229]:
+                  - img [ref=e3233]:
+                    - generic [ref=e3237]:
+                      - generic [ref=e3239]: May 7
+                      - generic [ref=e3241]: May 7
+                      - generic [ref=e3243]: May 7
+                      - generic [ref=e3245]: May 7
+                      - generic [ref=e3247]: May 11
+                      - generic [ref=e3249]: May 12
+                      - generic [ref=e3251]: Jun 18
+                      - generic [ref=e3253]: Jun 18
+                      - generic [ref=e3255]: Jun 18
+                      - generic [ref=e3257]: Jun 19
+                    - generic [ref=e3259]:
+                      - generic [ref=e3261]: "3270"
+                      - generic [ref=e3263]: "3300"
+                      - generic [ref=e3265]: "3330"
+                      - generic [ref=e3267]: "3360"
+                      - generic [ref=e3269]: "3390"
+                  - paragraph [ref=e3276]: Net change of +111 followers (3.4%) in window.
+              - generic [ref=e3277]:
+                - generic [ref=e3278]:
+                  - img [ref=e3280]
+                  - heading "Active hours" [level=3] [ref=e3283]
+                  - generic [ref=e3284]: Inferred
+                - generic [ref=e3285]:
+                  - img [ref=e3289]:
+                    - generic [ref=e3293]:
+                      - generic [ref=e3295]: 12AM
+                      - generic [ref=e3297]: 6AM
+                      - generic [ref=e3299]: 12PM
+                      - generic [ref=e3301]: 6PM
+                  - paragraph [ref=e3325]: Peak window is 7PM (evening).
+          - generic [ref=e3326]:
+            - generic [ref=e3327]:
+              - heading "Content & audience response" [level=2] [ref=e3328]
+              - paragraph [ref=e3329]: What you post, how it sounds, and how people react
+            - generic [ref=e3330]:
+              - generic [ref=e3331]:
+                - generic [ref=e3332]:
+                  - img [ref=e3334]
+                  - heading "Format performance" [level=3] [ref=e3336]
+                - generic [ref=e3337]:
+                  - img [ref=e3341]:
+                    - generic [ref=e3345]:
+                      - generic [ref=e3347]: Reel
+                      - generic [ref=e3349]: Carousel
+                      - generic [ref=e3351]: Image
+                    - generic [ref=e3353]:
+                      - generic [ref=e3355]: "0"
+                      - generic [ref=e3357]: "30"
+                      - generic [ref=e3359]: "60"
+                      - generic [ref=e3361]: "90"
+                      - generic [ref=e3363]: "120"
+                  - paragraph [ref=e3373]: Reels drive 109 avg engagement.
+              - generic [ref=e3374]:
+                - generic [ref=e3375]:
+                  - img [ref=e3377]
+                  - heading "Audience response sentiment" [level=3] [ref=e3379]
+                - generic [ref=e3381]:
+                  - img [ref=e3382]
+                  - paragraph [ref=e3384]: Not enough Meta data yet for this chart.
+                  - paragraph [ref=e3385]: Refresh after publishing more posts.
+              - generic [ref=e3386]:
+                - generic [ref=e3387]:
+                  - img [ref=e3389]
+                  - heading "Caption tone" [level=3] [ref=e3391]
+                  - generic [ref=e3392]: 29 captions
+                - generic [ref=e3393]:
+                  - generic [ref=e3395]:
+                    - img [ref=e3399]:
+                      - generic [ref=e3401]:
+                        - img [ref=e3403]
+                        - img [ref=e3405]
+                        - img [ref=e3407]
+                    - list [ref=e3408]:
+                      - listitem [ref=e3409]: Caption fallback
+                      - listitem [ref=e3410]:
+                        - generic [ref=e3413]: 🏞️ Join us this Sunday for a beautiful mountain adventure crossing the hidden valleys and cedar forests of Tannourine, starting from Chatine and ending inside one of Lebanon’s mos
+                      - listitem [ref=e3414]:
+                        - generic [ref=e3417]: "Saydet El Habes: Highlights!"
+                      - listitem [ref=e3418]:
+                        - generic [ref=e3421]: 🏞️ Join us this Sunday for a scenic mountain adventure connecting Wadi Chatine, Baatara Gorge, Saydet El Karn, Laqlouq, and Akoura (Saydet El Hebes) along one of the most beautifu
+                      - listitem [ref=e3422]:
+                        - generic [ref=e3425]: "Qornayel Lakes: Highlights! FOLLOW US FOR MORE EPIC HIKES🥾 #born2hike #explorelebanon #hiking #born2hiketeam #lebanonhikes"
+                  - paragraph [ref=e3426]: 90% of captions read as positive - this reflects your brand tone.
+          - group [ref=e3427]:
+            - generic "Data diagnostics (5)" [ref=e3428] [cursor=pointer]
+  - region "Notifications alt+T"
+  - alert [ref=e32]
+  - generic [ref=e3429]: "0"

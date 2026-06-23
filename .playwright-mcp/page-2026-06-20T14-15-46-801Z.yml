@@ -1,0 +1,158 @@
+- generic [ref=e1]:
+  - generic [ref=e33]:
+    - complementary [ref=e35]:
+      - generic [ref=e36]:
+        - link "S SmartMENA analytics ✦ MENA" [ref=e37] [cursor=pointer]:
+          - /url: /
+          - generic [ref=e38]:
+            - img [ref=e39]
+            - generic [ref=e42]: S
+          - generic [ref=e43]:
+            - generic [ref=e44]: SmartMENA
+            - generic [ref=e45]: analytics ✦ MENA
+        - button "Collapse sidebar" [ref=e46] [cursor=pointer]:
+          - img [ref=e47]
+      - button "B Born2Hike LB" [ref=e51] [cursor=pointer]:
+        - generic [ref=e52]: B
+        - generic [ref=e53]:
+          - generic [ref=e54]: Born2Hike
+          - generic [ref=e55]: LB
+      - navigation [ref=e56]:
+        - generic [ref=e57]:
+          - generic [ref=e58]: Today
+          - link "Overview G O" [ref=e60] [cursor=pointer]:
+            - /url: /
+            - img [ref=e61]
+            - generic [ref=e63]: Overview
+            - generic [ref=e64]: G O
+        - generic [ref=e65]:
+          - generic [ref=e66]: Publish
+          - generic [ref=e67]:
+            - link "Content G P" [active] [ref=e68] [cursor=pointer]:
+              - /url: /content
+              - img [ref=e69]
+              - generic [ref=e71]: Content
+              - generic [ref=e72]: G P
+            - link "Campaigns" [ref=e73] [cursor=pointer]:
+              - /url: /campaigns
+              - img [ref=e74]
+              - generic [ref=e77]: Campaigns
+            - link "Advisor" [ref=e78] [cursor=pointer]:
+              - /url: /advisor
+              - img [ref=e79]
+              - generic [ref=e81]: Advisor
+        - generic [ref=e82]:
+          - generic [ref=e83]: Analyze
+          - generic [ref=e84]:
+            - link "Audience G A" [ref=e85] [cursor=pointer]:
+              - /url: /audience
+              - img [ref=e86]
+              - generic [ref=e91]: Audience
+              - generic [ref=e92]: G A
+            - link "Trend Intelligence G T" [ref=e93] [cursor=pointer]:
+              - /url: /trend-intelligence
+              - img [ref=e94]
+              - generic [ref=e96]: Trend Intelligence
+              - generic [ref=e97]: G T
+            - link "Competitors G X" [ref=e98] [cursor=pointer]:
+              - /url: /competitors
+              - img [ref=e99]
+              - generic [ref=e108]: Competitors
+              - generic [ref=e109]: G X
+        - generic [ref=e110]:
+          - generic [ref=e111]: Connect
+          - link "Connections G C" [ref=e113] [cursor=pointer]:
+            - /url: /connections
+            - img [ref=e114]
+            - generic [ref=e120]: Connections
+            - generic [ref=e121]: G C
+      - button "B Born2Hike Demo User born2hike@smartmena.local" [ref=e123] [cursor=pointer]:
+        - generic [ref=e124]: B
+        - generic [ref=e125]:
+          - generic [ref=e126]: Born2Hike Demo User
+          - generic [ref=e127]: born2hike@smartmena.local
+    - generic [ref=e128]:
+      - banner [ref=e129]:
+        - navigation "Breadcrumb" [ref=e130]:
+          - generic [ref=e131]:
+            - link "SmartMENA" [ref=e396] [cursor=pointer]:
+              - /url: /
+            - img [ref=e397]
+          - generic [ref=e400]: Content
+        - button "Search or run a command ⌘ K" [ref=e137] [cursor=pointer]:
+          - img [ref=e138]
+          - generic [ref=e141]: Search or run a command
+          - generic [ref=e142]:
+            - generic [ref=e143]: ⌘
+            - generic [ref=e144]: K
+        - generic [ref=e145]: Backend OK
+        - button "Language" [ref=e147] [cursor=pointer]:
+          - img [ref=e148]
+        - button "Toggle theme" [ref=e152] [cursor=pointer]:
+          - img [ref=e153]
+        - button "Account" [ref=e159] [cursor=pointer]:
+          - img [ref=e160]
+        - button "Notifications" [ref=e164] [cursor=pointer]:
+          - img [ref=e165]
+      - main [ref=e168]:
+        - generic [ref=e401]:
+          - generic [ref=e402]:
+            - generic [ref=e403]:
+              - generic [ref=e404]: Publishing workspace
+              - heading "Content" [level=1] [ref=e405]
+              - paragraph [ref=e406]: Manage published posts, scheduled content, drafts, and calendar timing from one place.
+            - generic [ref=e408]:
+              - button "Refresh posts" [ref=e409] [cursor=pointer]:
+                - img [ref=e410]
+                - text: Refresh posts
+              - button "Run publish worker now" [ref=e415] [cursor=pointer]:
+                - img [ref=e416]
+                - text: Run publish worker now
+              - button "New scheduled post" [ref=e419] [cursor=pointer]:
+                - img [ref=e420]
+                - text: New scheduled post
+          - generic [ref=e423]:
+            - generic [ref=e424]:
+              - button "Grid" [ref=e425] [cursor=pointer]:
+                - img [ref=e426]
+                - text: Grid
+              - button "List" [ref=e431] [cursor=pointer]:
+                - img [ref=e432]
+                - text: List
+              - button "Calendar" [ref=e433] [cursor=pointer]:
+                - img [ref=e434]
+                - text: Calendar
+            - generic [ref=e436]:
+              - generic [ref=e437]:
+                - generic [ref=e438]: Published
+                - generic [ref=e439]: "0"
+              - generic [ref=e440]:
+                - generic [ref=e441]: Scheduled / drafts
+                - generic [ref=e442]: "0"
+              - generic [ref=e443]:
+                - generic [ref=e444]: In this view
+                - generic [ref=e445]: "0"
+          - generic [ref=e447]:
+            - generic [ref=e448]:
+              - generic [ref=e449]: Search
+              - generic [ref=e450]:
+                - img [ref=e451]
+                - textbox "Search" [ref=e454]:
+                  - /placeholder: Caption, hashtag, account...
+            - generic [ref=e455] [cursor=pointer]:
+              - generic [ref=e456]: Profiles
+              - combobox "Profiles" [ref=e458]:
+                - option "Viewing all" [selected]
+            - generic [ref=e459] [cursor=pointer]:
+              - generic [ref=e460]: Content type
+              - combobox "Content type" [ref=e462]:
+                - option "Viewing all" [selected]
+            - generic [ref=e463] [cursor=pointer]:
+              - generic [ref=e464]: Tags
+              - combobox "Tags" [ref=e466]:
+                - option "Viewing all" [selected]
+          - generic [ref=e468]:
+            - heading "No content found" [level=3] [ref=e469]
+            - paragraph [ref=e470]: Try clearing filters, refreshing Graph posts, or scheduling a new draft.
+  - region "Notifications alt+T"
+  - alert [ref=e32]

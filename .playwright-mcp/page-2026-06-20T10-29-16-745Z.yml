@@ -1,0 +1,29 @@
+- generic [active] [ref=e1]:
+  - main [ref=e2]:
+    - generic [ref=e3]:
+      - generic [ref=e4]:
+        - img [ref=e6]
+        - generic [ref=e9]:
+          - heading "SmartMENA" [level=1] [ref=e10]
+          - paragraph [ref=e11]: Marketing analytics workspace
+      - generic [ref=e12]:
+        - generic [ref=e13]:
+          - generic [ref=e14]:
+            - heading "Sign in" [level=3] [ref=e15]
+            - paragraph [ref=e16]: Access your SmartMENA analytics workspace.
+          - img [ref=e17]
+        - generic [ref=e21]:
+          - generic [ref=e22]:
+            - generic [ref=e23]: Email
+            - textbox "Email" [ref=e24]
+          - generic [ref=e25]:
+            - generic [ref=e26]: Password
+            - textbox "Password" [ref=e27]
+          - button "Sign in" [ref=e28] [cursor=pointer]
+          - button "Fill demo account" [ref=e29] [cursor=pointer]
+          - paragraph [ref=e30]:
+            - text: New user?
+            - link "Create an account" [ref=e31] [cursor=pointer]:
+              - /url: /register
+  - region "Notifications alt+T"
+  - alert [ref=e32]

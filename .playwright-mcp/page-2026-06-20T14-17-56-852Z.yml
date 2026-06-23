@@ -1,0 +1,187 @@
+- generic [ref=e1]:
+  - generic [ref=e33]:
+    - complementary [ref=e35]:
+      - generic [ref=e36]:
+        - link "S SmartMENA analytics ✦ MENA" [ref=e37] [cursor=pointer]:
+          - /url: /
+          - generic [ref=e38]:
+            - img [ref=e39]
+            - generic [ref=e42]: S
+          - generic [ref=e43]:
+            - generic [ref=e44]: SmartMENA
+            - generic [ref=e45]: analytics ✦ MENA
+        - button "Collapse sidebar" [ref=e46] [cursor=pointer]:
+          - img [ref=e47]
+      - button "B Born2Hike LB" [ref=e51] [cursor=pointer]:
+        - generic [ref=e52]: B
+        - generic [ref=e53]:
+          - generic [ref=e54]: Born2Hike
+          - generic [ref=e55]: LB
+      - navigation [ref=e56]:
+        - generic [ref=e57]:
+          - generic [ref=e58]: Today
+          - link "Overview G O" [ref=e60] [cursor=pointer]:
+            - /url: /
+            - img [ref=e61]
+            - generic [ref=e63]: Overview
+            - generic [ref=e64]: G O
+        - generic [ref=e65]:
+          - generic [ref=e66]: Publish
+          - generic [ref=e67]:
+            - link "Content G P" [ref=e68] [cursor=pointer]:
+              - /url: /content
+              - img [ref=e69]
+              - generic [ref=e71]: Content
+              - generic [ref=e72]: G P
+            - link "Campaigns" [ref=e73] [cursor=pointer]:
+              - /url: /campaigns
+              - img [ref=e74]
+              - generic [ref=e77]: Campaigns
+            - link "Advisor" [ref=e78] [cursor=pointer]:
+              - /url: /advisor
+              - img [ref=e79]
+              - generic [ref=e81]: Advisor
+        - generic [ref=e82]:
+          - generic [ref=e83]: Analyze
+          - generic [ref=e84]:
+            - link "Audience G A" [ref=e85] [cursor=pointer]:
+              - /url: /audience
+              - img [ref=e86]
+              - generic [ref=e91]: Audience
+              - generic [ref=e92]: G A
+            - link "Trend Intelligence G T" [ref=e93] [cursor=pointer]:
+              - /url: /trend-intelligence
+              - img [ref=e94]
+              - generic [ref=e96]: Trend Intelligence
+              - generic [ref=e97]: G T
+            - link "Competitors G X" [ref=e98] [cursor=pointer]:
+              - /url: /competitors
+              - img [ref=e99]
+              - generic [ref=e108]: Competitors
+              - generic [ref=e109]: G X
+        - generic [ref=e110]:
+          - generic [ref=e111]: Connect
+          - link "Connections G C" [ref=e113] [cursor=pointer]:
+            - /url: /connections
+            - img [ref=e114]
+            - generic [ref=e120]: Connections
+            - generic [ref=e121]: G C
+      - button "B Born2Hike Demo User born2hike@smartmena.local" [ref=e123] [cursor=pointer]:
+        - generic [ref=e124]: B
+        - generic [ref=e125]:
+          - generic [ref=e126]: Born2Hike Demo User
+          - generic [ref=e127]: born2hike@smartmena.local
+    - generic [ref=e128]:
+      - banner [ref=e129]:
+        - navigation "Breadcrumb" [ref=e130]:
+          - generic [ref=e131]:
+            - link "SmartMENA" [ref=e396] [cursor=pointer]:
+              - /url: /
+            - img [ref=e397]
+          - generic [ref=e400]: advisor
+        - button "Search or run a command ⌘ K" [ref=e137] [cursor=pointer]:
+          - img [ref=e138]
+          - generic [ref=e141]: Search or run a command
+          - generic [ref=e142]:
+            - generic [ref=e143]: ⌘
+            - generic [ref=e144]: K
+        - generic [ref=e145]: Backend OK
+        - button "Language" [ref=e147] [cursor=pointer]:
+          - img [ref=e148]
+        - button "Toggle theme" [ref=e152] [cursor=pointer]:
+          - img [ref=e153]
+        - button "Account" [ref=e159] [cursor=pointer]:
+          - img [ref=e160]
+        - button "Notifications" [ref=e164] [cursor=pointer]:
+          - img [ref=e165]
+      - main [ref=e168]:
+        - generic [ref=e2960]:
+          - complementary [ref=e2961]:
+            - generic [ref=e2962]:
+              - button "New Chat" [ref=e2963] [cursor=pointer]:
+                - img [ref=e2964]
+                - text: New Chat
+              - generic [ref=e2966]:
+                - img [ref=e2967]
+                - textbox "Search conversations..." [ref=e2970]
+              - generic [ref=e2972]:
+                - img [ref=e2973]
+                - generic [ref=e2975]: 4 chats
+            - generic [ref=e2977]:
+              - generic [ref=e2978]:
+                - button "what do u think about my latest campaign 2 messages • 28m ago" [ref=e2979] [cursor=pointer]:
+                  - generic [ref=e2980]: what do u think about my latest campaign
+                  - generic [ref=e2981]:
+                    - generic [ref=e2982]: 2 messages
+                    - generic [ref=e2983]: •
+                    - generic [ref=e2984]: 28m ago
+                - button "Delete" [ref=e2985] [cursor=pointer]:
+                  - img [ref=e2986]
+              - generic [ref=e2989]:
+                - button "what do u think about my latest campaign 2 messages • 43m ago" [ref=e2990] [cursor=pointer]:
+                  - generic [ref=e2991]: what do u think about my latest campaign
+                  - generic [ref=e2992]:
+                    - generic [ref=e2993]: 2 messages
+                    - generic [ref=e2994]: •
+                    - generic [ref=e2995]: 43m ago
+                - button "Delete" [ref=e2996] [cursor=pointer]:
+                  - img [ref=e2997]
+              - generic [ref=e3000]:
+                - button "• Request optimization strategies for better ROI 4 messages • May 25" [ref=e3001] [cursor=pointer]:
+                  - generic [ref=e3002]: • Request optimization strategies for better ROI
+                  - generic [ref=e3003]:
+                    - generic [ref=e3004]: 4 messages
+                    - generic [ref=e3005]: •
+                    - generic [ref=e3006]: May 25
+                - button "Delete" [ref=e3007] [cursor=pointer]:
+                  - img [ref=e3008]
+              - generic [ref=e3011]:
+                - button "Show me my campaign performance 2 messages • May 25" [ref=e3012] [cursor=pointer]:
+                  - generic [ref=e3013]: Show me my campaign performance
+                  - generic [ref=e3014]:
+                    - generic [ref=e3015]: 2 messages
+                    - generic [ref=e3016]: •
+                    - generic [ref=e3017]: May 25
+                - button "Delete" [ref=e3018] [cursor=pointer]:
+                  - img [ref=e3019]
+          - main [ref=e3022]:
+            - generic [ref=e3023]:
+              - img [ref=e3025]
+              - generic [ref=e3027]:
+                - heading "AI Advisor" [level=1] [ref=e3028]
+                - paragraph [ref=e3029]: Get intelligent recommendations for your campaigns
+              - generic [ref=e3030]:
+                - generic [ref=e3031]: ⌘K
+                - generic [ref=e3032]: to focus
+            - generic [ref=e3034]:
+              - img [ref=e3038]
+              - heading "Welcome to AI Advisor" [level=2] [ref=e3040]
+              - paragraph [ref=e3041]: Ask me anything about your campaigns, get optimization tips, or create new campaigns with AI assistance.
+              - generic [ref=e3042]:
+                - button "Help me create a new awareness campaign" [ref=e3043] [cursor=pointer]:
+                  - img [ref=e3045]
+                  - generic [ref=e3049]: Help me create a new awareness campaign
+                - button "What's the best budget for my next campaign?" [ref=e3050] [cursor=pointer]:
+                  - img [ref=e3052]
+                  - generic [ref=e3055]: What's the best budget for my next campaign?
+                - button "Show me my campaign performance" [ref=e3056] [cursor=pointer]:
+                  - img [ref=e3058]
+                  - generic [ref=e3060]: Show me my campaign performance
+              - generic [ref=e3061]:
+                - heading "Quick Tips" [level=3] [ref=e3062]:
+                  - img [ref=e3063]
+                  - text: Quick Tips
+                - list [ref=e3065]:
+                  - listitem [ref=e3066]: • Ask about campaign performance and metrics
+                  - listitem [ref=e3067]: • Get budget recommendations based on your goals
+                  - listitem [ref=e3068]: • Request optimization strategies for better ROI
+            - generic [ref=e3070]:
+              - generic [ref=e3071]:
+                - textbox "Ask me anything about your campaigns..." [active] [ref=e3073]
+                - button [disabled]:
+                  - img
+              - generic [ref=e3074]:
+                - generic [ref=e3075]: Press Enter to send · Shift+Enter for new line
+                - generic [ref=e3076]: ESC to clear
+  - region "Notifications alt+T"
+  - alert [ref=e32]

@@ -1,0 +1,721 @@
+- generic [ref=e1]:
+  - generic [ref=e33]:
+    - complementary [ref=e35]:
+      - generic [ref=e36]:
+        - link "S SmartMENA analytics ✦ MENA" [ref=e37] [cursor=pointer]:
+          - /url: /
+          - generic [ref=e38]:
+            - img [ref=e39]
+            - generic [ref=e42]: S
+          - generic [ref=e43]:
+            - generic [ref=e44]: SmartMENA
+            - generic [ref=e45]: analytics ✦ MENA
+        - button "Collapse sidebar" [ref=e46] [cursor=pointer]:
+          - img [ref=e47]
+      - button "B Born2Hike LB" [ref=e51] [cursor=pointer]:
+        - generic [ref=e52]: B
+        - generic [ref=e53]:
+          - generic [ref=e54]: Born2Hike
+          - generic [ref=e55]: LB
+      - navigation [ref=e56]:
+        - generic [ref=e57]:
+          - generic [ref=e58]: Today
+          - link "Overview G O" [ref=e60] [cursor=pointer]:
+            - /url: /
+            - img [ref=e61]
+            - generic [ref=e63]: Overview
+            - generic [ref=e64]: G O
+        - generic [ref=e65]:
+          - generic [ref=e66]: Publish
+          - generic [ref=e67]:
+            - link "Content G P" [ref=e68] [cursor=pointer]:
+              - /url: /content
+              - img [ref=e69]
+              - generic [ref=e71]: Content
+              - generic [ref=e72]: G P
+            - link "Campaigns" [active] [ref=e73] [cursor=pointer]:
+              - /url: /campaigns
+              - img [ref=e74]
+              - generic [ref=e77]: Campaigns
+            - link "Advisor" [ref=e78] [cursor=pointer]:
+              - /url: /advisor
+              - img [ref=e79]
+              - generic [ref=e81]: Advisor
+        - generic [ref=e82]:
+          - generic [ref=e83]: Analyze
+          - generic [ref=e84]:
+            - link "Audience G A" [ref=e85] [cursor=pointer]:
+              - /url: /audience
+              - img [ref=e86]
+              - generic [ref=e91]: Audience
+              - generic [ref=e92]: G A
+            - link "Trend Intelligence G T" [ref=e93] [cursor=pointer]:
+              - /url: /trend-intelligence
+              - img [ref=e94]
+              - generic [ref=e96]: Trend Intelligence
+              - generic [ref=e97]: G T
+            - link "Competitors G X" [ref=e98] [cursor=pointer]:
+              - /url: /competitors
+              - img [ref=e99]
+              - generic [ref=e108]: Competitors
+              - generic [ref=e109]: G X
+        - generic [ref=e110]:
+          - generic [ref=e111]: Connect
+          - link "Connections G C" [ref=e113] [cursor=pointer]:
+            - /url: /connections
+            - img [ref=e114]
+            - generic [ref=e120]: Connections
+            - generic [ref=e121]: G C
+      - button "B Born2Hike Demo User born2hike@smartmena.local" [ref=e123] [cursor=pointer]:
+        - generic [ref=e124]: B
+        - generic [ref=e125]:
+          - generic [ref=e126]: Born2Hike Demo User
+          - generic [ref=e127]: born2hike@smartmena.local
+    - generic [ref=e128]:
+      - banner [ref=e129]:
+        - navigation "Breadcrumb" [ref=e130]:
+          - generic [ref=e131]:
+            - link "SmartMENA" [ref=e396] [cursor=pointer]:
+              - /url: /
+            - img [ref=e397]
+          - generic [ref=e400]: Campaigns
+        - button "Search or run a command ⌘ K" [ref=e137] [cursor=pointer]:
+          - img [ref=e138]
+          - generic [ref=e141]: Search or run a command
+          - generic [ref=e142]:
+            - generic [ref=e143]: ⌘
+            - generic [ref=e144]: K
+        - generic [ref=e145]: Backend OK
+        - button "Language" [ref=e147] [cursor=pointer]:
+          - img [ref=e148]
+        - button "Toggle theme" [ref=e152] [cursor=pointer]:
+          - img [ref=e153]
+        - button "Account" [ref=e159] [cursor=pointer]:
+          - img [ref=e160]
+        - button "Notifications" [ref=e164] [cursor=pointer]:
+          - img [ref=e165]
+      - main [ref=e168]:
+        - generic [ref=e2285]:
+          - generic [ref=e2287]:
+            - generic [ref=e2288]:
+              - heading "Campaigns" [level=1] [ref=e2289]
+              - generic [ref=e2290]:
+                - button "All" [pressed] [ref=e2291] [cursor=pointer]
+                - button "Active" [ref=e2292] [cursor=pointer]
+                - button "Paused" [ref=e2293] [cursor=pointer]
+                - button "Effective" [ref=e2294] [cursor=pointer]
+            - button "Create Campaign" [ref=e2295] [cursor=pointer]:
+              - img [ref=e2296]
+              - text: Create Campaign
+          - table [ref=e2300]:
+            - rowgroup [ref=e2301]:
+              - row "Campaign Status Objective Budget Ends" [ref=e2302]:
+                - columnheader "Campaign" [ref=e2303]
+                - columnheader "Status" [ref=e2304]
+                - columnheader "Objective" [ref=e2305]
+                - columnheader "Budget" [ref=e2306]
+                - columnheader "Ends" [ref=e2307]
+                - columnheader [ref=e2308]
+            - rowgroup [ref=e2309]:
+              - row "Born To Hike | Awareness | Men MENA | May 2026 PAUSED Awareness $5 /day — View Details" [ref=e2310]:
+                - cell "Born To Hike | Awareness | Men MENA | May 2026" [ref=e2311]
+                - cell "PAUSED" [ref=e2312]:
+                  - generic [ref=e2314]: PAUSED
+                - cell "Awareness" [ref=e2315]
+                - cell "$5 /day" [ref=e2316]:
+                  - generic [ref=e2317]:
+                    - generic [ref=e2318]: $5
+                    - generic [ref=e2319]: /day
+                - cell "—" [ref=e2320]
+                - cell "View Details" [ref=e2321]:
+                  - button "View Details" [ref=e2322] [cursor=pointer]
+              - row "New Leads Campaign ACTIVE Leads $NaN /day — View Details" [ref=e2323]:
+                - cell "New Leads Campaign" [ref=e2324]
+                - cell "ACTIVE" [ref=e2325]:
+                  - generic [ref=e2327]: ACTIVE
+                - cell "Leads" [ref=e2328]
+                - cell "$NaN /day" [ref=e2329]:
+                  - generic [ref=e2330]:
+                    - generic [ref=e2331]: $NaN
+                    - generic [ref=e2332]: /day
+                - cell "—" [ref=e2333]
+                - cell "View Details" [ref=e2334]:
+                  - button "View Details" [ref=e2335] [cursor=pointer]
+              - row "Crete Travel Campaign ACTIVE Leads $1.25 /day — View Details" [ref=e2336]:
+                - cell "Crete Travel Campaign" [ref=e2337]
+                - cell "ACTIVE" [ref=e2338]:
+                  - generic [ref=e2340]: ACTIVE
+                - cell "Leads" [ref=e2341]
+                - cell "$1.25 /day" [ref=e2342]:
+                  - generic [ref=e2343]:
+                    - generic [ref=e2344]: $1.25
+                    - generic [ref=e2345]: /day
+                - cell "—" [ref=e2346]
+                - cell "View Details" [ref=e2347]:
+                  - button "View Details" [ref=e2348] [cursor=pointer]
+              - 'row "Instagram post: 🏞️ Join us this Sunday for a... ACTIVE Clicks $NaN /day May 30, 2026, 10:59 AM View Details" [ref=e2349]':
+                - 'cell "Instagram post: 🏞️ Join us this Sunday for a..." [ref=e2350]'
+                - cell "ACTIVE" [ref=e2351]:
+                  - generic [ref=e2353]: ACTIVE
+                - cell "Clicks" [ref=e2354]
+                - cell "$NaN /day" [ref=e2355]:
+                  - generic [ref=e2356]:
+                    - generic [ref=e2357]: $NaN
+                    - generic [ref=e2358]: /day
+                - cell "May 30, 2026, 10:59 AM" [ref=e2359]
+                - cell "View Details" [ref=e2360]:
+                  - button "View Details" [ref=e2361] [cursor=pointer]
+              - 'row "Instagram post: ❄️ Join us this week for an... ACTIVE Clicks $5 /day Jan 17, 2026, 3:39 PM View Details" [ref=e2362]':
+                - 'cell "Instagram post: ❄️ Join us this week for an..." [ref=e2363]'
+                - cell "ACTIVE" [ref=e2364]:
+                  - generic [ref=e2366]: ACTIVE
+                - cell "Clicks" [ref=e2367]
+                - cell "$5 /day" [ref=e2368]:
+                  - generic [ref=e2369]:
+                    - generic [ref=e2370]: $5
+                    - generic [ref=e2371]: /day
+                - cell "Jan 17, 2026, 3:39 PM" [ref=e2372]
+                - cell "View Details" [ref=e2373]:
+                  - button "View Details" [ref=e2374] [cursor=pointer]
+              - 'row "Instagram post: Christmas Football Camp ⚽🎄 For... ACTIVE Engagement $NaN /day Dec 18, 2025, 4:04 PM View Details" [ref=e2375]':
+                - 'cell "Instagram post: Christmas Football Camp ⚽🎄 For..." [ref=e2376]'
+                - cell "ACTIVE" [ref=e2377]:
+                  - generic [ref=e2379]: ACTIVE
+                - cell "Engagement" [ref=e2380]
+                - cell "$NaN /day" [ref=e2381]:
+                  - generic [ref=e2382]:
+                    - generic [ref=e2383]: $NaN
+                    - generic [ref=e2384]: /day
+                - cell "Dec 18, 2025, 4:04 PM" [ref=e2385]
+                - cell "View Details" [ref=e2386]:
+                  - button "View Details" [ref=e2387] [cursor=pointer]
+              - 'row "Instagram Messaging Ad: 🏞️ Join us this Sunday for an epic journey through the sacred... ACTIVE Engagement $NaN /day Oct 26, 2025, 8:43 AM View Details" [ref=e2388]':
+                - 'cell "Instagram Messaging Ad: 🏞️ Join us this Sunday for an epic journey through the sacred..." [ref=e2389]'
+                - cell "ACTIVE" [ref=e2390]:
+                  - generic [ref=e2392]: ACTIVE
+                - cell "Engagement" [ref=e2393]
+                - cell "$NaN /day" [ref=e2394]:
+                  - generic [ref=e2395]:
+                    - generic [ref=e2396]: $NaN
+                    - generic [ref=e2397]: /day
+                - cell "Oct 26, 2025, 8:43 AM" [ref=e2398]
+                - cell "View Details" [ref=e2399]:
+                  - button "View Details" [ref=e2400] [cursor=pointer]
+              - 'row "منشور Instagram: ‏‎Step onto the field at Oncourt... ACTIVE Messages $NaN /day Sep 24, 2025, 3:58 PM View Details" [ref=e2401]':
+                - 'cell "منشور Instagram: ‏‎Step onto the field at Oncourt..." [ref=e2402]'
+                - cell "ACTIVE" [ref=e2403]:
+                  - generic [ref=e2405]: ACTIVE
+                - cell "Messages" [ref=e2406]
+                - cell "$NaN /day" [ref=e2407]:
+                  - generic [ref=e2408]:
+                    - generic [ref=e2409]: $NaN
+                    - generic [ref=e2410]: /day
+                - cell "Sep 24, 2025, 3:58 PM" [ref=e2411]
+                - cell "View Details" [ref=e2412]:
+                  - button "View Details" [ref=e2413] [cursor=pointer]
+              - 'row "منشور Instagram: ‏‎🏞️ Join us this Sunday for a... ACTIVE Messages $NaN /day Sep 20, 2025, 10:24 AM View Details" [ref=e2414]':
+                - 'cell "منشور Instagram: ‏‎🏞️ Join us this Sunday for a..." [ref=e2415]'
+                - cell "ACTIVE" [ref=e2416]:
+                  - generic [ref=e2418]: ACTIVE
+                - cell "Messages" [ref=e2419]
+                - cell "$NaN /day" [ref=e2420]:
+                  - generic [ref=e2421]:
+                    - generic [ref=e2422]: $NaN
+                    - generic [ref=e2423]: /day
+                - cell "Sep 20, 2025, 10:24 AM" [ref=e2424]
+                - cell "View Details" [ref=e2425]:
+                  - button "View Details" [ref=e2426] [cursor=pointer]
+              - 'row "Instagram post: 🌍✨ ALBANIA 2025: BALKAN PEAKS &... ACTIVE Clicks $5 /day Aug 23, 2025, 9:31 AM View Details" [ref=e2427]':
+                - 'cell "Instagram post: 🌍✨ ALBANIA 2025: BALKAN PEAKS &..." [ref=e2428]'
+                - cell "ACTIVE" [ref=e2429]:
+                  - generic [ref=e2431]: ACTIVE
+                - cell "Clicks" [ref=e2432]
+                - cell "$5 /day" [ref=e2433]:
+                  - generic [ref=e2434]:
+                    - generic [ref=e2435]: $5
+                    - generic [ref=e2436]: /day
+                - cell "Aug 23, 2025, 9:31 AM" [ref=e2437]
+                - cell "View Details" [ref=e2438]:
+                  - button "View Details" [ref=e2439] [cursor=pointer]
+              - 'row "Instagram post: 🌍✨ ALBANIA 2025: BALKAN PEAKS &... ACTIVE Clicks $5 /day Aug 22, 2025, 7:19 PM View Details" [ref=e2440]':
+                - 'cell "Instagram post: 🌍✨ ALBANIA 2025: BALKAN PEAKS &..." [ref=e2441]'
+                - cell "ACTIVE" [ref=e2442]:
+                  - generic [ref=e2444]: ACTIVE
+                - cell "Clicks" [ref=e2445]
+                - cell "$5 /day" [ref=e2446]:
+                  - generic [ref=e2447]:
+                    - generic [ref=e2448]: $5
+                    - generic [ref=e2449]: /day
+                - cell "Aug 22, 2025, 7:19 PM" [ref=e2450]
+                - cell "View Details" [ref=e2451]:
+                  - button "View Details" [ref=e2452] [cursor=pointer]
+              - row "Instagram Post ACTIVE Messages $NaN /day Jun 27, 2025, 12:04 PM View Details" [ref=e2453]:
+                - cell "Instagram Post" [ref=e2454]
+                - cell "ACTIVE" [ref=e2455]:
+                  - generic [ref=e2457]: ACTIVE
+                - cell "Messages" [ref=e2458]
+                - cell "$NaN /day" [ref=e2459]:
+                  - generic [ref=e2460]:
+                    - generic [ref=e2461]: $NaN
+                    - generic [ref=e2462]: /day
+                - cell "Jun 27, 2025, 12:04 PM" [ref=e2463]
+                - cell "View Details" [ref=e2464]:
+                  - button "View Details" [ref=e2465] [cursor=pointer]
+              - 'row "منشور Instagram: ‏‎The wait is over… Next stop:... ACTIVE Clicks $NaN /day Jun 25, 2025, 8:39 AM View Details" [ref=e2466]':
+                - 'cell "منشور Instagram: ‏‎The wait is over… Next stop:..." [ref=e2467]'
+                - cell "ACTIVE" [ref=e2468]:
+                  - generic [ref=e2470]: ACTIVE
+                - cell "Clicks" [ref=e2471]
+                - cell "$NaN /day" [ref=e2472]:
+                  - generic [ref=e2473]:
+                    - generic [ref=e2474]: $NaN
+                    - generic [ref=e2475]: /day
+                - cell "Jun 25, 2025, 8:39 AM" [ref=e2476]
+                - cell "View Details" [ref=e2477]:
+                  - button "View Details" [ref=e2478] [cursor=pointer]
+              - 'row "منشور Instagram: ‏‎Are you ready to take your... ACTIVE Clicks $NaN /day Apr 22, 2025, 1:57 PM View Details" [ref=e2479]':
+                - 'cell "منشور Instagram: ‏‎Are you ready to take your..." [ref=e2480]'
+                - cell "ACTIVE" [ref=e2481]:
+                  - generic [ref=e2483]: ACTIVE
+                - cell "Clicks" [ref=e2484]
+                - cell "$NaN /day" [ref=e2485]:
+                  - generic [ref=e2486]:
+                    - generic [ref=e2487]: $NaN
+                    - generic [ref=e2488]: /day
+                - cell "Apr 22, 2025, 1:57 PM" [ref=e2489]
+                - cell "View Details" [ref=e2490]:
+                  - button "View Details" [ref=e2491] [cursor=pointer]
+              - 'row "Instagram post: 🌍✨ CRETE 2025: HIKING & CULTURAL... ACTIVE Messages $1.5 /day Apr 9, 2025, 10:02 AM View Details" [ref=e2492]':
+                - 'cell "Instagram post: 🌍✨ CRETE 2025: HIKING & CULTURAL..." [ref=e2493]'
+                - cell "ACTIVE" [ref=e2494]:
+                  - generic [ref=e2496]: ACTIVE
+                - cell "Messages" [ref=e2497]
+                - cell "$1.5 /day" [ref=e2498]:
+                  - generic [ref=e2499]:
+                    - generic [ref=e2500]: $1.5
+                    - generic [ref=e2501]: /day
+                - cell "Apr 9, 2025, 10:02 AM" [ref=e2502]
+                - cell "View Details" [ref=e2503]:
+                  - button "View Details" [ref=e2504] [cursor=pointer]
+              - 'row "منشور Instagram: ‏‎🌿 “SPRING 2025’S ADVENTURE IS... ACTIVE Clicks $NaN /day Mar 25, 2025, 8:41 PM View Details" [ref=e2505]':
+                - 'cell "منشور Instagram: ‏‎🌿 “SPRING 2025’S ADVENTURE IS..." [ref=e2506]'
+                - cell "ACTIVE" [ref=e2507]:
+                  - generic [ref=e2509]: ACTIVE
+                - cell "Clicks" [ref=e2510]
+                - cell "$NaN /day" [ref=e2511]:
+                  - generic [ref=e2512]:
+                    - generic [ref=e2513]: $NaN
+                    - generic [ref=e2514]: /day
+                - cell "Mar 25, 2025, 8:41 PM" [ref=e2515]
+                - cell "View Details" [ref=e2516]:
+                  - button "View Details" [ref=e2517] [cursor=pointer]
+              - 'row "منشور Instagram: ‏‎🌍✨ CRETE 2025: HIKING &... ACTIVE Messages $1.3 /day Mar 20, 2025, 9:53 PM View Details" [ref=e2518]':
+                - 'cell "منشور Instagram: ‏‎🌍✨ CRETE 2025: HIKING &..." [ref=e2519]'
+                - cell "ACTIVE" [ref=e2520]:
+                  - generic [ref=e2522]: ACTIVE
+                - cell "Messages" [ref=e2523]
+                - cell "$1.3 /day" [ref=e2524]:
+                  - generic [ref=e2525]:
+                    - generic [ref=e2526]: $1.3
+                    - generic [ref=e2527]: /day
+                - cell "Mar 20, 2025, 9:53 PM" [ref=e2528]
+                - cell "View Details" [ref=e2529]:
+                  - button "View Details" [ref=e2530] [cursor=pointer]
+              - 'row "منشور Instagram: ‏‎Dear Born2hikers and Friends,... ACTIVE Clicks $NaN /day Mar 1, 2025, 9:34 AM View Details" [ref=e2531]':
+                - 'cell "منشور Instagram: ‏‎Dear Born2hikers and Friends,..." [ref=e2532]'
+                - cell "ACTIVE" [ref=e2533]:
+                  - generic [ref=e2535]: ACTIVE
+                - cell "Clicks" [ref=e2536]
+                - cell "$NaN /day" [ref=e2537]:
+                  - generic [ref=e2538]:
+                    - generic [ref=e2539]: $NaN
+                    - generic [ref=e2540]: /day
+                - cell "Mar 1, 2025, 9:34 AM" [ref=e2541]
+                - cell "View Details" [ref=e2542]:
+                  - button "View Details" [ref=e2543] [cursor=pointer]
+              - 'row "المناسبة: ‏‎B2h snowshoeing to chouf reserve ‎‏ ACTIVE EVENT_RESPONSES $NaN /day Feb 15, 2025, 6:04 PM View Details" [ref=e2544]':
+                - 'cell "المناسبة: ‏‎B2h snowshoeing to chouf reserve ‎‏" [ref=e2545]'
+                - cell "ACTIVE" [ref=e2546]:
+                  - generic [ref=e2548]: ACTIVE
+                - cell "EVENT_RESPONSES" [ref=e2549]
+                - cell "$NaN /day" [ref=e2550]:
+                  - generic [ref=e2551]:
+                    - generic [ref=e2552]: $NaN
+                    - generic [ref=e2553]: /day
+                - cell "Feb 15, 2025, 6:04 PM" [ref=e2554]
+                - cell "View Details" [ref=e2555]:
+                  - button "View Details" [ref=e2556] [cursor=pointer]
+              - 'row "منشور Instagram: ‏‎Dear Born2hikers Join us this... ACTIVE Clicks $NaN /day Feb 14, 2025, 7:25 AM View Details" [ref=e2557]':
+                - 'cell "منشور Instagram: ‏‎Dear Born2hikers Join us this..." [ref=e2558]'
+                - cell "ACTIVE" [ref=e2559]:
+                  - generic [ref=e2561]: ACTIVE
+                - cell "Clicks" [ref=e2562]
+                - cell "$NaN /day" [ref=e2563]:
+                  - generic [ref=e2564]:
+                    - generic [ref=e2565]: $NaN
+                    - generic [ref=e2566]: /day
+                - cell "Feb 14, 2025, 7:25 AM" [ref=e2567]
+                - cell "View Details" [ref=e2568]:
+                  - button "View Details" [ref=e2569] [cursor=pointer]
+              - 'row "منشور Instagram: ‏‎Dear Born2hikers and Friend,... ACTIVE Clicks $NaN /day Feb 7, 2025, 11:44 PM View Details" [ref=e2570]':
+                - 'cell "منشور Instagram: ‏‎Dear Born2hikers and Friend,..." [ref=e2571]'
+                - cell "ACTIVE" [ref=e2572]:
+                  - generic [ref=e2574]: ACTIVE
+                - cell "Clicks" [ref=e2575]
+                - cell "$NaN /day" [ref=e2576]:
+                  - generic [ref=e2577]:
+                    - generic [ref=e2578]: $NaN
+                    - generic [ref=e2579]: /day
+                - cell "Feb 7, 2025, 11:44 PM" [ref=e2580]
+                - cell "View Details" [ref=e2581]:
+                  - button "View Details" [ref=e2582] [cursor=pointer]
+              - 'row "منشور Instagram: ‏‎Dear Born2hikers,Join us this... ACTIVE Clicks $NaN /day Feb 1, 2025, 6:03 PM View Details" [ref=e2583]':
+                - 'cell "منشور Instagram: ‏‎Dear Born2hikers,Join us this..." [ref=e2584]'
+                - cell "ACTIVE" [ref=e2585]:
+                  - generic [ref=e2587]: ACTIVE
+                - cell "Clicks" [ref=e2588]
+                - cell "$NaN /day" [ref=e2589]:
+                  - generic [ref=e2590]:
+                    - generic [ref=e2591]: $NaN
+                    - generic [ref=e2592]: /day
+                - cell "Feb 1, 2025, 6:03 PM" [ref=e2593]
+                - cell "View Details" [ref=e2594]:
+                  - button "View Details" [ref=e2595] [cursor=pointer]
+              - 'row "المناسبة: ‏‎B2h to Aanaya Village ‎‏ ACTIVE EVENT_RESPONSES $NaN /day Feb 1, 2025, 2:41 PM View Details" [ref=e2596]':
+                - 'cell "المناسبة: ‏‎B2h to Aanaya Village ‎‏" [ref=e2597]'
+                - cell "ACTIVE" [ref=e2598]:
+                  - generic [ref=e2600]: ACTIVE
+                - cell "EVENT_RESPONSES" [ref=e2601]
+                - cell "$NaN /day" [ref=e2602]:
+                  - generic [ref=e2603]:
+                    - generic [ref=e2604]: $NaN
+                    - generic [ref=e2605]: /day
+                - cell "Feb 1, 2025, 2:41 PM" [ref=e2606]
+                - cell "View Details" [ref=e2607]:
+                  - button "View Details" [ref=e2608] [cursor=pointer]
+              - 'row "منشور Instagram: ‏‎Dear Born2hikers Join us this... ACTIVE Clicks $NaN /day Jan 25, 2025, 5:55 PM View Details" [ref=e2609]':
+                - 'cell "منشور Instagram: ‏‎Dear Born2hikers Join us this..." [ref=e2610]'
+                - cell "ACTIVE" [ref=e2611]:
+                  - generic [ref=e2613]: ACTIVE
+                - cell "Clicks" [ref=e2614]
+                - cell "$NaN /day" [ref=e2615]:
+                  - generic [ref=e2616]:
+                    - generic [ref=e2617]: $NaN
+                    - generic [ref=e2618]: /day
+                - cell "Jan 25, 2025, 5:55 PM" [ref=e2619]
+                - cell "View Details" [ref=e2620]:
+                  - button "View Details" [ref=e2621] [cursor=pointer]
+              - 'row "Event: B2h from Aindara to Falougha Lakes ACTIVE EVENT_RESPONSES $NaN /day Jan 18, 2025, 5:40 PM View Details" [ref=e2622]':
+                - 'cell "Event: B2h from Aindara to Falougha Lakes" [ref=e2623]'
+                - cell "ACTIVE" [ref=e2624]:
+                  - generic [ref=e2626]: ACTIVE
+                - cell "EVENT_RESPONSES" [ref=e2627]
+                - cell "$NaN /day" [ref=e2628]:
+                  - generic [ref=e2629]:
+                    - generic [ref=e2630]: $NaN
+                    - generic [ref=e2631]: /day
+                - cell "Jan 18, 2025, 5:40 PM" [ref=e2632]
+                - cell "View Details" [ref=e2633]:
+                  - button "View Details" [ref=e2634] [cursor=pointer]
+              - 'row "منشور Instagram: ‏‎Dear Born2hikers Join us this... ACTIVE Messages $NaN /day Jan 18, 2025, 10:07 AM View Details" [ref=e2635]':
+                - 'cell "منشور Instagram: ‏‎Dear Born2hikers Join us this..." [ref=e2636]'
+                - cell "ACTIVE" [ref=e2637]:
+                  - generic [ref=e2639]: ACTIVE
+                - cell "Messages" [ref=e2640]
+                - cell "$NaN /day" [ref=e2641]:
+                  - generic [ref=e2642]:
+                    - generic [ref=e2643]: $NaN
+                    - generic [ref=e2644]: /day
+                - cell "Jan 18, 2025, 10:07 AM" [ref=e2645]
+                - cell "View Details" [ref=e2646]:
+                  - button "View Details" [ref=e2647] [cursor=pointer]
+              - 'row "منشور Instagram: ‏‎Join us this Sunday for an... ACTIVE Clicks $NaN /day Jan 11, 2025, 4:10 PM View Details" [ref=e2648]':
+                - 'cell "منشور Instagram: ‏‎Join us this Sunday for an..." [ref=e2649]'
+                - cell "ACTIVE" [ref=e2650]:
+                  - generic [ref=e2652]: ACTIVE
+                - cell "Clicks" [ref=e2653]
+                - cell "$NaN /day" [ref=e2654]:
+                  - generic [ref=e2655]:
+                    - generic [ref=e2656]: $NaN
+                    - generic [ref=e2657]: /day
+                - cell "Jan 11, 2025, 4:10 PM" [ref=e2658]
+                - cell "View Details" [ref=e2659]:
+                  - button "View Details" [ref=e2660] [cursor=pointer]
+              - 'row "Event: B2h to Feghri Mountain Douma side trail ACTIVE EVENT_RESPONSES $NaN /day Jan 11, 2025, 2:22 PM View Details" [ref=e2661]':
+                - 'cell "Event: B2h to Feghri Mountain Douma side trail" [ref=e2662]'
+                - cell "ACTIVE" [ref=e2663]:
+                  - generic [ref=e2665]: ACTIVE
+                - cell "EVENT_RESPONSES" [ref=e2666]
+                - cell "$NaN /day" [ref=e2667]:
+                  - generic [ref=e2668]:
+                    - generic [ref=e2669]: $NaN
+                    - generic [ref=e2670]: /day
+                - cell "Jan 11, 2025, 2:22 PM" [ref=e2671]
+                - cell "View Details" [ref=e2672]:
+                  - button "View Details" [ref=e2673] [cursor=pointer]
+              - 'row "منشور Instagram: ‏‎Join us this Sunday for an... ACTIVE Clicks $NaN /day Jan 4, 2025, 6:44 PM View Details" [ref=e2674]':
+                - 'cell "منشور Instagram: ‏‎Join us this Sunday for an..." [ref=e2675]'
+                - cell "ACTIVE" [ref=e2676]:
+                  - generic [ref=e2678]: ACTIVE
+                - cell "Clicks" [ref=e2679]
+                - cell "$NaN /day" [ref=e2680]:
+                  - generic [ref=e2681]:
+                    - generic [ref=e2682]: $NaN
+                    - generic [ref=e2683]: /day
+                - cell "Jan 4, 2025, 6:44 PM" [ref=e2684]
+                - cell "View Details" [ref=e2685]:
+                  - button "View Details" [ref=e2686] [cursor=pointer]
+              - 'row "Event: B2h to Naya Forest Chouf area ACTIVE EVENT_RESPONSES $NaN /day Jan 4, 2025, 3:38 PM View Details" [ref=e2687]':
+                - 'cell "Event: B2h to Naya Forest Chouf area" [ref=e2688]'
+                - cell "ACTIVE" [ref=e2689]:
+                  - generic [ref=e2691]: ACTIVE
+                - cell "EVENT_RESPONSES" [ref=e2692]
+                - cell "$NaN /day" [ref=e2693]:
+                  - generic [ref=e2694]:
+                    - generic [ref=e2695]: $NaN
+                    - generic [ref=e2696]: /day
+                - cell "Jan 4, 2025, 3:38 PM" [ref=e2697]
+                - cell "View Details" [ref=e2698]:
+                  - button "View Details" [ref=e2699] [cursor=pointer]
+              - 'row "منشور Instagram: ‏‎Dear Born2hikers,Join us this... ACTIVE Messages $NaN /day Dec 22, 2024, 11:52 PM View Details" [ref=e2700]':
+                - 'cell "منشور Instagram: ‏‎Dear Born2hikers,Join us this..." [ref=e2701]'
+                - cell "ACTIVE" [ref=e2702]:
+                  - generic [ref=e2704]: ACTIVE
+                - cell "Messages" [ref=e2705]
+                - cell "$NaN /day" [ref=e2706]:
+                  - generic [ref=e2707]:
+                    - generic [ref=e2708]: $NaN
+                    - generic [ref=e2709]: /day
+                - cell "Dec 22, 2024, 11:52 PM" [ref=e2710]
+                - cell "View Details" [ref=e2711]:
+                  - button "View Details" [ref=e2712] [cursor=pointer]
+              - 'row "منشور Instagram: ‏‎Dear Born2hikers,Join us this... ACTIVE Messages $NaN /day Dec 14, 2024, 8:30 PM View Details" [ref=e2713]':
+                - 'cell "منشور Instagram: ‏‎Dear Born2hikers,Join us this..." [ref=e2714]'
+                - cell "ACTIVE" [ref=e2715]:
+                  - generic [ref=e2717]: ACTIVE
+                - cell "Messages" [ref=e2718]
+                - cell "$NaN /day" [ref=e2719]:
+                  - generic [ref=e2720]:
+                    - generic [ref=e2721]: $NaN
+                    - generic [ref=e2722]: /day
+                - cell "Dec 14, 2024, 8:30 PM" [ref=e2723]
+                - cell "View Details" [ref=e2724]:
+                  - button "View Details" [ref=e2725] [cursor=pointer]
+              - 'row "Event: B2h to Darb Himlaya ACTIVE EVENT_RESPONSES $NaN /day Dec 13, 2024, 8:18 PM View Details" [ref=e2726]':
+                - 'cell "Event: B2h to Darb Himlaya" [ref=e2727]'
+                - cell "ACTIVE" [ref=e2728]:
+                  - generic [ref=e2730]: ACTIVE
+                - cell "EVENT_RESPONSES" [ref=e2731]
+                - cell "$NaN /day" [ref=e2732]:
+                  - generic [ref=e2733]:
+                    - generic [ref=e2734]: $NaN
+                    - generic [ref=e2735]: /day
+                - cell "Dec 13, 2024, 8:18 PM" [ref=e2736]
+                - cell "View Details" [ref=e2737]:
+                  - button "View Details" [ref=e2738] [cursor=pointer]
+              - 'row "منشور Instagram: ‏‎Dear Born2hikers and friends,... ACTIVE Clicks $NaN /day Dec 7, 2024, 11:52 PM View Details" [ref=e2739]':
+                - 'cell "منشور Instagram: ‏‎Dear Born2hikers and friends,..." [ref=e2740]'
+                - cell "ACTIVE" [ref=e2741]:
+                  - generic [ref=e2743]: ACTIVE
+                - cell "Clicks" [ref=e2744]
+                - cell "$NaN /day" [ref=e2745]:
+                  - generic [ref=e2746]:
+                    - generic [ref=e2747]: $NaN
+                    - generic [ref=e2748]: /day
+                - cell "Dec 7, 2024, 11:52 PM" [ref=e2749]
+                - cell "View Details" [ref=e2750]:
+                  - button "View Details" [ref=e2751] [cursor=pointer]
+              - 'row "Event: B2h to Kfertay Village ACTIVE EVENT_RESPONSES $NaN /day Dec 7, 2024, 11:42 PM View Details" [ref=e2752]':
+                - 'cell "Event: B2h to Kfertay Village" [ref=e2753]'
+                - cell "ACTIVE" [ref=e2754]:
+                  - generic [ref=e2756]: ACTIVE
+                - cell "EVENT_RESPONSES" [ref=e2757]
+                - cell "$NaN /day" [ref=e2758]:
+                  - generic [ref=e2759]:
+                    - generic [ref=e2760]: $NaN
+                    - generic [ref=e2761]: /day
+                - cell "Dec 7, 2024, 11:42 PM" [ref=e2762]
+                - cell "View Details" [ref=e2763]:
+                  - button "View Details" [ref=e2764] [cursor=pointer]
+              - 'row "منشور Instagram: ‏‎Dear Born2hikers, Join us... ACTIVE Clicks $NaN /day Nov 21, 2024, 8:12 PM View Details" [ref=e2765]':
+                - 'cell "منشور Instagram: ‏‎Dear Born2hikers, Join us..." [ref=e2766]'
+                - cell "ACTIVE" [ref=e2767]:
+                  - generic [ref=e2769]: ACTIVE
+                - cell "Clicks" [ref=e2770]
+                - cell "$NaN /day" [ref=e2771]:
+                  - generic [ref=e2772]:
+                    - generic [ref=e2773]: $NaN
+                    - generic [ref=e2774]: /day
+                - cell "Nov 21, 2024, 8:12 PM" [ref=e2775]
+                - cell "View Details" [ref=e2776]:
+                  - button "View Details" [ref=e2777] [cursor=pointer]
+              - 'row "Event: B2h stairway to qadisha valley ACTIVE EVENT_RESPONSES $NaN /day Nov 21, 2024, 8:11 AM View Details" [ref=e2778]':
+                - 'cell "Event: B2h stairway to qadisha valley" [ref=e2779]'
+                - cell "ACTIVE" [ref=e2780]:
+                  - generic [ref=e2782]: ACTIVE
+                - cell "EVENT_RESPONSES" [ref=e2783]
+                - cell "$NaN /day" [ref=e2784]:
+                  - generic [ref=e2785]:
+                    - generic [ref=e2786]: $NaN
+                    - generic [ref=e2787]: /day
+                - cell "Nov 21, 2024, 8:11 AM" [ref=e2788]
+                - cell "View Details" [ref=e2789]:
+                  - button "View Details" [ref=e2790] [cursor=pointer]
+              - 'row "منشور Instagram: ‏‎Dear Born2hikers Join us this... ACTIVE Clicks $NaN /day Nov 16, 2024, 10:08 PM View Details" [ref=e2791]':
+                - 'cell "منشور Instagram: ‏‎Dear Born2hikers Join us this..." [ref=e2792]'
+                - cell "ACTIVE" [ref=e2793]:
+                  - generic [ref=e2795]: ACTIVE
+                - cell "Clicks" [ref=e2796]
+                - cell "$NaN /day" [ref=e2797]:
+                  - generic [ref=e2798]:
+                    - generic [ref=e2799]: $NaN
+                    - generic [ref=e2800]: /day
+                - cell "Nov 16, 2024, 10:08 PM" [ref=e2801]
+                - cell "View Details" [ref=e2802]:
+                  - button "View Details" [ref=e2803] [cursor=pointer]
+              - 'row "منشور Instagram: ‏‎located in the Kesrouan area,... ACTIVE Clicks $NaN /day Nov 9, 2024, 9:45 PM View Details" [ref=e2804]':
+                - 'cell "منشور Instagram: ‏‎located in the Kesrouan area,..." [ref=e2805]'
+                - cell "ACTIVE" [ref=e2806]:
+                  - generic [ref=e2808]: ACTIVE
+                - cell "Clicks" [ref=e2809]
+                - cell "$NaN /day" [ref=e2810]:
+                  - generic [ref=e2811]:
+                    - generic [ref=e2812]: $NaN
+                    - generic [ref=e2813]: /day
+                - cell "Nov 9, 2024, 9:45 PM" [ref=e2814]
+                - cell "View Details" [ref=e2815]:
+                  - button "View Details" [ref=e2816] [cursor=pointer]
+              - 'row "منشور Instagram: ‏‎Dear Born2hikers and friends,... ACTIVE Clicks $NaN /day Nov 2, 2024, 10:31 PM View Details" [ref=e2817]':
+                - 'cell "منشور Instagram: ‏‎Dear Born2hikers and friends,..." [ref=e2818]'
+                - cell "ACTIVE" [ref=e2819]:
+                  - generic [ref=e2821]: ACTIVE
+                - cell "Clicks" [ref=e2822]
+                - cell "$NaN /day" [ref=e2823]:
+                  - generic [ref=e2824]:
+                    - generic [ref=e2825]: $NaN
+                    - generic [ref=e2826]: /day
+                - cell "Nov 2, 2024, 10:31 PM" [ref=e2827]
+                - cell "View Details" [ref=e2828]:
+                  - button "View Details" [ref=e2829] [cursor=pointer]
+              - 'row "منشور Instagram: ‏‎Dear Born2hikers join us this... ACTIVE Clicks $NaN /day Oct 27, 2024, 9:15 PM View Details" [ref=e2830]':
+                - 'cell "منشور Instagram: ‏‎Dear Born2hikers join us this..." [ref=e2831]'
+                - cell "ACTIVE" [ref=e2832]:
+                  - generic [ref=e2834]: ACTIVE
+                - cell "Clicks" [ref=e2835]
+                - cell "$NaN /day" [ref=e2836]:
+                  - generic [ref=e2837]:
+                    - generic [ref=e2838]: $NaN
+                    - generic [ref=e2839]: /day
+                - cell "Oct 27, 2024, 9:15 PM" [ref=e2840]
+                - cell "View Details" [ref=e2841]:
+                  - button "View Details" [ref=e2842] [cursor=pointer]
+              - 'row "منشور Instagram: ‏‎Dear Born2hikers join us this... ACTIVE Clicks $NaN /day Sep 22, 2024, 10:02 AM View Details" [ref=e2843]':
+                - 'cell "منشور Instagram: ‏‎Dear Born2hikers join us this..." [ref=e2844]'
+                - cell "ACTIVE" [ref=e2845]:
+                  - generic [ref=e2847]: ACTIVE
+                - cell "Clicks" [ref=e2848]
+                - cell "$NaN /day" [ref=e2849]:
+                  - generic [ref=e2850]:
+                    - generic [ref=e2851]: $NaN
+                    - generic [ref=e2852]: /day
+                - cell "Sep 22, 2024, 10:02 AM" [ref=e2853]
+                - cell "View Details" [ref=e2854]:
+                  - button "View Details" [ref=e2855] [cursor=pointer]
+              - 'row "منشور Instagram: ‏‎Dear Born2hikers join us this... ACTIVE Clicks $NaN /day Sep 14, 2024, 11:52 AM View Details" [ref=e2856]':
+                - 'cell "منشور Instagram: ‏‎Dear Born2hikers join us this..." [ref=e2857]'
+                - cell "ACTIVE" [ref=e2858]:
+                  - generic [ref=e2860]: ACTIVE
+                - cell "Clicks" [ref=e2861]
+                - cell "$NaN /day" [ref=e2862]:
+                  - generic [ref=e2863]:
+                    - generic [ref=e2864]: $NaN
+                    - generic [ref=e2865]: /day
+                - cell "Sep 14, 2024, 11:52 AM" [ref=e2866]
+                - cell "View Details" [ref=e2867]:
+                  - button "View Details" [ref=e2868] [cursor=pointer]
+              - 'row "منشور Instagram: ‏‎Dear Born2hikers Join us this... ACTIVE Clicks $NaN /day Sep 7, 2024, 10:59 AM View Details" [ref=e2869]':
+                - 'cell "منشور Instagram: ‏‎Dear Born2hikers Join us this..." [ref=e2870]'
+                - cell "ACTIVE" [ref=e2871]:
+                  - generic [ref=e2873]: ACTIVE
+                - cell "Clicks" [ref=e2874]
+                - cell "$NaN /day" [ref=e2875]:
+                  - generic [ref=e2876]:
+                    - generic [ref=e2877]: $NaN
+                    - generic [ref=e2878]: /day
+                - cell "Sep 7, 2024, 10:59 AM" [ref=e2879]
+                - cell "View Details" [ref=e2880]:
+                  - button "View Details" [ref=e2881] [cursor=pointer]
+              - 'row "منشور Instagram: ‏‎Join us this Sunday for an... ACTIVE Clicks $NaN /day Aug 31, 2024, 9:22 AM View Details" [ref=e2882]':
+                - 'cell "منشور Instagram: ‏‎Join us this Sunday for an..." [ref=e2883]'
+                - cell "ACTIVE" [ref=e2884]:
+                  - generic [ref=e2886]: ACTIVE
+                - cell "Clicks" [ref=e2887]
+                - cell "$NaN /day" [ref=e2888]:
+                  - generic [ref=e2889]:
+                    - generic [ref=e2890]: $NaN
+                    - generic [ref=e2891]: /day
+                - cell "Aug 31, 2024, 9:22 AM" [ref=e2892]
+                - cell "View Details" [ref=e2893]:
+                  - button "View Details" [ref=e2894] [cursor=pointer]
+              - 'row "منشور Instagram: ‏‎located in the Kesrouan area,... ACTIVE Clicks $NaN /day Aug 25, 2024, 9:34 AM View Details" [ref=e2895]':
+                - 'cell "منشور Instagram: ‏‎located in the Kesrouan area,..." [ref=e2896]'
+                - cell "ACTIVE" [ref=e2897]:
+                  - generic [ref=e2899]: ACTIVE
+                - cell "Clicks" [ref=e2900]
+                - cell "$NaN /day" [ref=e2901]:
+                  - generic [ref=e2902]:
+                    - generic [ref=e2903]: $NaN
+                    - generic [ref=e2904]: /day
+                - cell "Aug 25, 2024, 9:34 AM" [ref=e2905]
+                - cell "View Details" [ref=e2906]:
+                  - button "View Details" [ref=e2907] [cursor=pointer]
+              - 'row "Event: B2h from Jabal Moussa to Chouwen Lake ACTIVE EVENT_RESPONSES $NaN /day Aug 24, 2024, 8:09 PM View Details" [ref=e2908]':
+                - 'cell "Event: B2h from Jabal Moussa to Chouwen Lake" [ref=e2909]'
+                - cell "ACTIVE" [ref=e2910]:
+                  - generic [ref=e2912]: ACTIVE
+                - cell "EVENT_RESPONSES" [ref=e2913]
+                - cell "$NaN /day" [ref=e2914]:
+                  - generic [ref=e2915]:
+                    - generic [ref=e2916]: $NaN
+                    - generic [ref=e2917]: /day
+                - cell "Aug 24, 2024, 8:09 PM" [ref=e2918]
+                - cell "View Details" [ref=e2919]:
+                  - button "View Details" [ref=e2920] [cursor=pointer]
+              - 'row "منشور Instagram: ‏‎Join us for a sunset Hike for... ACTIVE Clicks $NaN /day Aug 23, 2024, 2:15 PM View Details" [ref=e2921]':
+                - 'cell "منشور Instagram: ‏‎Join us for a sunset Hike for..." [ref=e2922]'
+                - cell "ACTIVE" [ref=e2923]:
+                  - generic [ref=e2925]: ACTIVE
+                - cell "Clicks" [ref=e2926]
+                - cell "$NaN /day" [ref=e2927]:
+                  - generic [ref=e2928]:
+                    - generic [ref=e2929]: $NaN
+                    - generic [ref=e2930]: /day
+                - cell "Aug 23, 2024, 2:15 PM" [ref=e2931]
+                - cell "View Details" [ref=e2932]:
+                  - button "View Details" [ref=e2933] [cursor=pointer]
+              - 'row "منشور Instagram: ‏‎Dear Born2hikers join us this... ACTIVE Clicks $NaN /day Aug 17, 2024, 12:06 PM View Details" [ref=e2934]':
+                - 'cell "منشور Instagram: ‏‎Dear Born2hikers join us this..." [ref=e2935]'
+                - cell "ACTIVE" [ref=e2936]:
+                  - generic [ref=e2938]: ACTIVE
+                - cell "Clicks" [ref=e2939]
+                - cell "$NaN /day" [ref=e2940]:
+                  - generic [ref=e2941]:
+                    - generic [ref=e2942]: $NaN
+                    - generic [ref=e2943]: /day
+                - cell "Aug 17, 2024, 12:06 PM" [ref=e2944]
+                - cell "View Details" [ref=e2945]:
+                  - button "View Details" [ref=e2946] [cursor=pointer]
+              - 'row "منشور Instagram: ‏‎Dear Born2hikers join us this... ACTIVE Clicks $NaN /day Aug 4, 2024, 6:18 AM View Details" [ref=e2947]':
+                - 'cell "منشور Instagram: ‏‎Dear Born2hikers join us this..." [ref=e2948]'
+                - cell "ACTIVE" [ref=e2949]:
+                  - generic [ref=e2951]: ACTIVE
+                - cell "Clicks" [ref=e2952]
+                - cell "$NaN /day" [ref=e2953]:
+                  - generic [ref=e2954]:
+                    - generic [ref=e2955]: $NaN
+                    - generic [ref=e2956]: /day
+                - cell "Aug 4, 2024, 6:18 AM" [ref=e2957]
+                - cell "View Details" [ref=e2958]:
+                  - button "View Details" [ref=e2959] [cursor=pointer]
+  - region "Notifications alt+T"
+  - alert [ref=e32]
