@@ -9,15 +9,12 @@ import {
   ChevronsLeft,
   ChevronsRight,
   Activity,
-  Inbox,
-  LineChart,
   LogOut,
   Megaphone,
   Plus,
   Settings,
   Sparkles,
   Swords,
-  User,
   Users,
   type LucideIcon,
 } from "lucide-react";
@@ -55,7 +52,6 @@ const SECTIONS: NavSection[] = [
     titleKey: "nav.section.today",
     items: [
       { href: "/", labelKey: "nav.overview", icon: BarChart3, shortcut: "G O" },
-      { href: "/inbox", labelKey: "nav.inbox", icon: Inbox, shortcut: "G I" },
     ],
   },
   {
@@ -69,7 +65,6 @@ const SECTIONS: NavSection[] = [
   {
     titleKey: "nav.section.analyze",
     items: [
-      { href: "/reports/growth", labelKey: "nav.reports", icon: LineChart, shortcut: "G R" },
       { href: "/audience", labelKey: "nav.audience", icon: Users, shortcut: "G A" },
       { href: "/trend-intelligence", labelKey: "nav.trendIntelligence", icon: Activity, shortcut: "G T" },
       { href: "/competitors", labelKey: "nav.competitors", icon: Swords, shortcut: "G X" },
@@ -79,7 +74,6 @@ const SECTIONS: NavSection[] = [
     titleKey: "nav.section.connect",
     items: [
       { href: "/connections", labelKey: "nav.connections", icon: Cable, shortcut: "G C" },
-      { href: "/settings", labelKey: "nav.settings", icon: Settings },
     ],
   },
 ];

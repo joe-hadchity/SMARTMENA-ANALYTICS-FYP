@@ -109,7 +109,7 @@ export function HeroKpiCard({ hero, secondary }: HeroKpiCardProps) {
                 <div className="font-mono text-2xl font-bold tracking-tight leading-none">
                   {formatValue(stat.value, stat.format)}
                 </div>
-                <div style={{ color: "oklch(52% 0.13 195)" }}>
+                <div style={{ color: "oklch(46% 0.108 320)" }}>
                   <Sparkline
                     data={stat.sparkline}
                     width={52}

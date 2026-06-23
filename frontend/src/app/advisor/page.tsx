@@ -121,7 +121,7 @@ export default function AdvisorPage() {
   // Fetch conversations list
   const conversationsQuery = useQuery({
     queryKey: ["advisor-conversations"],
-    queryFn: () => advisorChatApi.listConversations({ limit: 20 }),
+    queryFn: () => advisorChatApi.listConversations({ limit: 20, status: "active", mode: "general" }),
   });
 
   // Fetch active conversation messages

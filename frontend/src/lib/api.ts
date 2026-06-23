@@ -1027,6 +1027,7 @@ export const advisorChatApi = {
   listConversations: async (params?: {
     limit?: number;
     status?: "active" | "archived" | "all";
+    mode?: "general" | "create_campaign";
   }): Promise<{
     conversations: AdvisorConversation[];
     count: number;

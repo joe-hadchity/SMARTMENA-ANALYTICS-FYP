@@ -781,7 +781,7 @@ function HashtagMomentumChart({ snapshots }: { snapshots: TrackedHashtag["snapsh
           <XAxis dataKey="date" hide />
           <YAxis hide />
           <Tooltip formatter={(value) => formatNumber(Number(value))} />
-          <Line type="monotone" dataKey="avg" stroke="#2563eb" strokeWidth={2} dot={false} />
+          <Line type="monotone" dataKey="avg" stroke="oklch(46% 0.108 320)" strokeWidth={2} dot={false} />
         </LineChart>
       </ResponsiveContainer>
     </div>

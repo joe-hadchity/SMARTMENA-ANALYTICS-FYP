@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useI18n } from "@/i18n/I18nProvider";
 import { TOKENS } from "@/lib/design-tokens";
-import { hashtagTrendsApi } from "@/lib/api";
+import { hashtagTrendsApi, workspacesApi } from "@/lib/api";
 
 interface HashtagRadarProps {
   primary?: string;
@@ -14,26 +14,40 @@ export default function HashtagRadar({ primary = "oklch(46% 0.108 320)" }: Hasht
   const ar = locale === "ar";
   const handFont = ar ? "'Kalam', cursive" : "'Caveat', cursive";
 
+  const workspaceQ = useQuery({
+    queryKey: ["workspace", "current"],
+    queryFn: workspacesApi.current,
+  });
+  const workspaceId = workspaceQ.data?.id;
+
+  // Same query key as trend-intelligence page so they share cache
   const hashtagsQ = useQuery({
-    queryKey: ["hashtags"],
+    queryKey: ["hashtag-trends", workspaceId],
     queryFn: hashtagTrendsApi.list,
+    enabled: Boolean(workspaceId),
   });
 
   const title = ar ? 'الوسوم الرائجة' : 'Trending Hashtags';
   const subtitle = ar ? 'زخم ٢٤ ساعة' : 'last 24h momentum';
 
   const hashtags = hashtagsQ.data?.hashtags ?? [];
+  const suggested = hashtagsQ.data?.suggested_hashtags ?? [];
 
-  // Take top 6 and calculate momentum as percentage of max engagement
-  const topHashtags = hashtags
-    .filter(h => h.latest_snapshot?.total_engagement) // Only show hashtags with data
+  // Hashtags with real engagement data
+  const withData = hashtags
+    .filter(h => h.latest_snapshot?.total_engagement)
     .sort((a, b) => (b.latest_snapshot?.total_engagement ?? 0) - (a.latest_snapshot?.total_engagement ?? 0))
     .slice(0, 6);
 
+  // Fall back to suggested hashtags as pill display when no tracked data
+  const hasSuggested = suggested.length > 0;
+  const topHashtags = withData;
+
   const maxEngagement = Math.max(...topHashtags.map(h => h.latest_snapshot?.total_engagement ?? 0), 1);
 
-  // If no data, show placeholder
+  // No tracked data — show suggested hashtags as pills
   if (topHashtags.length === 0) {
+    const pills = hasSuggested ? suggested : [];
     return (
       <div
         style={{
@@ -46,52 +60,42 @@ export default function HashtagRadar({ primary = "oklch(46% 0.108 320)" }: Hasht
         }}
       >
         <div style={{ marginBottom: 12, textAlign: ar ? 'right' : 'left' }}>
-          <div
-            style={{
-              fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: 9,
-              letterSpacing: '0.14em',
-              textTransform: 'uppercase',
-              color: TOKENS.ink[500],
-            }}
-          >
+          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase', color: TOKENS.ink[500] }}>
             {ar ? 'وسوم' : 'hashtags'}
           </div>
-          <h3
-            style={{
-              fontFamily: ar
-                ? "'IBM Plex Sans Arabic', sans-serif"
-                : 'Newsreader, serif',
-              fontWeight: 500,
-              fontSize: 15,
-              color: TOKENS.ink[900],
-              marginTop: 2,
-            }}
-          >
+          <h3 style={{ fontFamily: ar ? "'IBM Plex Sans Arabic', sans-serif" : 'Newsreader, serif', fontWeight: 500, fontSize: 15, color: TOKENS.ink[900], marginTop: 2 }}>
             {title}
           </h3>
-          <div
-            style={{
-              fontFamily: handFont,
-              fontSize: 13.5,
-              color: 'oklch(46% 0.108 320)',
-              marginTop: 2,
-            }}
-          >
-            {subtitle}
+          <div style={{ fontFamily: handFont, fontSize: 13.5, color: primary, marginTop: 2 }}>
+            {ar ? 'وسوم مقترحة' : 'suggested for your niche'}
           </div>
         </div>
-        <div
-          style={{
-            textAlign: 'center',
-            padding: '24px 16px',
-            fontFamily: handFont,
-            fontSize: 15,
-            color: TOKENS.ink[500],
-          }}
-        >
-          {ar ? 'لا توجد بيانات بعد ✿' : 'no data yet ✿'}
-        </div>
+        {pills.length > 0 ? (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+            {pills.map((tag: string) => (
+              <span
+                key={tag}
+                style={{
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontSize: 10.5,
+                  fontWeight: 600,
+                  color: primary,
+                  background: TOKENS.teal[50],
+                  border: `1px solid ${TOKENS.teal[200]}`,
+                  padding: '3px 9px',
+                  borderRadius: 999,
+                  letterSpacing: '0.02em',
+                }}
+              >
+                #{tag}
+              </span>
+            ))}
+          </div>
+        ) : (
+          <div style={{ textAlign: 'center', padding: '24px 16px', fontFamily: handFont, fontSize: 15, color: TOKENS.ink[500] }}>
+            {ar ? 'لا توجد بيانات بعد ✿' : 'no data yet ✿'}
+          </div>
+        )}
       </div>
     );
   }

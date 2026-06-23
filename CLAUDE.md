@@ -4,13 +4,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-SmartMENA Analytics is an AI-powered marketing analytics platform for SMEs in the MENA region. Three services communicate over HTTP with a shared Supabase (PostgreSQL) database:
+SmartMENA Analytics is an AI-powered marketing analytics platform for SMEs in the MENA region. Four services communicate over HTTP with a shared Supabase (PostgreSQL) database:
 
 | Service | Tech | Port |
 |---------|------|------|
 | Backend | Node.js 20 + Express | 4000 |
 | ML service | Python 3.11 + FastAPI | 8000 |
 | Frontend | Next.js 14 (App Router) | 3000 |
+| AI Advisor (Fyp/claude-sdk) | Fastify + Claude Agent SDK | 3001 |
+
+The AI Advisor service (`Fyp/claude-sdk`) is a separate Fastify server that wraps `@anthropic-ai/claude-agent-sdk`. It owns conversation sessions and calls Claude directly. At runtime it spawns `Fyp/meta-mcp` as a child subprocess (MCP server bridging Claude to Meta Graph API v21.0) — meta-mcp is not an independent service, just a subprocess of claude-sdk.
 
 ## Development Commands
 

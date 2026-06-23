@@ -3,7 +3,9 @@
     "allow": [
       "PowerShell($proc = Get-NetTCPConnection -LocalPort 3000 -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty OwningProcess; if \\($proc\\) { Stop-Process -Id $proc -Force; Write-Output \"Killed PID $proc\" } else { Write-Output \"Nothing on port 3000\" })",
       "Bash(rm -rf node_modules)",
-      "Bash(npm install *)"
+      "Bash(npm install *)",
+      "mcp__playwright__browser_take_screenshot",
+      "mcp__playwright__browser_snapshot"
     ]
   }
 }

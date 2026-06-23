@@ -41,14 +41,14 @@ import { cn } from "@/lib/utils";
 
 // Consistent palette — restrained 4-color scheme like Stripe / Linear.
 const PALETTE = {
-  primary: "#1a7a6e",
-  accent: "#0ea5e9",
-  warning: "#f59e0b",
-  positive: "#16a34a",
-  negative: "#dc2626",
-  neutral: "#94a3b8",
-  axis: "#94a3b8",
-  grid: "#e2e8f0",
+  primary: "oklch(46% 0.108 320)",   // plum — brand primary
+  accent: "oklch(64% 0.092 320)",    // plum-400
+  warning: "oklch(64% 0.135 60)",    // amber-500
+  positive: "oklch(58% 0.090 150)",  // sage — no green
+  negative: "oklch(54% 0.130 30)",   // terra
+  neutral: "oklch(64% 0.012 50)",    // ink-400
+  axis: "oklch(64% 0.012 50)",
+  grid: "oklch(90% 0.008 50)",
 };
 
 const RANGE_OPTIONS = [
@@ -59,7 +59,7 @@ const RANGE_OPTIONS = [
 type RangeDays = (typeof RANGE_OPTIONS)[number]["value"];
 
 export default function AudiencePage() {
-  const { locale } = useI18n() as { locale: Locale };
+  const { t, locale } = useI18n();
   const qc = useQueryClient();
   const [range, setRange] = useState<RangeDays>("90");
 
@@ -99,9 +99,9 @@ export default function AudiencePage() {
       <div className="flex flex-wrap items-end justify-between gap-4 border-b border-border pb-5">
         <div>
           <p className="text-xs font-medium uppercase tracking-wide text-fg-muted">
-            Audience intelligence
+            {t("audience.eyebrow", "Audience Intelligence")}
           </p>
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight text-fg">Audience</h1>
+          <h1 className="mt-1 text-2xl font-semibold tracking-tight text-fg">{t("audience.title", "Audience")}</h1>
           {data?.account?.handle ? (
             <p className="mt-1 text-sm text-fg-muted">
               @{data.account.handle} ·{" "}
@@ -111,7 +111,7 @@ export default function AudiencePage() {
             </p>
           ) : (
             <p className="mt-1 text-sm text-fg-muted">
-              Real-time analytics from Instagram Graph
+              {t("audience.subtitle", "Real-time analytics from your connected account")}
             </p>
           )}
         </div>
@@ -125,7 +125,7 @@ export default function AudiencePage() {
             className="inline-flex items-center gap-1.5 rounded-md border border-border bg-surface px-3 py-1.5 text-xs font-medium text-fg hover:bg-surface-hover disabled:opacity-50"
           >
             <Download className="h-3.5 w-3.5" />
-            Export
+            {t("common.export", "Export")}
           </button>
           <button
             type="button"
@@ -136,7 +136,7 @@ export default function AudiencePage() {
             <RefreshCw
               className={cn("h-3.5 w-3.5", refreshM.isPending && "animate-spin")}
             />
-            {refreshM.isPending ? "Refreshing" : "Refresh"}
+            {refreshM.isPending ? t("common.loading", "Refreshing") : t("common.retry", "Refresh")}
           </button>
         </div>
       </div>
@@ -145,13 +145,13 @@ export default function AudiencePage() {
       <AiInsightsRibbon insights={data?.ai_insights ?? []} loading={isLoading} />
 
       {/* KPI strip */}
-      <KpiStrip data={data} loading={isLoading} locale={locale} />
+      <KpiStrip data={data} loading={isLoading} locale={locale} t={t} />
 
       {/* Demographics */}
-      <Section title="Demographics" subtitle="Who follows you, by share of audience">
+      <Section title={t("audience.section.demographics", "Demographics")} subtitle={t("audience.section.demographics.sub", "Who follows you, by share of audience")}>
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <ChartCard
-            title="Gender distribution"
+            title={t("audience.chart.gender", "Gender distribution")}
             icon={<Users className="h-3.5 w-3.5" />}
             insight={genderInsight(data)}
             loading={isLoading}
@@ -161,7 +161,7 @@ export default function AudiencePage() {
           </ChartCard>
 
           <ChartCard
-            title="Age distribution"
+            title={t("audience.chart.age", "Age distribution")}
             icon={<Activity className="h-3.5 w-3.5" />}
             insight={ageInsight(data)}
             loading={isLoading}
@@ -173,10 +173,10 @@ export default function AudiencePage() {
       </Section>
 
       {/* Geography */}
-      <Section title="Geography" subtitle="Where your reach is concentrated">
+      <Section title={t("audience.section.geography", "Geography")} subtitle={t("audience.section.geography.sub", "Where your reach is concentrated")}>
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <ChartCard
-            title="Top cities"
+            title={t("audience.chart.cities", "Top cities")}
             icon={<MapPin className="h-3.5 w-3.5" />}
             insight={cityInsight(data)}
             loading={isLoading}
@@ -186,7 +186,7 @@ export default function AudiencePage() {
           </ChartCard>
 
           <ChartCard
-            title="Top countries"
+            title={t("audience.chart.countries", "Top countries")}
             icon={<Globe2 className="h-3.5 w-3.5" />}
             insight={countryInsight(data)}
             loading={isLoading}
@@ -198,11 +198,11 @@ export default function AudiencePage() {
       </Section>
 
       {/* Activity & growth */}
-      <Section title="Activity & growth" subtitle="When followers engage and how the audience trends">
+      <Section title={t("audience.section.activity", "Activity & growth")} subtitle={t("audience.section.activity.sub", "When followers engage and how the audience trends")}>
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
           <ChartCard
             className="lg:col-span-2"
-            title="Follower growth"
+            title={t("audience.chart.growth", "Follower growth")}
             icon={<TrendingUp className="h-3.5 w-3.5" />}
             insight={growthInsight(data)}
             loading={isLoading}
@@ -212,15 +212,15 @@ export default function AudiencePage() {
           </ChartCard>
 
           <ChartCard
-            title="Active hours"
+            title={t("audience.chart.hours", "Active hours")}
             icon={<Clock3 className="h-3.5 w-3.5" />}
             insight={activeInsight(data)}
             loading={isLoading}
             empty={!data?.active_times?.by_hour?.length}
             badge={
               data?.active_times?.source === "meta_graph"
-                ? { text: "Live", tone: "positive" }
-                : { text: "Inferred", tone: "neutral" }
+                ? { text: t("audience.badge.live", "Live"), tone: "positive" }
+                : { text: t("audience.badge.inferred", "Inferred"), tone: "neutral" }
             }
           >
             <ActiveHoursBars data={data?.active_times?.by_hour ?? []} />
@@ -229,10 +229,10 @@ export default function AudiencePage() {
       </Section>
 
       {/* Content & sentiment */}
-      <Section title="Content & audience response" subtitle="What you post, how it sounds, and how people react">
+      <Section title={t("audience.section.content", "Content & audience response")} subtitle={t("audience.section.content.sub", "What you post, how it sounds, and how people react")}>
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
           <ChartCard
-            title="Format performance"
+            title={t("audience.chart.format", "Format performance")}
             icon={<Sparkles className="h-3.5 w-3.5" />}
             insight={contentInsight(data)}
             loading={isLoading}
@@ -242,7 +242,7 @@ export default function AudiencePage() {
           </ChartCard>
 
           <ChartCard
-            title="Audience response sentiment"
+            title={t("audience.chart.sentiment", "Audience response sentiment")}
             icon={<Heart className="h-3.5 w-3.5" />}
             insight={commentSentimentInsight(data)}
             loading={isLoading}
@@ -264,7 +264,7 @@ export default function AudiencePage() {
           </ChartCard>
 
           <ChartCard
-            title="Caption tone"
+            title={t("audience.chart.caption", "Caption tone")}
             icon={<Heart className="h-3.5 w-3.5" />}
             insight={captionSentimentInsight(data)}
             loading={isLoading}
@@ -377,43 +377,45 @@ function KpiStrip({
   data,
   loading,
   locale,
+  t,
 }: {
   data: AudienceInsightsPayload | undefined;
   loading: boolean;
   locale: Locale;
+  t: (key: string, fallback?: string) => string;
 }) {
   const k = data?.kpis;
 
   return (
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
       <Kpi
-        label="Followers"
+        label={t("audience.kpi.followers", "Followers")}
         value={k ? formatNumber(k.followers, locale) : "—"}
         delta={k?.follower_delta ?? null}
         unit="abs"
         loading={loading}
       />
       <Kpi
-        label="Reach"
+        label={t("audience.kpi.reach", "Reach")}
         value={k ? formatNumber(k.reach, locale) : "—"}
         delta={null}
         loading={loading}
         sublabel={k ? `${formatNumber(k.posts_analyzed, locale)} posts` : undefined}
       />
       <Kpi
-        label="Engaged accounts"
+        label={t("audience.kpi.engaged", "Engaged accounts")}
         value={k ? formatNumber(k.engaged_accounts, locale) : "—"}
         delta={null}
         loading={loading}
       />
       <Kpi
-        label="Profile views"
+        label={t("audience.kpi.profileViews", "Profile views")}
         value={k ? formatNumber(k.profile_views, locale) : "—"}
         delta={null}
         loading={loading}
       />
       <Kpi
-        label="Engagement rate"
+        label={t("audience.kpi.engRate", "Engagement rate")}
         value={
           k && k.reach
             ? `${((k.engaged_accounts / Math.max(k.reach, 1)) * 100).toFixed(2)}%`
@@ -421,7 +423,7 @@ function KpiStrip({
         }
         delta={null}
         loading={loading}
-        sublabel="engaged / reach"
+        sublabel={t("audience.kpi.engRateHint", "engaged / reach")}
       />
     </div>
   );
@@ -551,11 +553,12 @@ function ChartCard({
 }
 
 function EmptyChart() {
+  const { t } = useI18n();
   return (
     <div className="flex h-56 flex-col items-center justify-center gap-1 text-center text-xs text-fg-subtle">
       <Sparkles className="h-5 w-5 opacity-40" />
-      <p>Not enough Meta data yet for this chart.</p>
-      <p className="text-[10px]">Refresh after publishing more posts.</p>
+      <p>{t("audience.empty.chart", "Not enough Meta data yet for this chart.")}</p>
+      <p className="text-[10px]">{t("audience.empty.chartSub", "Refresh after publishing more posts.")}</p>
     </div>
   );
 }
@@ -563,125 +566,6 @@ function EmptyChart() {
 // ---------------------------------------------------------------------------
 // Charts
 // ---------------------------------------------------------------------------
-
-function GenderDonut({
-  data,
-}: {
-  data: AudienceInsightsPayload["gender_distribution"];
-}) {
-  const colors = [PALETTE.primary, PALETTE.accent, PALETTE.warning];
-  const rows = data.map((row, i) => ({
-    name: row.gender || "Unknown",
-    value: row.value || (row.share ?? 0),
-    fill: colors[i % colors.length],
-  }));
-
-  return (
-    <ResponsiveContainer width="100%" height="100%">
-      <PieChart>
-        <Pie
-          data={rows}
-          dataKey="value"
-          innerRadius={50}
-          outerRadius={80}
-          paddingAngle={2}
-          stroke="none"
-        >
-          {rows.map((row, i) => (
-            <Cell key={i} fill={row.fill} />
-          ))}
-        </Pie>
-        <Tooltip
-          contentStyle={{
-            background: "white",
-            border: "1px solid #e2e8f0",
-            borderRadius: 6,
-            fontSize: 12,
-          }}
-          formatter={(value: number, name: string) => [`${value.toLocaleString()}`, name]}
-        />
-      </PieChart>
-    </ResponsiveContainer>
-  );
-}
-
-function AgeBars({ data }: { data: AudienceInsightsPayload["age_ranges"] }) {
-  const sorted = [...data].sort(
-    (a, b) => (b.value || (b.share ?? 0)) - (a.value || (a.share ?? 0)),
-  );
-  const rows = sorted.map((r) => ({
-    range: r.range,
-    value: r.value || (r.share ?? 0),
-    sharePct: ((r.share ?? 0) * 100).toFixed(1),
-  }));
-
-  return (
-    <ResponsiveContainer width="100%" height="100%">
-      <BarChart data={rows} layout="vertical" margin={{ left: 0, right: 12 }}>
-        <CartesianGrid horizontal={false} stroke={PALETTE.grid} strokeDasharray="3 3" />
-        <XAxis type="number" hide />
-        <YAxis
-          type="category"
-          dataKey="range"
-          stroke={PALETTE.axis}
-          tick={{ fontSize: 11 }}
-          width={50}
-          axisLine={false}
-          tickLine={false}
-        />
-        <Tooltip
-          contentStyle={{ background: "white", border: "1px solid #e2e8f0", borderRadius: 6, fontSize: 12 }}
-          formatter={(_v: number, _n: string, p) => [`${p.payload.sharePct}%`, "Share"]}
-        />
-        <Bar dataKey="value" fill={PALETTE.primary} radius={[0, 4, 4, 0]} />
-      </BarChart>
-    </ResponsiveContainer>
-  );
-}
-
-function RankedBars({
-  data,
-  color,
-}: {
-  data: Array<{ name: string; value?: number | null; share?: number | null }>;
-  color: string;
-}) {
-  const valueOf = (r: { value?: number | null; share?: number | null }) =>
-    r.value || (r.share ?? 0);
-  const sorted = [...data]
-    .filter((r) => r.name)
-    .sort((a, b) => valueOf(b) - valueOf(a))
-    .slice(0, 8);
-  const rows = sorted.map((r) => ({
-    name: shortenLocation(r.name),
-    fullName: r.name,
-    value: valueOf(r),
-    sharePct: ((r.share ?? 0) * 100).toFixed(1),
-  }));
-
-  return (
-    <ResponsiveContainer width="100%" height="100%">
-      <BarChart data={rows} layout="vertical" margin={{ left: 0, right: 12 }}>
-        <CartesianGrid horizontal={false} stroke={PALETTE.grid} strokeDasharray="3 3" />
-        <XAxis type="number" hide />
-        <YAxis
-          type="category"
-          dataKey="name"
-          stroke={PALETTE.axis}
-          tick={{ fontSize: 11 }}
-          width={110}
-          axisLine={false}
-          tickLine={false}
-        />
-        <Tooltip
-          contentStyle={{ background: "white", border: "1px solid #e2e8f0", borderRadius: 6, fontSize: 12 }}
-          formatter={(_v: number, _n: string, p) => [`${p.payload.sharePct}%`, p.payload.fullName]}
-        />
-        <Bar dataKey="value" fill={color} radius={[0, 4, 4, 0]} />
-      </BarChart>
-    </ResponsiveContainer>
-  );
-}
 
 function FollowerGrowthArea({
   data,
@@ -906,10 +790,11 @@ function SentimentDonut({
 // ---------------------------------------------------------------------------
 
 function DiagnosticPanel({ warnings }: { warnings: string[] }) {
+  const { t } = useI18n();
   return (
     <details className="rounded-lg border border-border bg-surface px-4 py-3 text-xs">
       <summary className="cursor-pointer font-medium text-fg-muted hover:text-fg">
-        Data diagnostics ({warnings.length})
+        {t("audience.diagnostics", "Data diagnostics")} ({warnings.length})
       </summary>
       <ul className="mt-2 space-y-1 text-fg-subtle">
         {warnings.map((w, i) => (
@@ -920,13 +805,6 @@ function DiagnosticPanel({ warnings }: { warnings: string[] }) {
       </ul>
     </details>
   );
-}
-
-function shortenLocation(name: string): string {
-  if (!name) return "";
-  // "Beirut, Beirut Governorate" -> "Beirut"
-  const first = name.split(",")[0]?.trim();
-  return first.length > 20 ? `${first.slice(0, 18)}…` : first;
 }
 
 function capitalize(s: string): string {
@@ -943,34 +821,6 @@ function formatHour(h: number): string {
 // ---------------------------------------------------------------------------
 // AI insight blurbs (one per chart, computed from data)
 // ---------------------------------------------------------------------------
-
-function genderInsight(data: AudienceInsightsPayload | undefined): string | null {
-  const top = data?.gender_distribution
-    ?.slice()
-    .sort((a, b) => (b.share ?? 0) - (a.share ?? 0))[0];
-  if (!top || !top.share) return null;
-  return `${capitalize(top.gender)} make up ${(top.share * 100).toFixed(0)}% of your audience.`;
-}
-
-function ageInsight(data: AudienceInsightsPayload | undefined): string | null {
-  const top = data?.age_ranges
-    ?.slice()
-    .sort((a, b) => (b.share ?? 0) - (a.share ?? 0))[0];
-  if (!top || top.share == null) return null;
-  return `${(top.share * 100).toFixed(0)}% of followers fall in the ${top.range} band.`;
-}
-
-function cityInsight(data: AudienceInsightsPayload | undefined): string | null {
-  const top = data?.top_cities?.[0];
-  if (!top?.name || top.share == null) return null;
-  return `${shortenLocation(top.name)} alone accounts for ${(top.share * 100).toFixed(0)}% of your reach.`;
-}
-
-function countryInsight(data: AudienceInsightsPayload | undefined): string | null {
-  const top = data?.top_countries?.[0];
-  if (!top?.name || top.share == null) return null;
-  return `${top.name} leads at ${(top.share * 100).toFixed(0)}%, the rest is diaspora and travelers.`;
-}
 
 function growthInsight(data: AudienceInsightsPayload | undefined): string | null {
   const points = data?.follower_growth ?? [];
@@ -1012,4 +862,113 @@ function captionSentimentInsight(data: AudienceInsightsPayload | undefined): str
   if (!s || !s.total) return null;
   const pos = ((s.positive / s.total) * 100).toFixed(0);
   return `${pos}% of captions read as positive - this reflects your brand tone.`;
+}
+
+function genderInsight(data: AudienceInsightsPayload | undefined): string | null {
+  const dist = data?.gender_distribution ?? [];
+  if (!dist.length) return null;
+  const top = [...dist].sort((a, b) => (b.share ?? 0) - (a.share ?? 0))[0];
+  if (!top?.share) return null;
+  return `${capitalize(top.gender)} followers make up ${(top.share * 100).toFixed(0)}% of your audience.`;
+}
+
+function ageInsight(data: AudienceInsightsPayload | undefined): string | null {
+  const ranges = data?.age_ranges ?? [];
+  if (!ranges.length) return null;
+  const top = [...ranges].sort((a, b) => (b.share ?? 0) - (a.share ?? 0))[0];
+  if (!top?.share) return null;
+  return `${(top.share * 100).toFixed(0)}% of your audience is aged ${top.range}.`;
+}
+
+function cityInsight(data: AudienceInsightsPayload | undefined): string | null {
+  const cities = data?.top_cities ?? [];
+  if (!cities.length) return null;
+  const top = cities[0];
+  if (!top?.name || !top?.share) return null;
+  return `${top.name} drives ${(top.share * 100).toFixed(0)}% of your audience.`;
+}
+
+function countryInsight(data: AudienceInsightsPayload | undefined): string | null {
+  const countries = data?.top_countries ?? [];
+  if (!countries.length) return null;
+  const top = countries[0];
+  if (!top?.name || !top?.share) return null;
+  return `${top.name} is your largest audience country at ${(top.share * 100).toFixed(0)}%.`;
+}
+
+// ---------------------------------------------------------------------------
+// Demographics charts
+// ---------------------------------------------------------------------------
+
+function GenderDonut({ data }: { data: Array<{ gender: string; share?: number | null; value: number }> }) {
+  const rows = data.map((d) => ({ name: capitalize(d.gender), value: d.value }));
+  const COLORS = [PALETTE.primary, PALETTE.accent, PALETTE.neutral];
+  return (
+    <div className="flex items-center gap-4 py-2">
+      <ResponsiveContainer width={120} height={120}>
+        <PieChart>
+          <Pie data={rows} dataKey="value" cx="50%" cy="50%" innerRadius={32} outerRadius={52} strokeWidth={0}>
+            {rows.map((_, i) => (
+              <Cell key={i} fill={COLORS[i % COLORS.length]} />
+            ))}
+          </Pie>
+        </PieChart>
+      </ResponsiveContainer>
+      <div className="flex flex-col gap-1.5 text-xs">
+        {rows.map((r, i) => (
+          <div key={r.name} className="flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full shrink-0" style={{ background: COLORS[i % COLORS.length] }} />
+            <span className="text-fg-muted">{r.name}</span>
+            <span className="ms-auto font-medium text-fg">{((r.value / rows.reduce((s, x) => s + x.value, 0)) * 100).toFixed(0)}%</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function AgeBars({ data }: { data: Array<{ range: string; share?: number | null; value: number }> }) {
+  const rows = [...data].sort((a, b) => b.value - a.value).slice(0, 6);
+  const max = Math.max(...rows.map((r) => r.value), 1);
+  return (
+    <div className="flex flex-col gap-2 py-2">
+      {rows.map((r) => (
+        <div key={r.range} className="flex items-center gap-2 text-xs">
+          <span className="w-12 shrink-0 text-fg-muted">{r.range}</span>
+          <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: PALETTE.grid }}>
+            <div className="h-full rounded-full" style={{ width: `${(r.value / max) * 100}%`, background: PALETTE.primary }} />
+          </div>
+          <span className="w-8 text-right font-medium text-fg">{((r.share ?? 0) * 100).toFixed(0)}%</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function RankedBars({
+  data,
+  color,
+}: {
+  data: Array<{ name: string; share?: number | null; value: number }>;
+  color: string;
+}) {
+  const rows = data.slice(0, 8);
+  const max = Math.max(...rows.map((r) => r.value), 1);
+  return (
+    <div className="flex flex-col gap-2 py-2">
+      {rows.map((r) => (
+        <div key={r.name} className="flex items-center gap-2 text-xs">
+          <span className="w-24 shrink-0 truncate text-fg-muted">{shortenLocation(r.name)}</span>
+          <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: PALETTE.grid }}>
+            <div className="h-full rounded-full" style={{ width: `${(r.value / max) * 100}%`, background: color }} />
+          </div>
+          <span className="w-8 text-right font-medium text-fg">{((r.share ?? 0) * 100).toFixed(0)}%</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function shortenLocation(name: string): string {
+  return name.length > 16 ? name.slice(0, 15) + "…" : name;
 }

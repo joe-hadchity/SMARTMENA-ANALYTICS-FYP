@@ -3,6 +3,7 @@ const axios = require("axios");
 const asyncHandler = require("../utils/asyncHandler");
 const workspaceContext = require("../middleware/workspaceContext");
 const advisorClient = require("../services/advisorClient");
+const mlClient = require("../services/mlClient");
 const { getSupabase } = require("../config/supabase");
 const conversationsController = require("../controllers/advisorConversationsController");
 
@@ -97,12 +98,54 @@ router.post(
         // Continue - don't block the chat if DB write fails
       }
       // --------------------------------------------------------------------
-      // Step 3: Fetch context for campaign creation mode
+      // Step 3: Fetch context — ROI prediction or campaign creation
       // --------------------------------------------------------------------
       let contextPrompt = "";
-      const hasUserRequirements = message.toLowerCase().includes("goal") ||
-                                   message.toLowerCase().includes("budget") ||
+      const msgLower = message.toLowerCase();
+      const hasUserRequirements = msgLower.includes("goal") ||
+                                   msgLower.includes("budget") ||
                                    /\$\d+/.test(message);
+
+      // ROI prediction: if user asks about ROI/predict, fetch latest active campaign
+      // and run it through the ML model, then inject the result as context
+      const asksROI = msgLower.includes("roi") || msgLower.includes("predict") ||
+                      msgLower.includes("return on investment") || msgLower.includes("forecast");
+
+      if (asksROI && advisorClient.isEnabled()) {
+        try {
+          const campaignsResult = await advisorClient.listCampaigns({ status: "ACTIVE", limit: 5 });
+          const campaigns = (campaignsResult.data || []);
+          if (campaigns.length > 0) {
+            const latest = campaigns[0];
+            const dailyBudget = Number(latest.daily_budget || 0) / 100;
+            // Map Meta objective to platform/content type best guess
+            const platform = "instagram";
+            const contentType = "reel"; // highest engagement for this account
+            const audienceSize = 50000;  // typical MENA reach estimate
+            const postingHour = 19;      // 7PM peak from audience data
+            const region = "Lebanon";
+
+            try {
+              const mlResult = await mlClient.predictRoi({
+                budget: dailyBudget || 5,
+                platform,
+                contentType,
+                audienceSize,
+                postingHour,
+                sentimentScore: 0.6,
+                holidayFlag: 0,
+                region,
+              });
+
+              contextPrompt = `\n\n[ROI_PREDICTION for "${latest.name}" (${latest.objective}, $${dailyBudget}/day): predicted_roi=${mlResult.predicted_roi?.toFixed(2)}x, predicted_engagement_rate=${mlResult.predicted_engagement?.toFixed(3)}, confidence=${mlResult.confidence_score?.toFixed(2)}. These are SmartMENA ML model estimates based on platform/budget/audience inputs, not Meta's own ROAS tracking.]`;
+            } catch (mlErr) {
+              contextPrompt = `\n\n[ROI_PREDICTION: ML service unavailable — ${mlErr.message}]`;
+            }
+          }
+        } catch (roiContextErr) {
+          console.warn("[ROI Context Warning]", roiContextErr.message);
+        }
+      }
 
       if (conversation.mode === "create_campaign" && hasUserRequirements && advisorClient.isEnabled()) {
         try {

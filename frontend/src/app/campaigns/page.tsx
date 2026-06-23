@@ -74,6 +74,7 @@ function AdvisorCampaignsTable({
   locale: Locale;
   onViewDetails: (id: string) => void;
 }) {
+  const { t } = useI18n();
   return (
     <div
       className="overflow-hidden rounded-xl border shadow-lg transition-shadow duration-300 hover:shadow-xl"
@@ -93,11 +94,11 @@ function AdvisorCampaignsTable({
                 color: 'oklch(var(--fg-muted))',
               }}
             >
-              <th className="px-3 md:px-5 py-3.5 md:py-4 text-start font-semibold">Campaign</th>
-              <th className="px-3 md:px-5 py-3.5 md:py-4 text-start font-semibold">Status</th>
-              <th className="px-3 md:px-5 py-3.5 md:py-4 text-start font-semibold">Objective</th>
-              <th className="px-3 md:px-5 py-3.5 md:py-4 text-start font-semibold">Budget</th>
-              <th className="px-3 md:px-5 py-3.5 md:py-4 text-start font-semibold">Ends</th>
+              <th className="px-3 md:px-5 py-3.5 md:py-4 text-start font-semibold">{t("campaigns.table.campaign", "Campaign")}</th>
+              <th className="px-3 md:px-5 py-3.5 md:py-4 text-start font-semibold">{t("campaigns.table.status", "Status")}</th>
+              <th className="px-3 md:px-5 py-3.5 md:py-4 text-start font-semibold">{t("campaigns.table.objective", "Objective")}</th>
+              <th className="px-3 md:px-5 py-3.5 md:py-4 text-start font-semibold">{t("campaigns.table.budget", "Budget")}</th>
+              <th className="px-3 md:px-5 py-3.5 md:py-4 text-start font-semibold">{t("campaigns.table.ends", "Ends")}</th>
               <th className="px-3 md:px-5 py-3.5 md:py-4 text-start font-semibold"></th>
             </tr>
           </thead>
@@ -141,7 +142,7 @@ function AdvisorCampaignsTable({
                           style={{ color: 'oklch(var(--warning))' }}
                           title="Campaign is active but not delivering ads"
                         >
-                          ⚠ No ads running
+                          ⚠ {t("campaigns.table.noAds", "No ads running")}
                         </span>
                       )}
                     </div>
@@ -165,7 +166,7 @@ function AdvisorCampaignsTable({
                       >
                         ${formatNumber(Number(c.daily_budget) / 100, locale)}
                       </span>
-                      <span className="text-fg-muted text-[10px] sm:text-xs">/day</span>
+                      <span className="text-fg-muted text-[10px] sm:text-xs">{t("campaigns.table.perDay", "/day")}</span>
                     </div>
                   </td>
                   <td className="px-3 md:px-5 py-3 md:py-4 transition-colors duration-200" style={{ color: 'oklch(var(--fg-muted))' }}>
@@ -190,7 +191,7 @@ function AdvisorCampaignsTable({
                         e.currentTarget.style.boxShadow = 'none';
                       }}
                     >
-                      View Details
+                      {t("campaigns.table.viewDetails", "View Details")}
                     </button>
                   </td>
                 </tr>
@@ -220,6 +221,7 @@ function CampaignDetailsDialog({
   onOpenChange: (open: boolean) => void;
   locale: Locale;
 }) {
+  const { t } = useI18n();
   const [dateRange, setDateRange] = useState<DateRangePreset>("last_7d");
   const [expandedAdSets, setExpandedAdSets] = useState<Set<string>>(new Set());
 
@@ -264,7 +266,7 @@ function CampaignDetailsDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{campaign?.name || "Campaign Details"}</DialogTitle>
+          <DialogTitle>{campaign?.name || t("campaigns.dialog.title", "Campaign Details")}</DialogTitle>
         </DialogHeader>
 
         {detailsQ.isLoading ? (
@@ -278,7 +280,7 @@ function CampaignDetailsDialog({
             {/* Campaign details grid */}
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <div className="text-fg-muted text-xs">Status</div>
+                <div className="text-fg-muted text-xs">{t("campaigns.dialog.status", "Status")}</div>
                 <div className="mt-1">
                   <Chip tone={campaignStatusTone(campaign.status)}>
                     {campaign.status}
@@ -286,26 +288,26 @@ function CampaignDetailsDialog({
                 </div>
               </div>
               <div>
-                <div className="text-fg-muted text-xs">Objective</div>
+                <div className="text-fg-muted text-xs">{t("campaigns.dialog.objective", "Objective")}</div>
                 <div className="font-medium mt-1">
                   {OBJECTIVE_LABELS[campaign.objective] || campaign.objective}
                 </div>
               </div>
               <div>
-                <div className="text-fg-muted text-xs">Daily Budget</div>
+                <div className="text-fg-muted text-xs">{t("campaigns.dialog.dailyBudget", "Daily Budget")}</div>
                 <div className="font-medium mt-1">
                   ${formatNumber(Number(campaign.daily_budget) / 100, locale)}/day
                 </div>
               </div>
               {campaign.buying_type && (
                 <div>
-                  <div className="text-fg-muted text-xs">Buying Type</div>
+                  <div className="text-fg-muted text-xs">{t("campaigns.dialog.buyingType", "Buying Type")}</div>
                   <div className="font-medium mt-1">{campaign.buying_type}</div>
                 </div>
               )}
               {campaign.start_time && (
                 <div>
-                  <div className="text-fg-muted text-xs">Start Time</div>
+                  <div className="text-fg-muted text-xs">{t("campaigns.dialog.startTime", "Start Time")}</div>
                   <div className="font-medium mt-1">
                     {formatDate(campaign.start_time, locale)}
                   </div>
@@ -313,7 +315,7 @@ function CampaignDetailsDialog({
               )}
               {campaign.stop_time && (
                 <div>
-                  <div className="text-fg-muted text-xs">Stop Time</div>
+                  <div className="text-fg-muted text-xs">{t("campaigns.dialog.stopTime", "Stop Time")}</div>
                   <div className="font-medium mt-1">
                     {formatDate(campaign.stop_time, locale)}
                   </div>
@@ -324,7 +326,7 @@ function CampaignDetailsDialog({
             {/* Performance metrics section */}
             <div className="border-t border-border pt-4">
               <div className="flex items-center justify-between mb-4">
-                <div className="text-sm font-medium">Performance Metrics</div>
+                <div className="text-sm font-medium">{t("campaigns.metrics.title", "Performance Metrics")}</div>
                 <SegmentedControl<DateRangePreset>
                   value={dateRange}
                   onChange={setDateRange}
@@ -345,48 +347,48 @@ function CampaignDetailsDialog({
               ) : insights ? (
                 <div className="grid grid-cols-3 gap-3">
                   <MetricCard
-                    label="Spend"
+                    label={t("campaigns.metrics.spend", "Spend")}
                     value={insights.spend != null ? `$${formatNumber(insights.spend, locale)}` : "—"}
                   />
                   <MetricCard
-                    label="Impressions"
+                    label={t("campaigns.metrics.impressions", "Impressions")}
                     value={insights.impressions != null ? formatNumber(insights.impressions, locale) : "—"}
                   />
                   <MetricCard
-                    label="Clicks"
+                    label={t("campaigns.metrics.clicks", "Clicks")}
                     value={insights.clicks != null ? formatNumber(insights.clicks, locale) : "—"}
                   />
                   <MetricCard
-                    label="CPC"
+                    label={t("campaigns.metrics.cpc", "CPC")}
                     value={insights.cpc != null ? `$${insights.cpc.toFixed(2)}` : "—"}
                   />
                   <MetricCard
-                    label="CTR"
+                    label={t("campaigns.metrics.ctr", "CTR")}
                     value={insights.ctr != null ? `${insights.ctr.toFixed(2)}%` : "—"}
                   />
                   {insights.conversions !== undefined && insights.conversions !== null && (
                     <MetricCard
-                      label="Conversions"
+                      label={t("campaigns.metrics.conversions", "Conversions")}
                       value={formatNumber(insights.conversions, locale)}
                     />
                   )}
                   {insights.purchase_roas !== undefined && insights.purchase_roas !== null && (
                     <MetricCard
-                      label="ROAS"
+                      label={t("campaigns.metrics.roas", "ROAS")}
                       value={`${insights.purchase_roas.toFixed(2)}x`}
                     />
                   )}
                 </div>
               ) : (
                 <div className="text-sm text-fg-muted text-center py-4">
-                  No insights available for this period
+                  {t("campaigns.metrics.empty", "No insights available for this period")}
                 </div>
               )}
             </div>
 
             {/* Ad Sets & Ads Hierarchy */}
             <div className="border-t border-border pt-4">
-              <div className="text-sm font-medium mb-3">Ad Sets & Ads</div>
+              <div className="text-sm font-medium mb-3">{t("campaigns.adsets.title", "Ad Sets & Ads")}</div>
               {adSetsQ.isLoading ? (
                 <div className="space-y-2">
                   {[...Array(2)].map((_, i) => (
@@ -395,7 +397,7 @@ function CampaignDetailsDialog({
                 </div>
               ) : adSets.length === 0 ? (
                 <div className="text-sm text-fg-muted text-center py-4 border border-border rounded-lg">
-                  No ad sets found
+                  {t("campaigns.adsets.empty", "No ad sets found")}
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -559,7 +561,7 @@ export default function CampaignsListPage() {
             onClick={() => setCreateModalOpen(true)}
           >
             <Plus className="h-4 w-4" />
-            Create Campaign
+            {t("campaigns.new", "New campaign")}
           </Button>
         </div>
         <Card>
@@ -586,13 +588,13 @@ export default function CampaignsListPage() {
             onClick={() => setCreateModalOpen(true)}
           >
             <Plus className="h-4 w-4" />
-            Create Campaign
+            {t("campaigns.new", "New campaign")}
           </Button>
         </div>
         <Card>
           <EmptyState
-            title="Failed to load campaigns"
-            description="Could not connect to Advisor API. Please try again later."
+            title={t("campaigns.error.title", "Failed to load campaigns")}
+            description={t("campaigns.error.desc", "Could not connect to Advisor API. Please try again later.")}
           />
         </Card>
       </div>
@@ -660,10 +662,10 @@ export default function CampaignsListPage() {
             <div className="flex items-center gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
               {(
                 [
-                  { value: "all", label: "All" },
-                  { value: "active", label: "Active" },
-                  { value: "paused", label: "Paused" },
-                  { value: "effective", label: "Effective" },
+                  { value: "all", label: t("campaigns.filter.all", "All") },
+                  { value: "active", label: t("campaigns.filter.active", "Active") },
+                  { value: "paused", label: t("campaigns.filter.paused", "Paused") },
+                  { value: "effective", label: t("campaigns.filter.effective", "Effective") },
                 ] as { value: CampaignFilter; label: string }[]
               ).map((filter, idx) => {
                 const active = statusFilter === filter.value;
@@ -722,10 +724,10 @@ export default function CampaignsListPage() {
               <div className="flex items-center gap-2 animate-in slide-in-from-left-4 duration-500 delay-150">
                 {(
                   [
-                    { value: "all", label: "All" },
-                    { value: "active", label: "Active" },
-                    { value: "paused", label: "Paused" },
-                    { value: "effective", label: "Effective" },
+                    { value: "all", label: t("campaigns.filter.all", "All") },
+                    { value: "active", label: t("campaigns.filter.active", "Active") },
+                    { value: "paused", label: t("campaigns.filter.paused", "Paused") },
+                    { value: "effective", label: t("campaigns.filter.effective", "Effective") },
                   ] as { value: CampaignFilter; label: string }[]
                 ).map((filter, idx) => {
                   const active = statusFilter === filter.value;
@@ -775,7 +777,7 @@ export default function CampaignsListPage() {
             }}
           >
             <Plus className="h-4 w-4" />
-            Create Campaign
+            {t("campaigns.new", "New campaign")}
           </Button>
         </div>
       </div>
@@ -801,8 +803,8 @@ export default function CampaignsListPage() {
           {campaigns.length === 0 ? (
             <Card>
               <EmptyState
-                title="No campaigns found"
-                description="No campaigns match the selected filters."
+                title={t("campaigns.empty.title", "No campaigns found")}
+                description={t("campaigns.empty.desc", "No campaigns match the selected filters.")}
               />
             </Card>
           ) : (

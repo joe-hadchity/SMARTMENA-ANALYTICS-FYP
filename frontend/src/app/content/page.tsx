@@ -98,10 +98,10 @@ const EVENT_TYPE_META: Record<
 
 type ContentView = "grid" | "list" | "calendar";
 
-const CONTENT_VIEWS: Array<{ value: ContentView; label: string; icon: React.ElementType }> = [
-  { value: "grid", label: "Grid", icon: LayoutGrid },
-  { value: "list", label: "List", icon: List },
-  { value: "calendar", label: "Calendar", icon: CalendarDays },
+const CONTENT_VIEWS: Array<{ value: ContentView; labelKey: string; icon: React.ElementType }> = [
+  { value: "grid", labelKey: "content.view.grid", icon: LayoutGrid },
+  { value: "list", labelKey: "content.view.list", icon: List },
+  { value: "calendar", labelKey: "content.view.calendar", icon: CalendarDays },
 ];
 
 const LIST_PAGE_SIZE = 12;
@@ -372,9 +372,9 @@ export default function ContentPage() {
   return (
     <div className="space-y-6 pb-24">
       <PageHeader
-        eyebrow="Publishing workspace"
-        title="Content"
-        subtitle="Manage published posts, scheduled content, drafts, and calendar timing from one place."
+        eyebrow={t("content.eyebrow", "Publishing workspace")}
+        title={t("content.title", "Content")}
+        subtitle={t("content.subtitle", "Manage published posts, scheduled content, drafts, and calendar timing from one place.")}
         actions={
           <div className="flex flex-wrap items-center gap-2">
             <Button
@@ -384,7 +384,7 @@ export default function ContentPage() {
               loading={refreshPosts.isPending}
               leftIcon={<RefreshCw className="h-3.5 w-3.5" />}
             >
-              Refresh posts
+              {t("content.refresh", "Refresh posts")}
             </Button>
             <Button
               variant="outline"
@@ -427,16 +427,16 @@ export default function ContentPage() {
                   )}
                 >
                   <Icon className="h-3.5 w-3.5" />
-                  {item.label}
+                  {t(item.labelKey, item.labelKey)}
                 </button>
               );
             })}
           </div>
 
           <div className="grid gap-2 text-xs text-fg-muted sm:grid-cols-3 lg:min-w-[420px]">
-            <ContentStat label="Published" value={filteredPublishedPosts.length} />
-            <ContentStat label="Scheduled / drafts" value={filteredScheduledPosts.length} />
-            <ContentStat label="In this view" value={contentItems.length} />
+            <ContentStat label={t("content.stat.published", "Published")} value={filteredPublishedPosts.length} />
+            <ContentStat label={t("content.stat.scheduled", "Scheduled / Drafts")} value={filteredScheduledPosts.length} />
+            <ContentStat label={t("content.stat.inView", "In this view")} value={contentItems.length} />
           </div>
         </div>
       </Card>
@@ -486,7 +486,7 @@ export default function ContentPage() {
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Caption, hashtag, account..."
+                placeholder={t("content.filter.search", "Caption, hashtag, account...")}
                 className="w-full bg-transparent outline-none placeholder:text-fg-subtle"
               />
             </div>
@@ -496,7 +496,7 @@ export default function ContentPage() {
             value={filterProfile}
             onChange={setFilterProfile}
             options={[
-              { value: "all", label: "Viewing all" },
+              { value: "all", label: t("content.filter.viewingAll", "Viewing all") },
               ...filterOptions.profiles.map((id) => {
                 const acct = accountsById.get(id);
                 return {
@@ -511,8 +511,8 @@ export default function ContentPage() {
             value={filterPostType}
             onChange={setFilterPostType}
             options={[
-              { value: "all", label: "Viewing all" },
-              ...filterOptions.types.map((t) => ({ value: t, label: t })),
+              { value: "all", label: t("content.filter.viewingAll", "Viewing all") },
+              ...filterOptions.types.map((tp) => ({ value: tp, label: tp })),
             ]}
           />
           <FilterCell
@@ -520,7 +520,7 @@ export default function ContentPage() {
             value={filterTag}
             onChange={setFilterTag}
             options={[
-              { value: "all", label: "Viewing all" },
+              { value: "all", label: t("content.filter.viewingAll", "Viewing all") },
               ...filterOptions.tags.map((tag) => ({
                 value: tag,
                 label: `#${tag}`,
@@ -533,7 +533,7 @@ export default function ContentPage() {
               onClick={clearFilters}
               className="absolute right-3 top-3 text-xs font-medium text-primary hover:underline"
             >
-              Clear All
+              {t("content.filter.clearAll", "Clear All")}
             </button>
           ) : null}
         </div>
@@ -680,13 +680,14 @@ function ContentLibraryView({
   onEditPost: (p: ScheduledPost) => void;
   pagination?: ListPagination;
 }) {
+  const { t } = useI18n();
   if (items.length === 0) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>No content found</CardTitle>
+          <CardTitle>{t("content.empty.title", "No content found")}</CardTitle>
           <CardDescription>
-            Try clearing filters, refreshing Graph posts, or scheduling a new draft.
+            {t("content.empty.desc", "Try clearing filters, refreshing Graph posts, or scheduling a new draft.")}
           </CardDescription>
         </CardHeader>
       </Card>
@@ -726,6 +727,7 @@ function ContentLibraryView({
 }
 
 function ListPaginationControls({ pagination }: { pagination: ListPagination }) {
+  const { t } = useI18n();
   const pages = pageWindow(pagination.page, pagination.totalPages);
   const canGoBack = pagination.page > 1;
   const canGoNext = pagination.page < pagination.totalPages;
@@ -733,11 +735,11 @@ function ListPaginationControls({ pagination }: { pagination: ListPagination }) 
   return (
     <div className="flex flex-col gap-3 border-t border-border bg-surface-muted/30 px-4 py-3 text-xs text-fg-muted sm:flex-row sm:items-center sm:justify-between">
       <div>
-        Showing{" "}
+        {t("content.pagination.showing", "Showing")}{" "}
         <span className="font-medium text-fg">
           {pagination.from}-{pagination.to}
         </span>{" "}
-        of <span className="font-medium text-fg">{pagination.totalItems}</span>
+        {t("content.pagination.of", "of")} <span className="font-medium text-fg">{pagination.totalItems}</span>
       </div>
 
       <div className="flex items-center gap-1">
@@ -747,7 +749,7 @@ function ListPaginationControls({ pagination }: { pagination: ListPagination }) 
           onClick={() => pagination.onPageChange(pagination.page - 1)}
           className="rounded-md border border-border bg-surface px-2.5 py-1.5 font-medium text-fg transition-colors hover:bg-surface-hover disabled:cursor-not-allowed disabled:opacity-45"
         >
-          Previous
+          {t("content.pagination.prev", "Previous")}
         </button>
 
         {pages.map((page) => (
@@ -773,7 +775,7 @@ function ListPaginationControls({ pagination }: { pagination: ListPagination }) 
           onClick={() => pagination.onPageChange(pagination.page + 1)}
           className="rounded-md border border-border bg-surface px-2.5 py-1.5 font-medium text-fg transition-colors hover:bg-surface-hover disabled:cursor-not-allowed disabled:opacity-45"
         >
-          Next
+          {t("content.pagination.next", "Next")}
         </button>
       </div>
     </div>
@@ -789,6 +791,7 @@ function ContentGridCard({
   locale: "en" | "ar";
   onEditPost: (p: ScheduledPost) => void;
 }) {
+  const { t } = useI18n();
   if (item.kind === "scheduled") {
     const post = item.post;
     const statusTone = STATUS_TONE[post.status];
@@ -827,7 +830,7 @@ function ContentGridCard({
             onClick={() => onEditPost(post)}
             className="font-medium text-primary hover:underline"
           >
-            Edit
+            {t("content.card.edit", "Edit")}
           </button>
         </div>
       </Card>
@@ -869,19 +872,19 @@ function ContentGridCard({
         </div>
       )}
       <div className="mb-2 flex items-center gap-2">
-        <Badge tone="success" size="sm">Published</Badge>
+        <Badge tone="success" size="sm">{t("calendar.status.published", "Published")}</Badge>
         {post.media_type ? <Badge tone="neutral" size="sm">{post.media_type}</Badge> : null}
         {post.social_accounts?.handle ? (
           <span className="text-xs text-fg-muted">@{post.social_accounts.handle}</span>
         ) : null}
       </div>
       <p className="line-clamp-4 flex-1 text-sm leading-relaxed text-fg">
-        {post.caption || "No caption"}
+        {post.caption || t("content.card.noCaption", "No caption")}
       </p>
       <div className="mt-4 grid grid-cols-3 gap-2 border-t border-border pt-3 text-xs">
-        <MetricMini label="Likes" value={metrics?.likes ?? 0} />
-        <MetricMini label="Comments" value={metrics?.comments ?? 0} />
-        <MetricMini label="Eng." value={engagement} />
+        <MetricMini label={t("content.metric.likes", "Likes")} value={metrics?.likes ?? 0} />
+        <MetricMini label={t("content.metric.comments", "Comments")} value={metrics?.comments ?? 0} />
+        <MetricMini label={t("content.metric.eng", "Eng.")} value={engagement} />
       </div>
       <div className="mt-3 flex items-center justify-between text-xs text-fg-muted">
         <span>{post.published_at ? formatDateTime(post.published_at, locale) : ""}</span>
@@ -892,7 +895,7 @@ function ContentGridCard({
             rel="noreferrer"
             className="font-medium text-primary hover:underline"
           >
-            Open
+            {t("content.card.open", "Open")}
           </a>
         ) : null}
       </div>
@@ -909,9 +912,10 @@ function ContentListRow({
   locale: "en" | "ar";
   onEditPost: (p: ScheduledPost) => void;
 }) {
+  const { t } = useI18n();
   const date = item.date ? formatDateTime(item.date, locale) : "";
   const isScheduled = item.kind === "scheduled";
-  const caption = isScheduled ? item.post.caption : item.post.caption || "No caption";
+  const caption = isScheduled ? item.post.caption : item.post.caption || t("content.card.noCaption", "No caption");
   const meta = isScheduled
     ? [item.post.status, item.post.platform]
     : ["published", item.post.media_type, item.post.social_accounts?.handle && `@${item.post.social_accounts.handle}`]
@@ -934,7 +938,7 @@ function ContentListRow({
       </div>
       <div className="text-xs text-fg-muted">{date}</div>
       <div className="text-xs text-fg-muted">
-        {isScheduled ? "Scheduled content" : publishedMetricsLabel(item.post)}
+        {isScheduled ? "Scheduled content" : publishedMetricsLabel(item.post, t)}
       </div>
       <div className="text-right">
         {isScheduled ? (
@@ -943,7 +947,7 @@ function ContentListRow({
             onClick={() => onEditPost(item.post)}
             className="text-xs font-medium text-primary hover:underline"
           >
-            Edit
+            {t("content.card.edit", "Edit")}
           </button>
         ) : item.post.permalink ? (
           <a
@@ -952,7 +956,7 @@ function ContentListRow({
             rel="noreferrer"
             className="text-xs font-medium text-primary hover:underline"
           >
-            Open
+            {t("content.card.open", "Open")}
           </a>
         ) : null}
       </div>
@@ -969,9 +973,9 @@ function MetricMini({ label, value }: { label: string; value: number }) {
   );
 }
 
-function publishedMetricsLabel(post: SocialPost) {
+function publishedMetricsLabel(post: SocialPost, t: (key: string, fallback?: string) => string) {
   const m = post.latest_metrics;
-  if (!m) return "No metrics yet";
+  if (!m) return t("content.metric.noMetrics", "No metrics yet");
   const engagement = (m.likes ?? 0) + (m.comments ?? 0) + (m.shares ?? 0) + (m.saves ?? 0);
   return `${compact(engagement)} engagement`;
 }
@@ -1046,6 +1050,7 @@ function DayCell({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   accountsById: Map<string, any>;
 }) {
+  const { t } = useI18n();
   return (
     <div
       className={cn(
@@ -1116,7 +1121,7 @@ function DayCell({
             className="pointer-events-auto inline-flex items-center justify-center gap-1.5 rounded-md border border-border bg-surface px-2 py-1.5 text-xs font-medium text-fg shadow-sm hover:bg-surface-hover"
           >
             <CalendarPlus className="h-3.5 w-3.5" />
-            Schedule Post
+            {t("content.schedule", "Schedule Post")}
           </button>
           <button
             type="button"
@@ -1127,7 +1132,7 @@ function DayCell({
             className="pointer-events-auto inline-flex items-center justify-center gap-1.5 rounded-md bg-primary px-2 py-1.5 text-xs font-medium text-primary-fg shadow-sm hover:opacity-90"
           >
             <PencilLine className="h-3.5 w-3.5" />
-            Start a Draft
+            {t("content.draft", "Start a Draft")}
           </button>
         </div>
       ) : null}

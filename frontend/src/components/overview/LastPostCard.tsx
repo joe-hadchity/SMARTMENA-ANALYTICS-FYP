@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useI18n } from "@/i18n/I18nProvider";
 import { TOKENS } from "@/lib/design-tokens";
-import { syncedPostsApi, socialAccountsApi } from "@/lib/api";
+import { socialPostsApi } from "@/lib/api";
 
 interface LastPostCardProps {
   primary?: string;
@@ -14,20 +14,13 @@ export default function LastPostCard({ primary = "oklch(46% 0.108 320)" }: LastP
   const ar = locale === "ar";
   const handFont = ar ? "'Kalam', cursive" : "'Caveat', cursive";
 
-  // Fetch latest post
+  // Fetch latest post from the same source as the content tab
   const postsQ = useQuery({
-    queryKey: ["synced-posts", "latest"],
-    queryFn: () => syncedPostsApi.list({ limit: 1 }),
-  });
-
-  // Fetch all social accounts to get handle info
-  const accountsQ = useQuery({
-    queryKey: ["social-accounts"],
-    queryFn: socialAccountsApi.list,
+    queryKey: ["social-posts", "latest"],
+    queryFn: () => socialPostsApi.list({ limit: 1 }),
   });
 
   const post = postsQ.data?.[0];
-  const accounts = accountsQ.data ?? [];
 
   const fmt = (n: number) => n >= 1000 ? (n / 1000).toFixed(1).replace(/\.0$/, '') + 'K' : String(n);
 
@@ -70,15 +63,14 @@ export default function LastPostCard({ primary = "oklch(46% 0.108 320)" }: LastP
     );
   }
 
-  // Find the social account for this post
-  const account = accounts.find(a => a.id === post.social_account_id);
+  // SocialPost has social_accounts joined
+  const account = post.social_accounts;
   const isInstagram = account?.provider === 'meta_instagram';
-  const platform = isInstagram ? 'instagram' : 'facebook';
   const color = isInstagram ? TOKENS.ig : TOKENS.fb;
   const handle = account?.handle || account?.display_name || '@account';
 
   // Calculate time ago
-  const postedAt = post.posted_at ? new Date(post.posted_at) : new Date(post.fetched_at);
+  const postedAt = post.published_at ? new Date(post.published_at) : new Date(post.created_at);
   const now = new Date();
   const diffMs = now.getTime() - postedAt.getTime();
   const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
@@ -100,10 +92,10 @@ export default function LastPostCard({ primary = "oklch(46% 0.108 320)" }: LastP
 
   const metrics = post.latest_metrics;
   const stats = {
-    likes: metrics?.likes ?? 0,
-    comments: metrics?.comments ?? 0,
-    saves: metrics?.saves ?? 0,
-    shares: metrics?.shares ?? 0,
+    likes: (metrics as any)?.likes ?? (metrics as any)?.like_count ?? 0,
+    comments: (metrics as any)?.comments ?? (metrics as any)?.comments_count ?? 0,
+    saves: (metrics as any)?.saves ?? 0,
+    shares: (metrics as any)?.shares ?? 0,
   };
 
   const caption = post.caption || (ar ? 'منشور جديد' : 'New post');

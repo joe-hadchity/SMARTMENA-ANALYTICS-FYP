@@ -11,7 +11,7 @@ const PLATFORMS = [
     label: "All Platforms",
     labelAr: "الكل",
     icon: LayoutGrid,
-    color: "oklch(52% 0.13 195)",
+    color: "oklch(46% 0.108 320)",
   },
   {
     id: "meta_instagram",

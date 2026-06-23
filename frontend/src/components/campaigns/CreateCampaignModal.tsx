@@ -389,7 +389,7 @@ export default function CreateCampaignModal({
                 >
                   <Info
                     className="h-5 w-5 shrink-0 mt-0.5"
-                    style={{ color: "oklch(52% 0.13 195)" }}
+                    style={{ color: "oklch(46% 0.108 320)" }}
                   />
                   <div className="text-sm text-fg-muted">
                     <strong className="text-fg">
@@ -520,14 +520,14 @@ export default function CreateCampaignModal({
                               msg.type === "warning"
                                 ? "oklch(98% 0.02 60)"
                                 : msg.type === "success"
-                                  ? "oklch(96% 0.04 148)"
+                                  ? "oklch(96% 0.028 320)"
                                   : "oklch(96% 0.04 240)",
                             borderLeft: `3px solid ${
                               msg.type === "warning"
                                 ? "oklch(54% 0.130 60)"
                                 : msg.type === "success"
                                   ? "oklch(40% 0.090 150)"
-                                  : "oklch(52% 0.13 195)"
+                                  : "oklch(46% 0.108 320)"
                             }`,
                             animationDelay: `${idx * 100}ms`,
                           }}
@@ -547,7 +547,7 @@ export default function CreateCampaignModal({
                           {msg.type === "info" && (
                             <Lightbulb
                               className="h-5 w-5 shrink-0 mt-0.5"
-                              style={{ color: "oklch(52% 0.13 195)" }}
+                              style={{ color: "oklch(46% 0.108 320)" }}
                             />
                           )}
                           <span
@@ -557,7 +557,7 @@ export default function CreateCampaignModal({
                                   ? "oklch(44% 0.110 60)"
                                   : msg.type === "success"
                                     ? "oklch(34% 0.080 150)"
-                                    : "oklch(42% 0.11 195)",
+                                    : "oklch(38% 0.094 320)",
                             }}
                           >
                             {msg.message}

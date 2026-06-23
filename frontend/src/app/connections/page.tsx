@@ -214,12 +214,12 @@ function ConnectionsPageContent() {
               {liveEnabled ? (
                 <Chip tone="green">Graph {oauthStatus.data?.graph_version ?? "v19"}</Chip>
               ) : (
-                <Chip tone="amber">mock</Chip>
+                <Chip tone="amber">{t("connections.mock", "mock")}</Chip>
               )}
               {metaDiagnostics.data?.connected ? (
-                <Chip tone="green">OAuth connected</Chip>
+                <Chip tone="green">{t("connections.oauthConnected", "OAuth connected")}</Chip>
               ) : liveEnabled ? (
-                <Chip tone="amber">OAuth not connected</Chip>
+                <Chip tone="amber">{t("connections.oauthNotConnected", "OAuth not connected")}</Chip>
               ) : null}
             </div>
             <p className="mt-1 text-sm text-fg-muted">
@@ -236,10 +236,10 @@ function ConnectionsPageContent() {
                   disabled={startMetaLive.isPending}
                   aria-label="Meta permission pack"
                 >
-                  <option value="core">Core account discovery</option>
-                  <option value="insights">Insights and post analytics</option>
-                  <option value="inbox">Inbox, comments, and replies</option>
-                  <option value="full">Full SmartMENA Graph access</option>
+                  <option value="core">{t("connections.scopeCore", "Core account discovery")}</option>
+                  <option value="insights">{t("connections.scopeInsights", "Insights and post analytics")}</option>
+                  <option value="inbox">{t("connections.scopeInbox", "Inbox, comments, and replies")}</option>
+                  <option value="full">{t("connections.scopeFull", "Full SmartMENA Graph access")}</option>
                 </select>
                 <button
                   className="btn btn-primary text-xs"
@@ -247,7 +247,7 @@ function ConnectionsPageContent() {
                   disabled={startMetaLive.isPending}
                 >
                   <Link2 className="h-3 w-3" />
-                  Connect / re-authorize Meta
+                  {t("connections.reauthorize", "Connect / re-authorize Meta")}
                 </button>
                 <button
                   className="btn btn-ghost text-xs"
@@ -265,12 +265,16 @@ function ConnectionsPageContent() {
             ) : null}
           </div>
           </div>
-          {liveEnabled ? (
+          {liveEnabled && metaDiagnostics.data?.connected ? (
             <MetaDiagnosticsPanel
               loading={metaDiagnostics.isLoading}
               data={metaDiagnostics.data}
               scopes={oauthStatus.data?.scope_packs?.[scopePack] ?? oauthStatus.data?.scopes ?? []}
             />
+          ) : liveEnabled && !metaDiagnostics.isLoading && metaDiagnostics.data && !metaDiagnostics.data.connected ? (
+            <div className="rounded-md border border-border bg-surface-muted/40 p-4 text-sm text-fg-muted">
+              {t("connections.connectFirst", "Connect via OAuth above to see permission status and discovered Meta assets.")}
+            </div>
           ) : null}
         </div>
       </Card>
@@ -369,6 +373,7 @@ function MetaDiagnosticsPanel({
   data?: Awaited<ReturnType<typeof oauthApi.metaDiagnostics>>;
   scopes: string[];
 }) {
+  const { t } = useI18n();
   const requested = data?.requested_scopes?.length
     ? data.requested_scopes
     : scopes;
@@ -380,9 +385,9 @@ function MetaDiagnosticsPanel({
       <div className="rounded-md border border-border bg-surface-muted/40 p-3">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <div className="text-xs font-semibold text-fg">Graph readiness</div>
+            <div className="text-xs font-semibold text-fg">{t("connections.graphReadiness", "Graph readiness")}</div>
             <p className="mt-1 text-[11px] text-fg-muted">
-              Permissions requested by SmartMENA and what Meta granted.
+              {t("connections.graphDesc", "Permissions requested by SmartMENA and what Meta granted.")}
             </p>
           </div>
           {data?.connected ? (
@@ -392,12 +397,12 @@ function MetaDiagnosticsPanel({
           )}
         </div>
         <div className="mt-3 grid grid-cols-3 gap-2 text-center">
-          <MiniStat label="Pages" value={loading ? "-" : String(data?.pages ?? 0)} />
+          <MiniStat label={t("connections.pages", "Pages")} value={loading ? "-" : String(data?.pages ?? 0)} />
           <MiniStat
-            label="IG accounts"
+            label={t("connections.igAccounts", "IG accounts")}
             value={loading ? "-" : String(data?.instagram_accounts ?? 0)}
           />
-          <MiniStat label="Missing" value={loading ? "-" : String(missing.length)} />
+          <MiniStat label={t("connections.missing", "Missing")} value={loading ? "-" : String(missing.length)} />
         </div>
         <div className="mt-3 flex flex-wrap gap-1.5">
           {requested.slice(0, 12).map((scope) => (
@@ -422,10 +427,9 @@ function MetaDiagnosticsPanel({
       </div>
 
       <div className="rounded-md border border-border bg-surface-muted/40 p-3">
-        <div className="text-xs font-semibold text-fg">Discovered Meta assets</div>
+        <div className="text-xs font-semibold text-fg">{t("connections.discoveredAssets", "Discovered Meta assets")}</div>
         <p className="mt-1 text-[11px] text-fg-muted">
-          Pages with linked Instagram professional accounts will be synced into
-          SmartMENA.
+          {t("connections.discoveredDesc", "Pages with linked Instagram professional accounts will be synced into SmartMENA.")}
         </p>
         <div className="mt-3 max-h-44 space-y-2 overflow-auto pr-1">
           {data?.accounts?.length ? (
@@ -441,19 +445,19 @@ function MetaDiagnosticsPanel({
                   <div className="truncate text-[11px] text-fg-muted">
                     {account.instagram?.username
                       ? `Instagram @${account.instagram.username}`
-                      : "No linked Instagram professional account"}
+                      : t("connections.noLinkedIg", "No linked Instagram professional account")}
                   </div>
                 </div>
                 <Chip tone={account.instagram ? "green" : "amber"}>
-                  {account.instagram ? "ready" : "page only"}
+                  {account.instagram ? t("connections.ready", "ready") : t("connections.pageOnly", "page only")}
                 </Chip>
               </div>
             ))
           ) : (
             <div className="rounded-md border border-dashed border-border px-3 py-6 text-center text-xs text-fg-muted">
               {loading
-                ? "Checking Meta assets..."
-                : "Connect Meta to discover Pages and linked Instagram accounts."}
+                ? t("connections.checking", "Checking Meta assets...")
+                : t("connections.connectToDiscover", "Connect Meta to discover Pages and linked Instagram accounts.")}
             </div>
           )}
         </div>

@@ -12,7 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/Dialog";
 import { Button } from "@/components/ui/Button";
-import { X, Send, Sparkles, Loader2, CheckCircle, AlertCircle } from "lucide-react";
+import { Send, Sparkles, Loader2, CheckCircle, AlertCircle } from "lucide-react";
 
 type Message = {
   role: "user" | "assistant";
@@ -59,6 +59,7 @@ export default function AdvisorChatModal({
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
+  const [conversationId, setConversationId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -70,7 +71,7 @@ export default function AdvisorChatModal({
         {
           role: "assistant",
           content:
-            "👋 Hi! I'm your AI Campaign Advisor. I'll help you create a high-performing Meta Ads campaign.\n\nTo give you the best recommendations, tell me:\n\n**1. What's your main goal?**\n• Awareness - Reach more people\n• Traffic - Drive website visits\n• Engagement - Get more interactions\n• Leads - Collect customer info\n• Sales - Drive purchases\n• App Promotion - Get app installs\n\n**2. What's your budget?** (e.g., $50/day or $1000 lifetime)\n\n**3. Who's your target audience?** (age, location, interests)\n\n**4. When should it run?** (start date, end date, or ongoing)\n\nProvide all 4 answers, and I'll give you smart recommendations! 🎯",
+            "👋 Hi! I'm your AI Campaign Advisor.\n\nTell me 4 things and I'll recommend a campaign — then just say **yes** and I'll create it in Meta Ads for you.\n\n**1. Goal** — Awareness / Traffic / Engagement / Leads / Sales / App Promotion\n**2. Budget** — e.g. $50/day or $1000 lifetime\n**3. Audience** — age, location, interests\n**4. Duration** — start date, end date, or ongoing\n\nOnce I give you the recommendation, reply **yes** to create the campaign. 🎯",
           timestamp: new Date(),
         },
       ]);
@@ -114,25 +115,32 @@ export default function AdvisorChatModal({
       console.log("Calling advisor at:", url);
       console.log("Message:", userMessage.content);
 
+      const token = readAuthToken();
+      const wsid = readWorkspaceId();
       const response = await axios.post(
         url,
         {
           message: userMessage.content,
-          sessionId: sessionId || undefined,
-          mode: "create_campaign", // Enable campaign creation mode
+          conversationId: conversationId || undefined,
+          mode: "create_campaign",
         },
         {
           headers: {
             "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            ...(wsid ? { "x-workspace-id": wsid } : {}),
           },
         }
       );
 
       const data = response.data;
 
-      // Save session ID
-      if (data.sessionId && !sessionId) {
-        setSessionId(data.sessionId);
+      // Save conversation ID (Supabase) and session ID (Claude SDK)
+      if (data.conversationId && !conversationId) {
+        setConversationId(data.conversationId);
+      }
+      if (data.externalSessionId && !sessionId) {
+        setSessionId(data.externalSessionId);
       }
 
       // Add AI response
@@ -176,6 +184,7 @@ export default function AdvisorChatModal({
   const resetChat = () => {
     setMessages([]);
     setSessionId(null);
+    setConversationId(null);
     setError(null);
     onOpenChange(false);
   };
@@ -203,12 +212,6 @@ export default function AdvisorChatModal({
                 </p>
               </div>
             </div>
-            <button
-              onClick={resetChat}
-              className="text-fg-muted hover:text-fg transition-colors"
-            >
-              <X className="h-5 w-5" />
-            </button>
           </div>
         </DialogHeader>
 

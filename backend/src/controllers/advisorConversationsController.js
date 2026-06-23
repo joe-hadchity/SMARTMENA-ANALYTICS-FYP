@@ -19,6 +19,7 @@ exports.listConversations = async (req, res) => {
   const { workspaceId } = req;
   const limit = parseInt(req.query.limit) || 20;
   const status = req.query.status || "active"; // active | archived | all
+  const mode = req.query.mode || null; // general | create_campaign | null (all)
 
   try {
     let query = getSupabase()
@@ -30,6 +31,10 @@ exports.listConversations = async (req, res) => {
 
     if (status !== "all") {
       query = query.eq("status", status);
+    }
+
+    if (mode) {
+      query = query.eq("mode", mode);
     }
 
     const { data, error } = await query;

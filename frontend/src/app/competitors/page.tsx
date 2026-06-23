@@ -1058,13 +1058,13 @@ function MetricRow({
 }
 
 const FORMAT_COLORS: Record<string, string> = {
-  reel:     "#7c3aed",
-  video:    "#2563eb",
-  carousel: "#0891b2",
-  image:    "#059669",
-  story:    "#d97706",
-  text:     "#64748b",
-  unknown:  "#94a3b8",
+  reel:     "oklch(46% 0.108 320)",
+  video:    "oklch(54% 0.105 320)",
+  carousel: "oklch(64% 0.092 320)",
+  image:    "oklch(72% 0.070 320)",
+  story:    "oklch(64% 0.135 60)",
+  text:     "oklch(64% 0.012 50)",
+  unknown:  "oklch(76% 0.010 50)",
 };
 
 function ComparisonCharts({
@@ -1110,16 +1110,16 @@ function ComparisonCharts({
       color: FORMAT_COLORS[fmt] ?? FORMAT_COLORS.unknown,
     }));
 
-  const CHART_YOU    = "#1a7a6e";   // primary teal
-  const CHART_OTHER  = "#94a3b8";   // slate-400
+  const CHART_YOU    = "oklch(46% 0.108 320)";
+  const CHART_OTHER  = "oklch(76% 0.010 50)";
 
   const tooltipStyle: React.CSSProperties = {
     background: "#ffffff",
-    border: "1px solid #e2e8f0",
+    border: "1px solid oklch(88% 0.022 320)",
     borderRadius: 8,
     fontSize: 11,
-    color: "#1e293b",
-    boxShadow: "0 2px 8px rgba(0,0,0,.12)",
+    color: "oklch(22% 0.050 320)",
+    boxShadow: "0 2px 8px rgba(30,22,12,.10)",
   };
 
   return (

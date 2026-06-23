@@ -45,8 +45,24 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen bg-bg text-fg grid place-items-center px-4 py-10">
-      <div className="w-full max-w-md">
+    <main
+      className="min-h-screen text-fg grid place-items-center px-4 py-10 relative overflow-hidden"
+      style={{ background: "oklch(var(--bg))" }}
+    >
+      <div
+        className="fixed pointer-events-none z-0"
+        style={{ top: -120, right: -120, width: 360, height: 360, borderRadius: "50%", background: "radial-gradient(circle, oklch(88% 0.060 320 / 0.45) 0%, transparent 70%)" }}
+      />
+      <div
+        className="fixed pointer-events-none z-0"
+        style={{ bottom: -140, left: -100, width: 320, height: 320, borderRadius: "50%", background: "radial-gradient(circle, oklch(92% 0.050 60 / 0.5) 0%, transparent 70%)" }}
+      />
+      <div
+        className="fixed inset-0 pointer-events-none z-0"
+        style={{ backgroundImage: "repeating-linear-gradient(0deg, transparent 0 24px, rgba(50,30,30,0.04) 24px 25px), repeating-linear-gradient(90deg, transparent 0 24px, rgba(50,30,30,0.04) 24px 25px)", backgroundAttachment: "fixed" }}
+      />
+
+      <div className="relative z-10 w-full max-w-md">
         <div className="mb-6 flex items-center gap-3">
           <div className="grid h-10 w-10 place-items-center rounded-md bg-primary text-primary-fg">
             <LineChart className="h-5 w-5" />

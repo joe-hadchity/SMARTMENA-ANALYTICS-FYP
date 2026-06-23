@@ -32,7 +32,6 @@ const DEFAULT_FIELDS = [
 const PROFILE_FIELDS = [
   "id",
   "username",
-  "account_type",
   "media_count",
   "followers_count",
   "follows_count",
@@ -70,7 +69,10 @@ function getClient(accessToken) {
 
 async function fetchProfile(accessToken) {
   const client = getClient(accessToken);
-  const { data } = await client.get("/me", { params: { fields: PROFILE_FIELDS } });
+  // When using graph.facebook.com (page token), /me resolves to the page, not
+  // the IG account. Use the explicit IG user ID if configured.
+  const igPath = env.META_INSTAGRAM_USER_ID ? `/${env.META_INSTAGRAM_USER_ID}` : "/me";
+  const { data } = await client.get(igPath, { params: { fields: PROFILE_FIELDS } });
   return data;
 }
 
@@ -81,7 +83,8 @@ async function fetchProfile(accessToken) {
 async function fetchMedia(accessToken, { limit = 50 } = {}) {
   const client = getClient(accessToken);
   const items = [];
-  let nextUrl = "/me/media";
+  const igPath = env.META_INSTAGRAM_USER_ID ? `/${env.META_INSTAGRAM_USER_ID}` : "/me";
+  let nextUrl = `${igPath}/media`;
   let nextParams = { fields: DEFAULT_FIELDS, limit: Math.min(limit, 100) };
 
   while (items.length < limit && nextUrl) {
@@ -150,8 +153,9 @@ async function replyToComment(commentId, message, accessToken) {
 
 async function fetchAccountInsight(metric, { period = "lifetime", accessToken, params = {} } = {}) {
   const client = getClient(accessToken);
+  const igPath = env.META_INSTAGRAM_USER_ID ? `/${env.META_INSTAGRAM_USER_ID}` : "/me";
   try {
-    const { data } = await client.get("/me/insights", {
+    const { data } = await client.get(`${igPath}/insights`, {
       params: { metric, period, ...params },
     });
     return reduceAccountInsights(data?.data || []);
